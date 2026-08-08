@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "slice_id": "S06",
+  "scenarios": [
+    {
+      "id": "hook_failure",
+      "failure_code": "commit_failed",
+      "commit_created": false,
+      "head_changed": false,
+      "checkpoint_preserved": true
+    },
+    {
+      "id": "head_drift",
+      "failure_code": "head_drift",
+      "commit_created": false,
+      "head_changed": true,
+      "checkpoint_preserved": true
+    },
+    {
+      "id": "checkpoint_rename_failure",
+      "failure_code": "checkpoint_refresh_failed",
+      "commit_created": true,
+      "head_changed": true,
+      "checkpoint_preserved": true
+    },
+    {
+      "id": "stage_scope_mismatch",
+      "failure_code": "stage_scope_mismatch",
+      "commit_created": false,
+      "head_changed": false,
+      "checkpoint_preserved": true
+    }
+  ],
+  "result": "PASS"
+}

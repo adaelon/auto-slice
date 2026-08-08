@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "slice_id": "S06",
+  "contract_digest": "sha256:22ca58a7eb60fbda3cf9218d6a6e16fc54be61d2b867130946a66b762e194861",
+  "input_digests": [
+    {
+      "path": "artifacts/s03/completion-receipt.json",
+      "digest": "sha256:2272647e961ac4adacb39d74eb53c68145b4206d28be2f3f679eb5a05730d02e"
+    },
+    {
+      "path": "artifacts/s05/completion-receipt.json",
+      "digest": "sha256:d89d90ac8e26712b8b1d52243fcb983d1346a83a8c55331d6b6416cc6ebf9454"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec"
+    },
+    {
+      "path": "docs/adr/0003-commit-and-checkpoint-order.md",
+      "digest": "sha256:f687019a8868b1442fe96426063c7c267084b915c0991ae9aa2f570206c5fe55"
+    },
+    {
+      "path": "docs/adr/0006-project-write-lease-log.md",
+      "digest": "sha256:73a015f9bb6ea8c5fc7bfa17027fcbc1ad1e1f8ae0de0447c8c9011d21448661"
+    }
+  ],
+  "output_digests": [
+    {
+      "path": "artifacts/s06/checkpoint.sample.md",
+      "digest": "sha256:2124cf1680c06521ccfda52cf54d0f4dd938e600683807f5716af7e9b56fb8e4"
+    },
+    {
+      "path": "artifacts/s06/commit-tree-golden.json",
+      "digest": "sha256:8333b68614f3130a4367df5932d136d79d050a7d136d6eafb49eb07821da1eff"
+    },
+    {
+      "path": "artifacts/s06/failure-scene-matrix.json",
+      "digest": "sha256:fec39d779df046062f3a21f9a184a607494128217f6ffc751df23b119b33f917"
+    },
+    {
+      "path": "contracts/slices/S06.json",
+      "digest": "sha256:22ca58a7eb60fbda3cf9218d6a6e16fc54be61d2b867130946a66b762e194861"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:152c3e1640f982320776de121c1c911b1c9fec9cf5fdc8c921547b5c29081a65"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:8bf2bb97e1c6a7acf85836cade824a3ef78d62c7a3f5118b892818a14b642831"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:fc5c546e56b1a545391ab42c3ca25b8b190da5a286f12f75658134bd0e8d68cc"
+    },
+    {
+      "path": "scripts/verify-s06-evidence.mjs",
+      "digest": "sha256:2d1626a70836a4b061e9204d6b5c047978dba3de118297b2fc41791e2a1bcb77"
+    },
+    {
+      "path": "scripts/verify-s06.mjs",
+      "digest": "sha256:b3cf76a7766cda76e136796a1b9817ce2a27148ddd6b4032df8a196d6e3adf33"
+    },
+    {
+      "path": "src/controller/git/checkpoint-writer.ts",
+      "digest": "sha256:b0f7baef00bf8f78804f4775658027c43bdd59720754e8d55d0fe717cdb3e041"
+    },
+    {
+      "path": "src/controller/git/commit-coordinator.ts",
+      "digest": "sha256:b1a78dcc0eaf611fd9fbbbbf5459d18f0e09927b51d40c454c77a1fb1a83f143"
+    },
+    {
+      "path": "src/controller/git/errors.ts",
+      "digest": "sha256:1a6d9d26fc3e2ffdec864c37d8182086aae8827abc5bee12d2be268e3703c09a"
+    },
+    {
+      "path": "src/controller/git/git-process-runner.ts",
+      "digest": "sha256:728976843002846e2b6dfc1ced0a251e90d8a581913a4e2f54aa57cbf6a5ddff"
+    },
+    {
+      "path": "src/controller/git/index.ts",
+      "digest": "sha256:bbd4a5c92e893ccd2b464d820fcab95f18e09a90ff16db8d24b81d374bf7f56c"
+    },
+    {
+      "path": "src/controller/git/types.ts",
+      "digest": "sha256:2dffca342c4e8c80b4de0916074c79e27e2476ce276409ccd9dadc819d1a8ae5"
+    },
+    {
+      "path": "test/commit-coordinator.test.ts",
+      "digest": "sha256:810355ef7040a2bae274c4a8c8eac84812a547961f46d1a4d3d58b301885d998"
+    }
+  ],
+  "touched_paths": [
+    "artifacts/s06/checkpoint.sample.md",
+    "artifacts/s06/commit-tree-golden.json",
+    "artifacts/s06/completion-receipt.json",
+    "artifacts/s06/failure-scene-matrix.json",
+    "contracts/slices/S06.json",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "package.json",
+    "scripts/verify-s06-evidence.mjs",
+    "scripts/verify-s06.mjs",
+    "src/controller/git/checkpoint-writer.ts",
+    "src/controller/git/commit-coordinator.ts",
+    "src/controller/git/errors.ts",
+    "src/controller/git/git-process-runner.ts",
+    "src/controller/git/index.ts",
+    "src/controller/git/types.ts",
+    "test/commit-coordinator.test.ts"
+  ],
+  "check_receipts": [
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ca622aa6b87a4fbd135ae14f841cd92016f6ce189674c007da77682d9bc3fe7a",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 2590
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b4d5eeaf054ffadd6ba18423f31f81288f54bd16be7a5390eafbb745eeba53dc",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 2271
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:c5add66c43f058b0c78aa8b26f132163de085565ed1c3575185ad613c1a44d60",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 84412
+    },
+    {
+      "check_id": "s06_evidence",
+      "argv": [
+        "node",
+        "scripts/verify-s06-evidence.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:25fd735b07706038cc5dbeee9d93f111d8efb2ae7c2f867c48dfe455a73ada1c",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 56019
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:50bf418d3f46fa3975eade28b9f81047ee52461d61415cc22546263c0cca2afe",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 8685
+    }
+  ],
+  "start_head": "81e69830211292b277c9198a1d2b856166837771",
+  "end_head": null,
+  "owned_diff_digest": "sha256:f75f7522c8cafeef8eeeb88c9971f07f2ad616d09ecc99770b8517d555eb2121",
+  "completed_at": "2026-08-08T16:03:27.615Z"
+}

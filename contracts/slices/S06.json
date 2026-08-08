@@ -1,0 +1,254 @@
+{
+  "id": "S06",
+  "contract_version": 1,
+  "requires": [
+    "S03",
+    "S05"
+  ],
+  "objective": "实现 after_slice|none、Slice override、仅提交已验证 OwnedPatch、checkpoint 原子刷新和永不 push 的本地 Git 边界。",
+  "exclusions": [
+    "不执行 Git push 或任何远端写入",
+    "不自动解决冲突、HEAD 竞争或 Protected Change 重叠",
+    "不修改 VerificationReceipt 的结果或把失败折算为通过",
+    "不实现 S07 自动压缩监测或后续任务接力"
+  ],
+  "inputs": [
+    {
+      "path": "artifacts/s03/completion-receipt.json",
+      "digest": "sha256:2272647e961ac4adacb39d74eb53c68145b4206d28be2f3f679eb5a05730d02e",
+      "producer_slice": "S03"
+    },
+    {
+      "path": "artifacts/s05/completion-receipt.json",
+      "digest": "sha256:d89d90ac8e26712b8b1d52243fcb983d1346a83a8c55331d6b6416cc6ebf9454",
+      "producer_slice": "S05"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0003-commit-and-checkpoint-order.md",
+      "digest": "sha256:f687019a8868b1442fe96426063c7c267084b915c0991ae9aa2f570206c5fe55",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0006-project-write-lease-log.md",
+      "digest": "sha256:73a015f9bb6ea8c5fc7bfa17027fcbc1ad1e1f8ae0de0447c8c9011d21448661",
+      "producer_slice": "S03"
+    }
+  ],
+  "owned_paths": [
+    "contracts/slices/S06.json",
+    "src/controller/git/**",
+    "test/commit-coordinator.test.ts",
+    "scripts/verify-s06-evidence.mjs",
+    "scripts/verify-s06.mjs",
+    "package.json",
+    "artifacts/s06/**",
+    "docs/代码链路.md",
+    "docs/架构.md"
+  ],
+  "ports": [
+    {
+      "name": "finish_slice",
+      "signature": "CommitCoordinator.finishSlice(input) -> FinishReceipt | CommitCoordinatorError"
+    },
+    {
+      "name": "atomic_rewrite_checkpoint",
+      "signature": "CheckpointWriter.atomicRewrite(workspace, document) -> CheckpointWriteReceipt | CheckpointWriteError"
+    }
+  ],
+  "allowed_transitions": [
+    "VERIFYING -> COMMITTING",
+    "VERIFYING -> CHECKPOINTING",
+    "COMMITTING -> CHECKPOINTING",
+    "CHECKPOINTING -> SLICE_RUNNING",
+    "CHECKPOINTING -> DONE",
+    "COMMITTING -> NEEDS_USER",
+    "CHECKPOINTING -> NEEDS_USER"
+  ],
+  "failure_codes": [
+    "verification_failed",
+    "verification_receipt_invalid",
+    "finish_input_invalid",
+    "workspace_not_git_worktree",
+    "git_inspection_failed",
+    "head_drift",
+    "protected_change_overlap",
+    "owned_patch_invalid",
+    "stage_scope_mismatch",
+    "commit_failed",
+    "checkpoint_invalid",
+    "checkpoint_refresh_failed"
+  ],
+  "checks": [
+    {
+      "id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        "dist/src/controller/git/index.js"
+      ]
+    },
+    {
+      "id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "cwd": ".",
+      "timeout_ms": 300000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "s06_evidence",
+      "argv": [
+        "node",
+        "scripts/verify-s06-evidence.mjs"
+      ],
+      "cwd": ".",
+      "timeout_ms": 240000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    }
+  ],
+  "expected_artifacts": [
+    {
+      "path": "artifacts/s06/commit-tree-golden.json",
+      "kind": "real_git_commit_tree_golden"
+    },
+    {
+      "path": "artifacts/s06/checkpoint.sample.md",
+      "kind": "normalized_atomic_checkpoint_sample"
+    },
+    {
+      "path": "artifacts/s06/failure-scene-matrix.json",
+      "kind": "git_and_checkpoint_failure_scene_matrix"
+    },
+    {
+      "path": "artifacts/s06/completion-receipt.json",
+      "kind": "completion_receipt"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "kind": "code_path_index"
+    },
+    {
+      "path": "docs/架构.md",
+      "kind": "implementation_architecture"
+    }
+  ],
+  "unlocks": [
+    "S11.full_control_plane",
+    "S12"
+  ]
+}

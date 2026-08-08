@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "slice_id": "S06",
+  "after_slice": {
+    "commit_count": 2,
+    "committed_paths": [
+      "owned-new.txt",
+      "owned.txt"
+    ],
+    "owned_content_digest": "sha256:dd36c419bf98fb2b3aec0e0d6d5b1a43d792e7929a7f12b03981a2f069e86746",
+    "new_owned_content_digest": "sha256:ad782874306b51bad60da0a5f5ce952db72ccf337ae049f21b0b08f48104e3ac",
+    "protected_head_digest": "sha256:13287cb534a6cf83d192a4e48b84d4dddc2dee374e80071edf0dc0964cebdefa",
+    "checkpoint_head_digest": "sha256:8485b5b6bda7399198a2cda237e41736ca0af516979e3b4e674e3c0322b7c98b",
+    "protected_staged_paths": [
+      "protected.txt"
+    ],
+    "protected_untracked_preserved": true,
+    "checkpoint_references_new_head": true,
+    "push_invocations": 0
+  },
+  "result": "PASS",
+  "none": {
+    "commit_count_unchanged": true,
+    "head_unchanged": true,
+    "override_effective": true,
+    "diff_digest_preserved": true
+  }
+}
