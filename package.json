@@ -16,6 +16,7 @@
     "validate:plugin": "node scripts/validate-plugin.mjs .",
     "verify:s01": "node scripts/verify-s01.mjs",
     "verify:s02": "node scripts/verify-s02.mjs",
+    "verify:s03": "node scripts/verify-s03.mjs",
     "state:replay": "node scripts/replay-run-events.mjs"
   },
   "engines": {

@@ -1,0 +1,186 @@
+{
+  "schema_version": 1,
+  "slice_id": "S03",
+  "contract_digest": "sha256:2f3b231fc9652b6a464a8787e7705d9853091b539adc360e08f5ca9ac327b922",
+  "input_digests": [
+    {
+      "path": "artifacts/s02/completion-receipt.json",
+      "digest": "sha256:21897c4a55c145e285109ea2c0f065356f94249616497b2d8dd2225762032d98"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec"
+    },
+    {
+      "path": "docs/adr/0005-directory-event-store.md",
+      "digest": "sha256:fa5797d3133d8c8168080337ce3e34c4fe7d4415c5860ed8b3497e8b9f2d021b"
+    }
+  ],
+  "output_digests": [
+    {
+      "path": "artifacts/s03/concurrency-report.json",
+      "digest": "sha256:54edaa607a81f400b70e7980eb7526da407b44ad90ae6e7f5a21065b48890112"
+    },
+    {
+      "path": "artifacts/s03/git-scenario-matrix.json",
+      "digest": "sha256:a9b2ea2bb43cd545f28aaf62fba0e35722d97bece7bc3644312d6e6f68ced62b"
+    },
+    {
+      "path": "artifacts/s03/lease-event-log.json",
+      "digest": "sha256:91cffeb8b3a3e716fc9a5596092a86022724e06bbb92ec9887a58cc6af89e116"
+    },
+    {
+      "path": "contracts/slices/S03.json",
+      "digest": "sha256:2f3b231fc9652b6a464a8787e7705d9853091b539adc360e08f5ca9ac327b922"
+    },
+    {
+      "path": "docs/adr/0006-project-write-lease-log.md",
+      "digest": "sha256:73a015f9bb6ea8c5fc7bfa17027fcbc1ad1e1f8ae0de0447c8c9011d21448661"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:9942567f621389320bc611fbc3fee2ae9a37b8d8b43e7bde7271bcb96564f6c6"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:91bc156840e27aa6deb95f3662a1022fb5bbcee3e34d6826f1245a187708f3df"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:0e1d7b416af6b03f76201b031db9029acc572b632557c2615b0bce4aa343a07a"
+    },
+    {
+      "path": "scripts/verify-s03-evidence.mjs",
+      "digest": "sha256:7cc665881180b8aba17c95f561ba090733964b486bd54df5bf958b867072746a"
+    },
+    {
+      "path": "scripts/verify-s03.mjs",
+      "digest": "sha256:ab115966ccaaa126c01611c62070b77bd4d110e10fe7fa97ce4d0b55a1f2cda3"
+    },
+    {
+      "path": "src/controller/workspace/errors.ts",
+      "digest": "sha256:1d04019ab4d51336c390a16cccb02ae17411deced94a4ec36a602e6bfbea547f"
+    },
+    {
+      "path": "src/controller/workspace/file-workspace-guard.ts",
+      "digest": "sha256:6c2d90f392e5286ef35fb00217b907ec7e46d362fb319ec05293974437d98714"
+    },
+    {
+      "path": "src/controller/workspace/git-change-guard.ts",
+      "digest": "sha256:49a06a59b7ed6c3278dd435fc4ceb55d3d4663f6df020be96a76c022c1bfb302"
+    },
+    {
+      "path": "src/controller/workspace/index.ts",
+      "digest": "sha256:bd1718d8d73e7c6923466690361c5beb7de1f2b802fcc32aa0dfb998ff59cb34"
+    },
+    {
+      "path": "src/controller/workspace/types.ts",
+      "digest": "sha256:e648c293f2890879ab22fa27a2b20d918350c5f13d05b1a3dbf1805e6e2d8547"
+    },
+    {
+      "path": "test/helpers/workspace-lease-worker.ts",
+      "digest": "sha256:33ebdb880bc590b59454a2ea8a6866e4975346556e7b5000b64c69021c994619"
+    },
+    {
+      "path": "test/workspace-guard.test.ts",
+      "digest": "sha256:baaf646b2e4a304dab985b53e52ef6f604f6dac49434aaa39ea2543931de24b1"
+    }
+  ],
+  "touched_paths": [
+    "artifacts/s03/completion-receipt.json",
+    "artifacts/s03/concurrency-report.json",
+    "artifacts/s03/git-scenario-matrix.json",
+    "artifacts/s03/lease-event-log.json",
+    "contracts/slices/S03.json",
+    "docs/adr/0006-project-write-lease-log.md",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "package.json",
+    "scripts/verify-s03-evidence.mjs",
+    "scripts/verify-s03.mjs",
+    "src/controller/workspace/errors.ts",
+    "src/controller/workspace/file-workspace-guard.ts",
+    "src/controller/workspace/git-change-guard.ts",
+    "src/controller/workspace/index.ts",
+    "src/controller/workspace/types.ts",
+    "test/helpers/workspace-lease-worker.ts",
+    "test/workspace-guard.test.ts"
+  ],
+  "check_receipts": [
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ca622aa6b87a4fbd135ae14f841cd92016f6ce189674c007da77682d9bc3fe7a",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 2445
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b4d5eeaf054ffadd6ba18423f31f81288f54bd16be7a5390eafbb745eeba53dc",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 2267
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:d1ad82f7ad3fb8ee9215d4b011954ab73cdec56445ae967487699ab135000e86",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 33088
+    },
+    {
+      "check_id": "s03_evidence",
+      "argv": [
+        "node",
+        "scripts/verify-s03-evidence.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:f2a8a067ab86c39ea54bf83d3706ce5a4f0f0145b4acaf887ee2b78beb9f2b52",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 18313
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:50bf418d3f46fa3975eade28b9f81047ee52461d61415cc22546263c0cca2afe",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 9453
+    }
+  ],
+  "start_head": "51c5a421fdb495366d64ae66e61870edd509627f",
+  "end_head": null,
+  "owned_diff_digest": "sha256:c91195b6383e0a5b8ffc2b71289d4960bbf1b51cfd8b0948553c6a23cc7f1255",
+  "completed_at": "2026-08-08T13:55:01.492Z"
+}

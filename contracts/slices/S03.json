@@ -1,0 +1,274 @@
+{
+  "id": "S03",
+  "contract_version": 1,
+  "requires": [
+    "S02"
+  ],
+  "objective": "实现工作区独占 Project Write Lease、write epoch 能力轮换、Protected Change 基线与 Slice-owned change 归属判断。",
+  "exclusions": [
+    "不执行 Git commit 或 push",
+    "不运行或编排 Slice 业务验收",
+    "不控制 Codex Source、Compression 或 Continuation 任务",
+    "不对 Protected Change 做猜测性 hunk 拆分"
+  ],
+  "inputs": [
+    {
+      "path": "artifacts/s02/completion-receipt.json",
+      "digest": "sha256:21897c4a55c145e285109ea2c0f065356f94249616497b2d8dd2225762032d98",
+      "producer_slice": "S02"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0005-directory-event-store.md",
+      "digest": "sha256:fa5797d3133d8c8168080337ce3e34c4fe7d4415c5860ed8b3497e8b9f2d021b",
+      "producer_slice": "S02"
+    }
+  ],
+  "owned_paths": [
+    "contracts/slices/S03.json",
+    "src/controller/workspace/**",
+    "test/workspace-guard.test.ts",
+    "test/helpers/workspace-lease-worker.ts",
+    "scripts/verify-s03-evidence.mjs",
+    "scripts/verify-s03.mjs",
+    "package.json",
+    "artifacts/s03/**",
+    "docs/adr/0006-project-write-lease-log.md",
+    "docs/代码链路.md",
+    "docs/架构.md"
+  ],
+  "ports": [
+    {
+      "name": "acquire_project_lease",
+      "signature": "WorkspaceGuard.acquire(workspace, run_id) -> ProjectLease | project_lock_unavailable"
+    },
+    {
+      "name": "renew_project_lease",
+      "signature": "WorkspaceGuard.renew(lease_id, expected_epoch) -> ProjectLease | lease_lost | stale_write_epoch"
+    },
+    {
+      "name": "assert_writable",
+      "signature": "WorkspaceGuard.assert_writable(lease_id, expected_epoch) -> ProjectLease | lease_lost | stale_write_epoch"
+    },
+    {
+      "name": "freeze_writes",
+      "signature": "WorkspaceGuard.freeze_writes(lease_id, expected_epoch) -> FrozenLease | lease_lost | stale_write_epoch"
+    },
+    {
+      "name": "rotate_write_epoch",
+      "signature": "WorkspaceGuard.rotate_epoch(frozen_lease) -> ProjectLease | lease_lost | stale_write_epoch"
+    },
+    {
+      "name": "release_project_lease",
+      "signature": "WorkspaceGuard.release(lease_id, expected_epoch) -> ReleasedLease | lease_lost | stale_write_epoch"
+    },
+    {
+      "name": "capture_protected_baseline",
+      "signature": "ChangeGuard.capture_baseline(workspace) -> ProtectedBaseline | workspace_not_git_worktree | git_inspection_failed"
+    },
+    {
+      "name": "capture_current_workspace",
+      "signature": "ChangeGuard.capture_current(workspace) -> WorkspaceSnapshot | workspace_not_git_worktree | git_inspection_failed"
+    },
+    {
+      "name": "classify_changes",
+      "signature": "ChangeGuard.classify(baseline, current, owned_paths) -> ChangeSet | invalid_owned_path"
+    },
+    {
+      "name": "assert_committable",
+      "signature": "ChangeGuard.assert_committable(change_set) -> OwnedPatch | protected_change_overlap"
+    }
+  ],
+  "allowed_transitions": [
+    "BLOCKED -> READY",
+    "READY -> IN_PROGRESS",
+    "IN_PROGRESS -> VERIFYING",
+    "VERIFYING -> COMPLETE",
+    "VERIFYING -> FAILED"
+  ],
+  "failure_codes": [
+    "project_lock_unavailable",
+    "lease_lost",
+    "stale_write_epoch",
+    "protected_change_overlap",
+    "workspace_guard_persist_failed",
+    "workspace_guard_corrupt",
+    "workspace_not_git_worktree",
+    "git_inspection_failed",
+    "invalid_owned_path"
+  ],
+  "checks": [
+    {
+      "id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        "dist/src/controller/workspace/index.js"
+      ]
+    },
+    {
+      "id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "s03_evidence",
+      "argv": [
+        "node",
+        "scripts/verify-s03-evidence.mjs"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    }
+  ],
+  "expected_artifacts": [
+    {
+      "path": "artifacts/s03/concurrency-report.json",
+      "kind": "process_race_report"
+    },
+    {
+      "path": "artifacts/s03/git-scenario-matrix.json",
+      "kind": "real_git_scenario_matrix"
+    },
+    {
+      "path": "artifacts/s03/lease-event-log.json",
+      "kind": "lease_event_log"
+    },
+    {
+      "path": "artifacts/s03/completion-receipt.json",
+      "kind": "completion_receipt"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "kind": "code_path_index"
+    },
+    {
+      "path": "docs/架构.md",
+      "kind": "implementation_architecture"
+    }
+  ],
+  "unlocks": [
+    "S05",
+    "S06",
+    "S08",
+    "S10"
+  ]
+}

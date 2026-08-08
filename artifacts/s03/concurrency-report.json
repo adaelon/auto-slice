@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "slice_id": "S03",
+  "contenders": [
+    "run-a",
+    "run-b"
+  ],
+  "outcomes": [
+    "acquired",
+    "project_lock_unavailable"
+  ],
+  "acquired_count": 1,
+  "project_lock_unavailable_count": 1,
+  "result": "PASS"
+}

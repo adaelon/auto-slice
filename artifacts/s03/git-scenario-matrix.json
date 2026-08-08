@@ -1,0 +1,76 @@
+{
+  "schema_version": 1,
+  "slice_id": "S03",
+  "scenarios": [
+    {
+      "id": "clean",
+      "owned_paths": [],
+      "overlap_paths": [],
+      "unowned_paths": [],
+      "outcome": "committable",
+      "result": "PASS"
+    },
+    {
+      "id": "untracked",
+      "owned_paths": [
+        "new.txt"
+      ],
+      "overlap_paths": [],
+      "unowned_paths": [],
+      "outcome": "committable",
+      "result": "PASS"
+    },
+    {
+      "id": "staged",
+      "owned_paths": [
+        "tracked.txt"
+      ],
+      "overlap_paths": [],
+      "unowned_paths": [],
+      "outcome": "committable",
+      "result": "PASS"
+    },
+    {
+      "id": "unstaged",
+      "owned_paths": [
+        "tracked.txt"
+      ],
+      "overlap_paths": [],
+      "unowned_paths": [],
+      "outcome": "committable",
+      "result": "PASS"
+    },
+    {
+      "id": "rename",
+      "owned_paths": [
+        "old-name.txt",
+        "renamed.txt"
+      ],
+      "overlap_paths": [],
+      "unowned_paths": [],
+      "outcome": "committable",
+      "result": "PASS"
+    },
+    {
+      "id": "deleted",
+      "owned_paths": [
+        "delete.txt"
+      ],
+      "overlap_paths": [],
+      "unowned_paths": [],
+      "outcome": "committable",
+      "result": "PASS"
+    },
+    {
+      "id": "same_file_protected_overlap",
+      "owned_paths": [],
+      "overlap_paths": [
+        "protected.txt"
+      ],
+      "unowned_paths": [],
+      "outcome": "protected_change_overlap",
+      "result": "PASS"
+    }
+  ],
+  "result": "PASS"
+}
