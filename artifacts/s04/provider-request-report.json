@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "slice_id": "S04",
+  "role": "DETERMINISTIC",
+  "decision": {
+    "mode": "none"
+  },
+  "capability_read_count": 0,
+  "provider_request_count": 0,
+  "result": "PASS"
+}

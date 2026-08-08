@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "slice_id": "S04",
+  "scenarios": [
+    {
+      "id": "missing_exact_model",
+      "outcome": "model_policy_unavailable",
+      "reason": "model_unavailable",
+      "result": "PASS"
+    },
+    {
+      "id": "missing_exact_effort",
+      "outcome": "model_policy_unavailable",
+      "reason": "reasoning_effort_unavailable",
+      "result": "PASS"
+    },
+    {
+      "id": "unknown_role",
+      "outcome": "model_policy_unavailable",
+      "reason": "unknown_role",
+      "result": "PASS"
+    },
+    {
+      "id": "expired_snapshot",
+      "outcome": "model_policy_unavailable",
+      "reason": "expired_capability_snapshot",
+      "result": "PASS"
+    }
+  ],
+  "result": "PASS"
+}

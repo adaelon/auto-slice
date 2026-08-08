@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "slice_id": "S04",
+  "scenarios": [
+    {
+      "role": "DEVELOPMENT",
+      "decision": {
+        "mode": "model",
+        "model": "gpt-5.6-sol",
+        "effort": "max"
+      },
+      "result": "PASS"
+    },
+    {
+      "role": "CONTINUATION",
+      "decision": {
+        "mode": "model",
+        "model": "gpt-5.6-sol",
+        "effort": "max"
+      },
+      "result": "PASS"
+    },
+    {
+      "role": "COMPRESSION",
+      "decision": {
+        "mode": "model",
+        "model": "gpt-5.6-sol",
+        "effort": "medium"
+      },
+      "result": "PASS"
+    },
+    {
+      "role": "DETERMINISTIC",
+      "decision": {
+        "mode": "none"
+      },
+      "result": "PASS"
+    }
+  ],
+  "result": "PASS"
+}

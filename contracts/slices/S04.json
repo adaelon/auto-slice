@@ -1,0 +1,231 @@
+{
+  "id": "S04",
+  "contract_version": 1,
+  "requires": [
+    "S01"
+  ],
+  "objective": "把开发、续接、压缩和确定性工作角色严格映射到冻结的模型策略，并在精确模型、reasoning effort 或有效 Host 能力快照不可用时 fail closed。",
+  "exclusions": [
+    "不调用任何模型或模型 provider",
+    "不比较模型性能或动态优化路由",
+    "不允许相似模型、较低 reasoning effort 或默认策略 fallback",
+    "不执行 Slice、自动压缩或任务接力"
+  ],
+  "inputs": [
+    {
+      "path": "artifacts/s01/completion-receipt.json",
+      "digest": "sha256:244e7b2d75a27ff77e9e0747a8553c09b21d6b79372133bf22e7474e1cbc4ef9",
+      "producer_slice": "S01"
+    },
+    {
+      "path": "artifacts/s01/frozen-contracts.json",
+      "digest": "sha256:d7c96460e3bcff340b56258849ecf54178856a2e86d783a7a8c27436646d762b",
+      "producer_slice": "S01"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0002-deterministic-model-routing.md",
+      "digest": "sha256:d0752d65132aa27689cf7c6f20a56cfeefaa144a537722c56a7a7a237950dc1a",
+      "producer_slice": "frozen-design"
+    }
+  ],
+  "owned_paths": [
+    "contracts/slices/S04.json",
+    "src/controller/model-policy/**",
+    "test/model-router.test.ts",
+    "scripts/verify-s04-evidence.mjs",
+    "scripts/verify-s04.mjs",
+    "package.json",
+    "artifacts/s04/**",
+    "docs/代码链路.md",
+    "docs/架构.md"
+  ],
+  "ports": [
+    {
+      "name": "resolve_model_policy",
+      "signature": "ModelRouter.resolve(role, capabilities) -> ModelDecision | model_policy_unavailable"
+    },
+    {
+      "name": "capture_host_model_capabilities",
+      "signature": "HostModelCapabilityAdapter.snapshot() -> HostModelCapabilitySnapshot | model_policy_unavailable"
+    }
+  ],
+  "allowed_transitions": [
+    "BLOCKED -> READY",
+    "READY -> IN_PROGRESS",
+    "IN_PROGRESS -> VERIFYING",
+    "VERIFYING -> COMPLETE",
+    "VERIFYING -> FAILED"
+  ],
+  "failure_codes": [
+    "model_policy_unavailable"
+  ],
+  "checks": [
+    {
+      "id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        "dist/src/controller/model-policy/index.js"
+      ]
+    },
+    {
+      "id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "s04_evidence",
+      "argv": [
+        "node",
+        "scripts/verify-s04-evidence.mjs"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    }
+  ],
+  "expected_artifacts": [
+    {
+      "path": "artifacts/s04/policy-matrix.json",
+      "kind": "model_policy_matrix"
+    },
+    {
+      "path": "artifacts/s04/failure-matrix.json",
+      "kind": "model_policy_failure_matrix"
+    },
+    {
+      "path": "artifacts/s04/provider-request-report.json",
+      "kind": "provider_request_zero_call_report"
+    },
+    {
+      "path": "artifacts/s04/completion-receipt.json",
+      "kind": "completion_receipt"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "kind": "code_path_index"
+    },
+    {
+      "path": "docs/架构.md",
+      "kind": "implementation_architecture"
+    }
+  ],
+  "unlocks": [
+    "S05",
+    "S09",
+    "S10"
+  ]
+}

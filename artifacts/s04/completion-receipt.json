@@ -1,0 +1,171 @@
+{
+  "schema_version": 1,
+  "slice_id": "S04",
+  "contract_digest": "sha256:14abc23f94f6d8f75f291c0dfb04b318434f0edaae5d702b1c10485066ca63e4",
+  "input_digests": [
+    {
+      "path": "artifacts/s01/completion-receipt.json",
+      "digest": "sha256:244e7b2d75a27ff77e9e0747a8553c09b21d6b79372133bf22e7474e1cbc4ef9"
+    },
+    {
+      "path": "artifacts/s01/frozen-contracts.json",
+      "digest": "sha256:d7c96460e3bcff340b56258849ecf54178856a2e86d783a7a8c27436646d762b"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8"
+    },
+    {
+      "path": "docs/adr/0002-deterministic-model-routing.md",
+      "digest": "sha256:d0752d65132aa27689cf7c6f20a56cfeefaa144a537722c56a7a7a237950dc1a"
+    }
+  ],
+  "output_digests": [
+    {
+      "path": "artifacts/s04/failure-matrix.json",
+      "digest": "sha256:b27ac3467f4be751aa78bb90181a2b77a0d50155a1951ca9f1089256d8ae6458"
+    },
+    {
+      "path": "artifacts/s04/policy-matrix.json",
+      "digest": "sha256:1b1232db216b016e54e3c81d93ad8ff92f996d550629d8e8f545cc5d23606ae0"
+    },
+    {
+      "path": "artifacts/s04/provider-request-report.json",
+      "digest": "sha256:15ada155178566819e04023c5604d9573aae8e3348b53046447234cf5bb77e2a"
+    },
+    {
+      "path": "contracts/slices/S04.json",
+      "digest": "sha256:14abc23f94f6d8f75f291c0dfb04b318434f0edaae5d702b1c10485066ca63e4"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:801f6baed4a7a6a718679871943f16b89c0a0a264c5719500f8f3697376004a5"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:1648c569ece66d26ec0285518150c11b65f7f0f9015154d0679e977ca0de5a5f"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:716765457f7274ee7b92a3f837c26df0f51c9a01f9c770977ae3c2d3fb4b0c11"
+    },
+    {
+      "path": "scripts/verify-s04-evidence.mjs",
+      "digest": "sha256:85d484e9d81dc6580e7effe5a91c8e7c2bb300b03fdb9a031b8033f44ae78f95"
+    },
+    {
+      "path": "scripts/verify-s04.mjs",
+      "digest": "sha256:ad2c05dc42de7393b681508bfa749aacc171320c4c7f84737dc507a9e9377393"
+    },
+    {
+      "path": "src/controller/model-policy/errors.ts",
+      "digest": "sha256:973b52d1051401512636d6b0f5f58737ebbc3caedc65db08d82000261ca02e3b"
+    },
+    {
+      "path": "src/controller/model-policy/index.ts",
+      "digest": "sha256:06971f6b802d54c227d901bdb3265704f070f22dd37dd733d1179e5bd5e67340"
+    },
+    {
+      "path": "src/controller/model-policy/model-router.ts",
+      "digest": "sha256:d8d644faa1ea461eb9e4bec0cda6c0d40f16b878d70ae888bfc20ee09d43abe4"
+    },
+    {
+      "path": "src/controller/model-policy/types.ts",
+      "digest": "sha256:c92bcf5f12244671ba4e13db95f25987e9b0e48ae17d568840dba4f524654b9e"
+    },
+    {
+      "path": "test/model-router.test.ts",
+      "digest": "sha256:307a5d88700d253411115d9c8fc2948952822676dac6b82d5d812589aadd4e6a"
+    }
+  ],
+  "touched_paths": [
+    "artifacts/s04/completion-receipt.json",
+    "artifacts/s04/failure-matrix.json",
+    "artifacts/s04/policy-matrix.json",
+    "artifacts/s04/provider-request-report.json",
+    "contracts/slices/S04.json",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "package.json",
+    "scripts/verify-s04-evidence.mjs",
+    "scripts/verify-s04.mjs",
+    "src/controller/model-policy/errors.ts",
+    "src/controller/model-policy/index.ts",
+    "src/controller/model-policy/model-router.ts",
+    "src/controller/model-policy/types.ts",
+    "test/model-router.test.ts"
+  ],
+  "check_receipts": [
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ca622aa6b87a4fbd135ae14f841cd92016f6ce189674c007da77682d9bc3fe7a",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 2668
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b4d5eeaf054ffadd6ba18423f31f81288f54bd16be7a5390eafbb745eeba53dc",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 2690
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:326279a0893f897f3aacb985d0c437f4398e6f249928892527cbe0716602705d",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 33482
+    },
+    {
+      "check_id": "s04_evidence",
+      "argv": [
+        "node",
+        "scripts/verify-s04-evidence.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:dbadfff6422abf254f3844b96291bf81b141359563c7a0e8b92db127efc7fc89",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 216
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:50bf418d3f46fa3975eade28b9f81047ee52461d61415cc22546263c0cca2afe",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 9435
+    }
+  ],
+  "start_head": "d499d3fc962acf67faa94f2e706403cce932fec0",
+  "end_head": null,
+  "owned_diff_digest": "sha256:0a6597cf1ead83f41c7e7bb6e9b8a38a9fc842f28287b22b1547ea528539ed24",
+  "completed_at": "2026-08-08T14:18:56.811Z"
+}
