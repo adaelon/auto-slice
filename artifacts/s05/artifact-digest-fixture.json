@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "slice_id": "S05",
+  "expected_digest": "sha256:1919834013738c8e3c8a825d301593b1453ad8bb9e65101667da529b05f8decd",
+  "scenarios": [
+    {
+      "id": "match",
+      "result": "PASS",
+      "failure_code": null
+    },
+    {
+      "id": "missing",
+      "result": "FAIL",
+      "failure_code": "artifact_missing"
+    },
+    {
+      "id": "mismatch",
+      "result": "FAIL",
+      "failure_code": "artifact_digest_mismatch"
+    },
+    {
+      "id": "unowned_write",
+      "result": "FAIL",
+      "failure_code": "unowned_change_detected"
+    },
+    {
+      "id": "llm_claim_runner_failure",
+      "result": "FAIL",
+      "failure_code": "check_nonzero_exit"
+    }
+  ],
+  "result": "PASS"
+}

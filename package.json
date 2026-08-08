@@ -18,6 +18,7 @@
     "verify:s02": "node scripts/verify-s02.mjs",
     "verify:s03": "node scripts/verify-s03.mjs",
     "verify:s04": "node scripts/verify-s04.mjs",
+    "verify:s05": "node scripts/verify-s05.mjs",
     "state:replay": "node scripts/replay-run-events.mjs"
   },
   "engines": {

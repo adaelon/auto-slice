@@ -1,0 +1,212 @@
+{
+  "schema_version": 1,
+  "slice_id": "S05",
+  "contract_digest": "sha256:d785aefe0a2215e4c58c74bcccf4e8a2ab97a5f6288c815b84fdfb7e8f5bcd5a",
+  "input_digests": [
+    {
+      "path": "artifacts/s02/completion-receipt.json",
+      "digest": "sha256:21897c4a55c145e285109ea2c0f065356f94249616497b2d8dd2225762032d98"
+    },
+    {
+      "path": "artifacts/s03/completion-receipt.json",
+      "digest": "sha256:2272647e961ac4adacb39d74eb53c68145b4206d28be2f3f679eb5a05730d02e"
+    },
+    {
+      "path": "artifacts/s04/completion-receipt.json",
+      "digest": "sha256:6f4b8e43ed3d82d294c46049b904bb20723583a901a1d930d48cfb4d4b41110a"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec"
+    },
+    {
+      "path": "docs/adr/0002-deterministic-model-routing.md",
+      "digest": "sha256:d0752d65132aa27689cf7c6f20a56cfeefaa144a537722c56a7a7a237950dc1a"
+    },
+    {
+      "path": "docs/adr/0005-directory-event-store.md",
+      "digest": "sha256:fa5797d3133d8c8168080337ce3e34c4fe7d4415c5860ed8b3497e8b9f2d021b"
+    },
+    {
+      "path": "docs/adr/0006-project-write-lease-log.md",
+      "digest": "sha256:73a015f9bb6ea8c5fc7bfa17027fcbc1ad1e1f8ae0de0447c8c9011d21448661"
+    }
+  ],
+  "output_digests": [
+    {
+      "path": "artifacts/s05/artifact-digest-fixture.json",
+      "digest": "sha256:2bc84fd70feea3cd4fa69f50d074dac372547ed24a96cb9c6995737306b4adc0"
+    },
+    {
+      "path": "artifacts/s05/process-scenario-matrix.json",
+      "digest": "sha256:1bd44b42739b6f5b5efbd24a01172843792c3ce91b24eea5f69ae526eb7c52b7"
+    },
+    {
+      "path": "artifacts/s05/verification-receipt.sample.json",
+      "digest": "sha256:ac25026aeec60b50beb531aa7854d8705ab31d80ece51391bda02489251136cf"
+    },
+    {
+      "path": "contracts/slices/S05.json",
+      "digest": "sha256:d785aefe0a2215e4c58c74bcccf4e8a2ab97a5f6288c815b84fdfb7e8f5bcd5a"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:fd390ec5838ba9122bf7ef213c177fdc885220d4c783623dcd871e769b1f3c01"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:62ab63200223c0f5e7c34cea126120b1d414218b1f18c0485388cfcfe92d3bdb"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:46b73801de8fd8c7b8575b4f118a8d0d9459f5f91e5ed89beae8ed564ee84430"
+    },
+    {
+      "path": "scripts/verify-s05-evidence.mjs",
+      "digest": "sha256:0f75ce43ddf5c3f72177d1083ed6d4697c7c9e7f40e35c9c1fd937ec55c5b658"
+    },
+    {
+      "path": "scripts/verify-s05.mjs",
+      "digest": "sha256:963dfefaa9b1e264430ebd1e4780d4388742ef826e61d5e484e91427e1c45ee6"
+    },
+    {
+      "path": "src/controller/slices/contract-parser.ts",
+      "digest": "sha256:60b03dc4c27ac7babd29c97ebad8eeb8ea7008db18443978fb3a2947fac7e138"
+    },
+    {
+      "path": "src/controller/slices/errors.ts",
+      "digest": "sha256:af9d38afa13eb81ca2ace87eb0678f8e1bda51ac753589b9c5f26a6850f960da"
+    },
+    {
+      "path": "src/controller/slices/index.ts",
+      "digest": "sha256:90d6e0ec5ff4b7e416c27a90122c23ea074a3819702d4c6ac89d7898754504fe"
+    },
+    {
+      "path": "src/controller/slices/path-utils.ts",
+      "digest": "sha256:0c29810a3bfad491f08f3c9c3fa67df74b5abe4b9fca3898051ef38f9a081d63"
+    },
+    {
+      "path": "src/controller/slices/process-runner.ts",
+      "digest": "sha256:57f1a4029bf44f7ed004472851cf31065266a48d69da38e55ed7f382fb2a4efa"
+    },
+    {
+      "path": "src/controller/slices/slice-executor.ts",
+      "digest": "sha256:93e4eab9d0006d197dd5e86b733d14c4bfc69f00cc96a509d35bc902b2948020"
+    },
+    {
+      "path": "src/controller/slices/types.ts",
+      "digest": "sha256:3fe0dc9e85baba35f17a17ab16c5bba24abb78802e5bbebfaae99afcbc70dce2"
+    },
+    {
+      "path": "src/controller/slices/verifier.ts",
+      "digest": "sha256:153393e6ae0c86ccc9eae939309618310e02db2aac56a1a2f0ce06053924723e"
+    },
+    {
+      "path": "test/fixtures/process/check-fixture.mjs",
+      "digest": "sha256:c7bbe8e4a8788b6de8774bc551c48de6f8008ea4554e078100701f8c06828ece"
+    },
+    {
+      "path": "test/slice-executor.test.ts",
+      "digest": "sha256:7617daa1386742014180656190a5bda1fe41f48c8c63caa8d6e1e24fc5a66d30"
+    }
+  ],
+  "touched_paths": [
+    "artifacts/s05/artifact-digest-fixture.json",
+    "artifacts/s05/completion-receipt.json",
+    "artifacts/s05/process-scenario-matrix.json",
+    "artifacts/s05/verification-receipt.sample.json",
+    "contracts/slices/S05.json",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "package.json",
+    "scripts/verify-s05-evidence.mjs",
+    "scripts/verify-s05.mjs",
+    "src/controller/slices/contract-parser.ts",
+    "src/controller/slices/errors.ts",
+    "src/controller/slices/index.ts",
+    "src/controller/slices/path-utils.ts",
+    "src/controller/slices/process-runner.ts",
+    "src/controller/slices/slice-executor.ts",
+    "src/controller/slices/types.ts",
+    "src/controller/slices/verifier.ts",
+    "test/fixtures/process/check-fixture.mjs",
+    "test/slice-executor.test.ts"
+  ],
+  "check_receipts": [
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ca622aa6b87a4fbd135ae14f841cd92016f6ce189674c007da77682d9bc3fe7a",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 2544
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b4d5eeaf054ffadd6ba18423f31f81288f54bd16be7a5390eafbb745eeba53dc",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 2273
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:91cee5fb9fe22df58dfb9ea8e4ad4790500feab5d64ed34287ad260fd7731165",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 42809
+    },
+    {
+      "check_id": "s05_evidence",
+      "argv": [
+        "node",
+        "scripts/verify-s05-evidence.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:7e822fa17c3ed8fdcb06bd14fae6b6941391c3e476fededb6162ee78fdb3d5c7",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 24888
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:50bf418d3f46fa3975eade28b9f81047ee52461d61415cc22546263c0cca2afe",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 8445
+    }
+  ],
+  "start_head": "0c3f50b27cf6798e1de1451bdf89345a7f447cdb",
+  "end_head": null,
+  "owned_diff_digest": "sha256:f55eef3c81a0272d1714bcf2c4f1b954cb02c527a0351c41f6b2438bd746c4a9",
+  "completed_at": "2026-08-08T15:10:43.866Z"
+}

@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "slice_id": "S05-evidence",
+  "execution_id": "execution-s05-match",
+  "contract_digest": "sha256:57ea6aa45c3ee87bdd6edd201cbf47af881e7a4ae122ea027132cda2173eedbc",
+  "result": "PASS",
+  "check_receipts": [
+    {
+      "check_id": "write",
+      "outcome": "PASS",
+      "expected_exit_code": 0,
+      "exit_code": 0,
+      "stdout_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    }
+  ],
+  "artifact_digests": [
+    {
+      "path": "owned/result.txt",
+      "digest": "sha256:1919834013738c8e3c8a825d301593b1453ad8bb9e65101667da529b05f8decd"
+    }
+  ],
+  "owned_diff_digest_present": true,
+  "overlap_paths": [],
+  "unowned_paths": [],
+  "receipt_digest_valid": true,
+  "repeated_verification_equal": true
+}

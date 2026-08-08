@@ -1,0 +1,280 @@
+{
+  "id": "S05",
+  "contract_version": 1,
+  "requires": [
+    "S02",
+    "S03",
+    "S04"
+  ],
+  "objective": "解析 SliceContractV1，在有效 Project Write Lease 与 DEVELOPMENT ModelDecision 下执行 argv-only 确定性 checks，并以 artifact digest 和 Slice-owned diff 生成不可歧义的 VerificationReceipt。",
+  "exclusions": [
+    "不执行 Git commit、push 或 checkpoint 刷新",
+    "不实现自动压缩监测、Source Interruption 或任务接力",
+    "不把 LLM 文本、自述或评分当作验收证据",
+    "不允许 shell 字符串、workspace 外 cwd、未列入 allowlist 的环境变量或越界写入"
+  ],
+  "inputs": [
+    {
+      "path": "artifacts/s02/completion-receipt.json",
+      "digest": "sha256:21897c4a55c145e285109ea2c0f065356f94249616497b2d8dd2225762032d98",
+      "producer_slice": "S02"
+    },
+    {
+      "path": "artifacts/s03/completion-receipt.json",
+      "digest": "sha256:2272647e961ac4adacb39d74eb53c68145b4206d28be2f3f679eb5a05730d02e",
+      "producer_slice": "S03"
+    },
+    {
+      "path": "artifacts/s04/completion-receipt.json",
+      "digest": "sha256:6f4b8e43ed3d82d294c46049b904bb20723583a901a1d930d48cfb4d4b41110a",
+      "producer_slice": "S04"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0002-deterministic-model-routing.md",
+      "digest": "sha256:d0752d65132aa27689cf7c6f20a56cfeefaa144a537722c56a7a7a237950dc1a",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0005-directory-event-store.md",
+      "digest": "sha256:fa5797d3133d8c8168080337ce3e34c4fe7d4415c5860ed8b3497e8b9f2d021b",
+      "producer_slice": "S02"
+    },
+    {
+      "path": "docs/adr/0006-project-write-lease-log.md",
+      "digest": "sha256:73a015f9bb6ea8c5fc7bfa17027fcbc1ad1e1f8ae0de0447c8c9011d21448661",
+      "producer_slice": "S03"
+    }
+  ],
+  "owned_paths": [
+    "contracts/slices/S05.json",
+    "src/controller/slices/**",
+    "test/slice-executor.test.ts",
+    "test/fixtures/process/**",
+    "scripts/verify-s05-evidence.mjs",
+    "scripts/verify-s05.mjs",
+    "package.json",
+    "artifacts/s05/**",
+    "docs/代码链路.md",
+    "docs/架构.md"
+  ],
+  "ports": [
+    {
+      "name": "parse_slice_contract",
+      "signature": "parseSliceContractV1(input) -> SliceContractV1 | slice_contract_invalid | path_outside_workspace"
+    },
+    {
+      "name": "run_check",
+      "signature": "CheckProcessRunner.run(check, workspace) -> CheckExecutionReceipt"
+    },
+    {
+      "name": "start_slice_execution",
+      "signature": "SliceExecutor.start(contract, lease, model_decision) -> ExecutionId | SliceExecutionError"
+    },
+    {
+      "name": "collect_slice_execution",
+      "signature": "SliceExecutor.collect(execution_id) -> ExecutionReceipt | SliceExecutionError"
+    },
+    {
+      "name": "verify_slice",
+      "signature": "SliceVerifier.verify(contract, execution_receipt, workspace) -> VerificationReceipt"
+    }
+  ],
+  "allowed_transitions": [
+    "SLICE_RUNNING -> VERIFYING",
+    "VERIFYING -> SLICE_VERIFIED",
+    "VERIFYING -> SLICE_RUNNING",
+    "VERIFYING -> NEEDS_USER"
+  ],
+  "failure_codes": [
+    "slice_contract_invalid",
+    "path_outside_workspace",
+    "write_capability_unavailable",
+    "model_decision_invalid",
+    "execution_not_found",
+    "execution_already_collected",
+    "check_spawn_failed",
+    "check_timeout",
+    "check_nonzero_exit",
+    "check_output_limit_exceeded",
+    "artifact_missing",
+    "artifact_digest_mismatch",
+    "unowned_change_detected",
+    "protected_change_overlap",
+    "workspace_inspection_failed",
+    "verification_receipt_invalid"
+  ],
+  "checks": [
+    {
+      "id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        "dist/src/controller/slices/index.js"
+      ]
+    },
+    {
+      "id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "cwd": ".",
+      "timeout_ms": 180000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "s05_evidence",
+      "argv": [
+        "node",
+        "scripts/verify-s05-evidence.mjs"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    }
+  ],
+  "expected_artifacts": [
+    {
+      "path": "artifacts/s05/process-scenario-matrix.json",
+      "kind": "real_process_scenario_matrix"
+    },
+    {
+      "path": "artifacts/s05/artifact-digest-fixture.json",
+      "kind": "artifact_digest_verification_fixture"
+    },
+    {
+      "path": "artifacts/s05/verification-receipt.sample.json",
+      "kind": "normalized_verification_receipt_sample"
+    },
+    {
+      "path": "artifacts/s05/completion-receipt.json",
+      "kind": "completion_receipt"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "kind": "code_path_index"
+    },
+    {
+      "path": "docs/架构.md",
+      "kind": "implementation_architecture"
+    }
+  ],
+  "unlocks": [
+    "S06",
+    "S11.start",
+    "S11.resume"
+  ]
+}

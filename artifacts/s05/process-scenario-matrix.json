@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "slice_id": "S05",
+  "scenarios": [
+    {
+      "id": "success",
+      "outcome": "PASS",
+      "expected_exit_code": 0,
+      "observed_exit_code": 0,
+      "process_tree_terminated": false,
+      "output_limit_exceeded": false,
+      "result": "PASS"
+    },
+    {
+      "id": "nonzero_llm_claim",
+      "outcome": "CHECK_NONZERO_EXIT",
+      "expected_exit_code": 0,
+      "observed_exit_code": 7,
+      "process_tree_terminated": false,
+      "output_limit_exceeded": false,
+      "result": "PASS"
+    },
+    {
+      "id": "timeout",
+      "outcome": "CHECK_TIMEOUT",
+      "expected_exit_code": 0,
+      "observed_exit_code": null,
+      "process_tree_terminated": true,
+      "output_limit_exceeded": false,
+      "result": "PASS"
+    },
+    {
+      "id": "output_limit",
+      "outcome": "CHECK_OUTPUT_LIMIT_EXCEEDED",
+      "expected_exit_code": 0,
+      "observed_exit_code": null,
+      "process_tree_terminated": true,
+      "output_limit_exceeded": true,
+      "result": "PASS"
+    },
+    {
+      "id": "process_tree_timeout",
+      "outcome": "CHECK_TIMEOUT",
+      "expected_exit_code": 0,
+      "observed_exit_code": null,
+      "process_tree_terminated": true,
+      "output_limit_exceeded": false,
+      "result": "PASS"
+    }
+  ],
+  "result": "PASS"
+}
