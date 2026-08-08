@@ -1,0 +1,124 @@
+[
+  {
+    "schema_version": 1,
+    "run_id": "golden-run",
+    "event_index": 0,
+    "event_kind": "RUN_CREATED",
+    "action": "create_run",
+    "occurred_at": "2026-08-08T00:00:00.000Z",
+    "previous_event_digest": null,
+    "before_state": null,
+    "before_state_digest": null,
+    "after_state": {
+      "commit_mode": "after_slice",
+      "current_slice_id": "S02",
+      "plan_digest": "sha256:64879f7d6b960a01909762d911a32d4582c20010c5641ee90278b644a9e3b525",
+      "project_lock_owner": null,
+      "protected_baseline_digest": "sha256:8ba8496a2525ae171ffd104d632dede6ef418d9b95962a9d88e2fcdbc8d48d24",
+      "run_id": "golden-run",
+      "schema_version": 1,
+      "source_thread_id": null,
+      "state_version": 0,
+      "status": "IDLE",
+      "workspace_identity": {
+        "canonical_root": "E:\\workspace\\fixture",
+        "filesystem_identity": "win32:sha256:fixture"
+      },
+      "write_epoch": 0
+    },
+    "after_state_digest": "sha256:d19cb5b468db800d6a2e4a127b07665b75b7905fd5a84e8cae821ed8961d0dca",
+    "event_digest": "sha256:ac9cb63bffb2b39f7619ee5a78e72e51419611ebd1f6b41fc7fe635bf3d002c0"
+  },
+  {
+    "schema_version": 1,
+    "run_id": "golden-run",
+    "event_index": 1,
+    "event_kind": "STATE_TRANSITION",
+    "action": "prepare_run",
+    "occurred_at": "2026-08-08T00:00:01.000Z",
+    "previous_event_digest": "sha256:ac9cb63bffb2b39f7619ee5a78e72e51419611ebd1f6b41fc7fe635bf3d002c0",
+    "before_state": {
+      "commit_mode": "after_slice",
+      "current_slice_id": "S02",
+      "plan_digest": "sha256:64879f7d6b960a01909762d911a32d4582c20010c5641ee90278b644a9e3b525",
+      "project_lock_owner": null,
+      "protected_baseline_digest": "sha256:8ba8496a2525ae171ffd104d632dede6ef418d9b95962a9d88e2fcdbc8d48d24",
+      "run_id": "golden-run",
+      "schema_version": 1,
+      "source_thread_id": null,
+      "state_version": 0,
+      "status": "IDLE",
+      "workspace_identity": {
+        "canonical_root": "E:\\workspace\\fixture",
+        "filesystem_identity": "win32:sha256:fixture"
+      },
+      "write_epoch": 0
+    },
+    "before_state_digest": "sha256:d19cb5b468db800d6a2e4a127b07665b75b7905fd5a84e8cae821ed8961d0dca",
+    "after_state": {
+      "commit_mode": "after_slice",
+      "current_slice_id": "S02",
+      "plan_digest": "sha256:64879f7d6b960a01909762d911a32d4582c20010c5641ee90278b644a9e3b525",
+      "project_lock_owner": null,
+      "protected_baseline_digest": "sha256:8ba8496a2525ae171ffd104d632dede6ef418d9b95962a9d88e2fcdbc8d48d24",
+      "run_id": "golden-run",
+      "schema_version": 1,
+      "source_thread_id": null,
+      "state_version": 1,
+      "status": "PREPARING",
+      "workspace_identity": {
+        "canonical_root": "E:\\workspace\\fixture",
+        "filesystem_identity": "win32:sha256:fixture"
+      },
+      "write_epoch": 0
+    },
+    "after_state_digest": "sha256:66a2976c7c7c36a502ea27bd7b2b8a19aa443f0a8b1629746f8dfdca1dd801e2",
+    "event_digest": "sha256:599d12b077b51bcf0658d2e877f49fe16fbf5026fbf62cfc4cf99bd8869417b7"
+  },
+  {
+    "schema_version": 1,
+    "run_id": "golden-run",
+    "event_index": 2,
+    "event_kind": "STATE_TRANSITION",
+    "action": "start_slice",
+    "occurred_at": "2026-08-08T00:00:02.000Z",
+    "previous_event_digest": "sha256:599d12b077b51bcf0658d2e877f49fe16fbf5026fbf62cfc4cf99bd8869417b7",
+    "before_state": {
+      "commit_mode": "after_slice",
+      "current_slice_id": "S02",
+      "plan_digest": "sha256:64879f7d6b960a01909762d911a32d4582c20010c5641ee90278b644a9e3b525",
+      "project_lock_owner": null,
+      "protected_baseline_digest": "sha256:8ba8496a2525ae171ffd104d632dede6ef418d9b95962a9d88e2fcdbc8d48d24",
+      "run_id": "golden-run",
+      "schema_version": 1,
+      "source_thread_id": null,
+      "state_version": 1,
+      "status": "PREPARING",
+      "workspace_identity": {
+        "canonical_root": "E:\\workspace\\fixture",
+        "filesystem_identity": "win32:sha256:fixture"
+      },
+      "write_epoch": 0
+    },
+    "before_state_digest": "sha256:66a2976c7c7c36a502ea27bd7b2b8a19aa443f0a8b1629746f8dfdca1dd801e2",
+    "after_state": {
+      "commit_mode": "after_slice",
+      "current_slice_id": "S02",
+      "plan_digest": "sha256:64879f7d6b960a01909762d911a32d4582c20010c5641ee90278b644a9e3b525",
+      "project_lock_owner": null,
+      "protected_baseline_digest": "sha256:8ba8496a2525ae171ffd104d632dede6ef418d9b95962a9d88e2fcdbc8d48d24",
+      "run_id": "golden-run",
+      "schema_version": 1,
+      "source_thread_id": "thread-source-1",
+      "state_version": 2,
+      "status": "SLICE_RUNNING",
+      "workspace_identity": {
+        "canonical_root": "E:\\workspace\\fixture",
+        "filesystem_identity": "win32:sha256:fixture"
+      },
+      "write_epoch": 0
+    },
+    "after_state_digest": "sha256:a71853404ef5d669d42c9ddb1855090da972c6324b1ab34cc5ed6e9cb1ec4c9d",
+    "event_digest": "sha256:4b2ee6d72e0f3eab65fd82ee5d12e9f133b2303ef0009442cf4f5bce9b5d3317"
+  }
+]

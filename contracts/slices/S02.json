@@ -1,0 +1,262 @@
+{
+  "id": "S02",
+  "contract_version": 1,
+  "requires": [
+    "S01"
+  ],
+  "objective": "实现 RunState、追加式事件日志、state_version CAS、幂等副作用账本和崩溃恢复。",
+  "exclusions": [
+    "不调用真实 Codex、Git、进程或文件写租约适配器",
+    "不实现业务副作用",
+    "不实现 S03 Project Write Lease 或 Protected Change",
+    "不实现 S04 Deterministic Model Router"
+  ],
+  "inputs": [
+    {
+      "path": "artifacts/s01/completion-receipt.json",
+      "digest": "sha256:244e7b2d75a27ff77e9e0747a8553c09b21d6b79372133bf22e7474e1cbc4ef9",
+      "producer_slice": "S01"
+    },
+    {
+      "path": "artifacts/s01/frozen-contracts.json",
+      "digest": "sha256:d7c96460e3bcff340b56258849ecf54178856a2e86d783a7a8c27436646d762b",
+      "producer_slice": "S01"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec",
+      "producer_slice": "frozen-design"
+    }
+  ],
+  "owned_paths": [
+    "contracts/slices/S02.json",
+    "src/controller/state/**",
+    "test/run-store.test.ts",
+    "test/helpers/cas-worker.ts",
+    "test/fixtures/state/**",
+    "scripts/replay-run-events.mjs",
+    "scripts/verify-s02-replay.mjs",
+    "scripts/verify-s02.mjs",
+    "package.json",
+    "artifacts/s02/**",
+    "docs/adr/0005-directory-event-store.md",
+    "docs/代码链路.md",
+    "docs/架构.md"
+  ],
+  "ports": [
+    {
+      "name": "create_run",
+      "signature": "RunStore.create(initial: RunState) -> StoredRun | StateStoreError"
+    },
+    {
+      "name": "load_run",
+      "signature": "RunStore.load(run_id) -> StoredRun | run_not_found | state_corrupt"
+    },
+    {
+      "name": "compare_and_swap",
+      "signature": "RunStore.compare_and_swap(run_id, expected_version, transition) -> StoredRun | stale_state | invalid_transition"
+    },
+    {
+      "name": "append_effect_intent",
+      "signature": "RunStore.append_effect_intent(idempotency_key, payload_digest) -> EffectRecord | StateStoreError"
+    },
+    {
+      "name": "complete_effect",
+      "signature": "RunStore.complete_effect(idempotency_key, receipt_digest) -> EffectRecord | StateStoreError"
+    },
+    {
+      "name": "recover_incomplete_effects",
+      "signature": "RunStore.recover_incomplete_effects(run_id) -> EffectRecord[] | StateStoreError"
+    },
+    {
+      "name": "replay_run_events",
+      "signature": "RunStore.replay_run_events(run_id) -> RunReplayReport | StateStoreError"
+    }
+  ],
+  "allowed_transitions": [
+    "BLOCKED -> READY",
+    "READY -> IN_PROGRESS",
+    "IN_PROGRESS -> VERIFYING",
+    "VERIFYING -> COMPLETE",
+    "VERIFYING -> FAILED"
+  ],
+  "failure_codes": [
+    "run_not_found",
+    "run_already_exists",
+    "invalid_state",
+    "invalid_transition",
+    "stale_state",
+    "state_persist_failed",
+    "state_corrupt",
+    "unsupported_state_schema"
+  ],
+  "checks": [
+    {
+      "id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        "dist/src/controller/state/index.js"
+      ]
+    },
+    {
+      "id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "event_replay_tool",
+      "argv": [
+        "node",
+        "scripts/verify-s02-replay.mjs"
+      ],
+      "cwd": ".",
+      "timeout_ms": 30000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    }
+  ],
+  "expected_artifacts": [
+    {
+      "path": "artifacts/s02/state-transition-matrix.json",
+      "kind": "state_transition_matrix"
+    },
+    {
+      "path": "artifacts/s02/crash-recovery-report.json",
+      "kind": "crash_injection_report"
+    },
+    {
+      "path": "test/fixtures/state/event-log.golden.json",
+      "kind": "event_log_golden_fixture"
+    },
+    {
+      "path": "artifacts/s02/completion-receipt.json",
+      "kind": "completion_receipt"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "kind": "code_path_index"
+    },
+    {
+      "path": "docs/架构.md",
+      "kind": "implementation_architecture"
+    }
+  ],
+  "unlocks": [
+    "S03",
+    "S07",
+    "S11.status"
+  ]
+}

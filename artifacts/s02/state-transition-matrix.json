@@ -1,0 +1,1004 @@
+{
+  "schema_version": 1,
+  "slice_id": "S02",
+  "statuses": [
+    "IDLE",
+    "PREPARING",
+    "SLICE_RUNNING",
+    "VERIFYING",
+    "COMMITTING",
+    "CHECKPOINTING",
+    "COMPACTION_WAIT",
+    "SOURCE_INTERRUPTING",
+    "HANDOFF_EXPORTING",
+    "CONTINUATION_STARTING",
+    "PAUSED",
+    "NEEDS_USER",
+    "DONE",
+    "ABORTED"
+  ],
+  "allowed_count": 65,
+  "denied_count": 131,
+  "matrix": [
+    {
+      "from": "IDLE",
+      "to": "IDLE",
+      "allowed": false
+    },
+    {
+      "from": "IDLE",
+      "to": "PREPARING",
+      "allowed": true
+    },
+    {
+      "from": "IDLE",
+      "to": "SLICE_RUNNING",
+      "allowed": false
+    },
+    {
+      "from": "IDLE",
+      "to": "VERIFYING",
+      "allowed": false
+    },
+    {
+      "from": "IDLE",
+      "to": "COMMITTING",
+      "allowed": false
+    },
+    {
+      "from": "IDLE",
+      "to": "CHECKPOINTING",
+      "allowed": false
+    },
+    {
+      "from": "IDLE",
+      "to": "COMPACTION_WAIT",
+      "allowed": false
+    },
+    {
+      "from": "IDLE",
+      "to": "SOURCE_INTERRUPTING",
+      "allowed": false
+    },
+    {
+      "from": "IDLE",
+      "to": "HANDOFF_EXPORTING",
+      "allowed": false
+    },
+    {
+      "from": "IDLE",
+      "to": "CONTINUATION_STARTING",
+      "allowed": false
+    },
+    {
+      "from": "IDLE",
+      "to": "PAUSED",
+      "allowed": true
+    },
+    {
+      "from": "IDLE",
+      "to": "NEEDS_USER",
+      "allowed": true
+    },
+    {
+      "from": "IDLE",
+      "to": "DONE",
+      "allowed": false
+    },
+    {
+      "from": "IDLE",
+      "to": "ABORTED",
+      "allowed": true
+    },
+    {
+      "from": "PREPARING",
+      "to": "IDLE",
+      "allowed": false
+    },
+    {
+      "from": "PREPARING",
+      "to": "PREPARING",
+      "allowed": false
+    },
+    {
+      "from": "PREPARING",
+      "to": "SLICE_RUNNING",
+      "allowed": true
+    },
+    {
+      "from": "PREPARING",
+      "to": "VERIFYING",
+      "allowed": false
+    },
+    {
+      "from": "PREPARING",
+      "to": "COMMITTING",
+      "allowed": false
+    },
+    {
+      "from": "PREPARING",
+      "to": "CHECKPOINTING",
+      "allowed": false
+    },
+    {
+      "from": "PREPARING",
+      "to": "COMPACTION_WAIT",
+      "allowed": false
+    },
+    {
+      "from": "PREPARING",
+      "to": "SOURCE_INTERRUPTING",
+      "allowed": false
+    },
+    {
+      "from": "PREPARING",
+      "to": "HANDOFF_EXPORTING",
+      "allowed": false
+    },
+    {
+      "from": "PREPARING",
+      "to": "CONTINUATION_STARTING",
+      "allowed": false
+    },
+    {
+      "from": "PREPARING",
+      "to": "PAUSED",
+      "allowed": true
+    },
+    {
+      "from": "PREPARING",
+      "to": "NEEDS_USER",
+      "allowed": true
+    },
+    {
+      "from": "PREPARING",
+      "to": "DONE",
+      "allowed": false
+    },
+    {
+      "from": "PREPARING",
+      "to": "ABORTED",
+      "allowed": true
+    },
+    {
+      "from": "SLICE_RUNNING",
+      "to": "IDLE",
+      "allowed": false
+    },
+    {
+      "from": "SLICE_RUNNING",
+      "to": "PREPARING",
+      "allowed": false
+    },
+    {
+      "from": "SLICE_RUNNING",
+      "to": "SLICE_RUNNING",
+      "allowed": false
+    },
+    {
+      "from": "SLICE_RUNNING",
+      "to": "VERIFYING",
+      "allowed": true
+    },
+    {
+      "from": "SLICE_RUNNING",
+      "to": "COMMITTING",
+      "allowed": false
+    },
+    {
+      "from": "SLICE_RUNNING",
+      "to": "CHECKPOINTING",
+      "allowed": false
+    },
+    {
+      "from": "SLICE_RUNNING",
+      "to": "COMPACTION_WAIT",
+      "allowed": true
+    },
+    {
+      "from": "SLICE_RUNNING",
+      "to": "SOURCE_INTERRUPTING",
+      "allowed": false
+    },
+    {
+      "from": "SLICE_RUNNING",
+      "to": "HANDOFF_EXPORTING",
+      "allowed": false
+    },
+    {
+      "from": "SLICE_RUNNING",
+      "to": "CONTINUATION_STARTING",
+      "allowed": false
+    },
+    {
+      "from": "SLICE_RUNNING",
+      "to": "PAUSED",
+      "allowed": true
+    },
+    {
+      "from": "SLICE_RUNNING",
+      "to": "NEEDS_USER",
+      "allowed": true
+    },
+    {
+      "from": "SLICE_RUNNING",
+      "to": "DONE",
+      "allowed": false
+    },
+    {
+      "from": "SLICE_RUNNING",
+      "to": "ABORTED",
+      "allowed": true
+    },
+    {
+      "from": "VERIFYING",
+      "to": "IDLE",
+      "allowed": false
+    },
+    {
+      "from": "VERIFYING",
+      "to": "PREPARING",
+      "allowed": false
+    },
+    {
+      "from": "VERIFYING",
+      "to": "SLICE_RUNNING",
+      "allowed": false
+    },
+    {
+      "from": "VERIFYING",
+      "to": "VERIFYING",
+      "allowed": false
+    },
+    {
+      "from": "VERIFYING",
+      "to": "COMMITTING",
+      "allowed": true
+    },
+    {
+      "from": "VERIFYING",
+      "to": "CHECKPOINTING",
+      "allowed": true
+    },
+    {
+      "from": "VERIFYING",
+      "to": "COMPACTION_WAIT",
+      "allowed": false
+    },
+    {
+      "from": "VERIFYING",
+      "to": "SOURCE_INTERRUPTING",
+      "allowed": false
+    },
+    {
+      "from": "VERIFYING",
+      "to": "HANDOFF_EXPORTING",
+      "allowed": false
+    },
+    {
+      "from": "VERIFYING",
+      "to": "CONTINUATION_STARTING",
+      "allowed": false
+    },
+    {
+      "from": "VERIFYING",
+      "to": "PAUSED",
+      "allowed": true
+    },
+    {
+      "from": "VERIFYING",
+      "to": "NEEDS_USER",
+      "allowed": true
+    },
+    {
+      "from": "VERIFYING",
+      "to": "DONE",
+      "allowed": false
+    },
+    {
+      "from": "VERIFYING",
+      "to": "ABORTED",
+      "allowed": true
+    },
+    {
+      "from": "COMMITTING",
+      "to": "IDLE",
+      "allowed": false
+    },
+    {
+      "from": "COMMITTING",
+      "to": "PREPARING",
+      "allowed": false
+    },
+    {
+      "from": "COMMITTING",
+      "to": "SLICE_RUNNING",
+      "allowed": false
+    },
+    {
+      "from": "COMMITTING",
+      "to": "VERIFYING",
+      "allowed": false
+    },
+    {
+      "from": "COMMITTING",
+      "to": "COMMITTING",
+      "allowed": false
+    },
+    {
+      "from": "COMMITTING",
+      "to": "CHECKPOINTING",
+      "allowed": true
+    },
+    {
+      "from": "COMMITTING",
+      "to": "COMPACTION_WAIT",
+      "allowed": false
+    },
+    {
+      "from": "COMMITTING",
+      "to": "SOURCE_INTERRUPTING",
+      "allowed": false
+    },
+    {
+      "from": "COMMITTING",
+      "to": "HANDOFF_EXPORTING",
+      "allowed": false
+    },
+    {
+      "from": "COMMITTING",
+      "to": "CONTINUATION_STARTING",
+      "allowed": false
+    },
+    {
+      "from": "COMMITTING",
+      "to": "PAUSED",
+      "allowed": true
+    },
+    {
+      "from": "COMMITTING",
+      "to": "NEEDS_USER",
+      "allowed": true
+    },
+    {
+      "from": "COMMITTING",
+      "to": "DONE",
+      "allowed": false
+    },
+    {
+      "from": "COMMITTING",
+      "to": "ABORTED",
+      "allowed": true
+    },
+    {
+      "from": "CHECKPOINTING",
+      "to": "IDLE",
+      "allowed": false
+    },
+    {
+      "from": "CHECKPOINTING",
+      "to": "PREPARING",
+      "allowed": false
+    },
+    {
+      "from": "CHECKPOINTING",
+      "to": "SLICE_RUNNING",
+      "allowed": true
+    },
+    {
+      "from": "CHECKPOINTING",
+      "to": "VERIFYING",
+      "allowed": false
+    },
+    {
+      "from": "CHECKPOINTING",
+      "to": "COMMITTING",
+      "allowed": false
+    },
+    {
+      "from": "CHECKPOINTING",
+      "to": "CHECKPOINTING",
+      "allowed": false
+    },
+    {
+      "from": "CHECKPOINTING",
+      "to": "COMPACTION_WAIT",
+      "allowed": false
+    },
+    {
+      "from": "CHECKPOINTING",
+      "to": "SOURCE_INTERRUPTING",
+      "allowed": false
+    },
+    {
+      "from": "CHECKPOINTING",
+      "to": "HANDOFF_EXPORTING",
+      "allowed": false
+    },
+    {
+      "from": "CHECKPOINTING",
+      "to": "CONTINUATION_STARTING",
+      "allowed": false
+    },
+    {
+      "from": "CHECKPOINTING",
+      "to": "PAUSED",
+      "allowed": true
+    },
+    {
+      "from": "CHECKPOINTING",
+      "to": "NEEDS_USER",
+      "allowed": true
+    },
+    {
+      "from": "CHECKPOINTING",
+      "to": "DONE",
+      "allowed": true
+    },
+    {
+      "from": "CHECKPOINTING",
+      "to": "ABORTED",
+      "allowed": true
+    },
+    {
+      "from": "COMPACTION_WAIT",
+      "to": "IDLE",
+      "allowed": false
+    },
+    {
+      "from": "COMPACTION_WAIT",
+      "to": "PREPARING",
+      "allowed": false
+    },
+    {
+      "from": "COMPACTION_WAIT",
+      "to": "SLICE_RUNNING",
+      "allowed": true
+    },
+    {
+      "from": "COMPACTION_WAIT",
+      "to": "VERIFYING",
+      "allowed": false
+    },
+    {
+      "from": "COMPACTION_WAIT",
+      "to": "COMMITTING",
+      "allowed": false
+    },
+    {
+      "from": "COMPACTION_WAIT",
+      "to": "CHECKPOINTING",
+      "allowed": false
+    },
+    {
+      "from": "COMPACTION_WAIT",
+      "to": "COMPACTION_WAIT",
+      "allowed": false
+    },
+    {
+      "from": "COMPACTION_WAIT",
+      "to": "SOURCE_INTERRUPTING",
+      "allowed": true
+    },
+    {
+      "from": "COMPACTION_WAIT",
+      "to": "HANDOFF_EXPORTING",
+      "allowed": false
+    },
+    {
+      "from": "COMPACTION_WAIT",
+      "to": "CONTINUATION_STARTING",
+      "allowed": false
+    },
+    {
+      "from": "COMPACTION_WAIT",
+      "to": "PAUSED",
+      "allowed": true
+    },
+    {
+      "from": "COMPACTION_WAIT",
+      "to": "NEEDS_USER",
+      "allowed": true
+    },
+    {
+      "from": "COMPACTION_WAIT",
+      "to": "DONE",
+      "allowed": false
+    },
+    {
+      "from": "COMPACTION_WAIT",
+      "to": "ABORTED",
+      "allowed": true
+    },
+    {
+      "from": "SOURCE_INTERRUPTING",
+      "to": "IDLE",
+      "allowed": false
+    },
+    {
+      "from": "SOURCE_INTERRUPTING",
+      "to": "PREPARING",
+      "allowed": false
+    },
+    {
+      "from": "SOURCE_INTERRUPTING",
+      "to": "SLICE_RUNNING",
+      "allowed": false
+    },
+    {
+      "from": "SOURCE_INTERRUPTING",
+      "to": "VERIFYING",
+      "allowed": false
+    },
+    {
+      "from": "SOURCE_INTERRUPTING",
+      "to": "COMMITTING",
+      "allowed": false
+    },
+    {
+      "from": "SOURCE_INTERRUPTING",
+      "to": "CHECKPOINTING",
+      "allowed": false
+    },
+    {
+      "from": "SOURCE_INTERRUPTING",
+      "to": "COMPACTION_WAIT",
+      "allowed": false
+    },
+    {
+      "from": "SOURCE_INTERRUPTING",
+      "to": "SOURCE_INTERRUPTING",
+      "allowed": false
+    },
+    {
+      "from": "SOURCE_INTERRUPTING",
+      "to": "HANDOFF_EXPORTING",
+      "allowed": true
+    },
+    {
+      "from": "SOURCE_INTERRUPTING",
+      "to": "CONTINUATION_STARTING",
+      "allowed": false
+    },
+    {
+      "from": "SOURCE_INTERRUPTING",
+      "to": "PAUSED",
+      "allowed": true
+    },
+    {
+      "from": "SOURCE_INTERRUPTING",
+      "to": "NEEDS_USER",
+      "allowed": true
+    },
+    {
+      "from": "SOURCE_INTERRUPTING",
+      "to": "DONE",
+      "allowed": false
+    },
+    {
+      "from": "SOURCE_INTERRUPTING",
+      "to": "ABORTED",
+      "allowed": true
+    },
+    {
+      "from": "HANDOFF_EXPORTING",
+      "to": "IDLE",
+      "allowed": false
+    },
+    {
+      "from": "HANDOFF_EXPORTING",
+      "to": "PREPARING",
+      "allowed": false
+    },
+    {
+      "from": "HANDOFF_EXPORTING",
+      "to": "SLICE_RUNNING",
+      "allowed": false
+    },
+    {
+      "from": "HANDOFF_EXPORTING",
+      "to": "VERIFYING",
+      "allowed": false
+    },
+    {
+      "from": "HANDOFF_EXPORTING",
+      "to": "COMMITTING",
+      "allowed": false
+    },
+    {
+      "from": "HANDOFF_EXPORTING",
+      "to": "CHECKPOINTING",
+      "allowed": false
+    },
+    {
+      "from": "HANDOFF_EXPORTING",
+      "to": "COMPACTION_WAIT",
+      "allowed": false
+    },
+    {
+      "from": "HANDOFF_EXPORTING",
+      "to": "SOURCE_INTERRUPTING",
+      "allowed": false
+    },
+    {
+      "from": "HANDOFF_EXPORTING",
+      "to": "HANDOFF_EXPORTING",
+      "allowed": false
+    },
+    {
+      "from": "HANDOFF_EXPORTING",
+      "to": "CONTINUATION_STARTING",
+      "allowed": true
+    },
+    {
+      "from": "HANDOFF_EXPORTING",
+      "to": "PAUSED",
+      "allowed": true
+    },
+    {
+      "from": "HANDOFF_EXPORTING",
+      "to": "NEEDS_USER",
+      "allowed": true
+    },
+    {
+      "from": "HANDOFF_EXPORTING",
+      "to": "DONE",
+      "allowed": false
+    },
+    {
+      "from": "HANDOFF_EXPORTING",
+      "to": "ABORTED",
+      "allowed": true
+    },
+    {
+      "from": "CONTINUATION_STARTING",
+      "to": "IDLE",
+      "allowed": false
+    },
+    {
+      "from": "CONTINUATION_STARTING",
+      "to": "PREPARING",
+      "allowed": false
+    },
+    {
+      "from": "CONTINUATION_STARTING",
+      "to": "SLICE_RUNNING",
+      "allowed": true
+    },
+    {
+      "from": "CONTINUATION_STARTING",
+      "to": "VERIFYING",
+      "allowed": false
+    },
+    {
+      "from": "CONTINUATION_STARTING",
+      "to": "COMMITTING",
+      "allowed": false
+    },
+    {
+      "from": "CONTINUATION_STARTING",
+      "to": "CHECKPOINTING",
+      "allowed": false
+    },
+    {
+      "from": "CONTINUATION_STARTING",
+      "to": "COMPACTION_WAIT",
+      "allowed": false
+    },
+    {
+      "from": "CONTINUATION_STARTING",
+      "to": "SOURCE_INTERRUPTING",
+      "allowed": false
+    },
+    {
+      "from": "CONTINUATION_STARTING",
+      "to": "HANDOFF_EXPORTING",
+      "allowed": false
+    },
+    {
+      "from": "CONTINUATION_STARTING",
+      "to": "CONTINUATION_STARTING",
+      "allowed": false
+    },
+    {
+      "from": "CONTINUATION_STARTING",
+      "to": "PAUSED",
+      "allowed": true
+    },
+    {
+      "from": "CONTINUATION_STARTING",
+      "to": "NEEDS_USER",
+      "allowed": true
+    },
+    {
+      "from": "CONTINUATION_STARTING",
+      "to": "DONE",
+      "allowed": false
+    },
+    {
+      "from": "CONTINUATION_STARTING",
+      "to": "ABORTED",
+      "allowed": true
+    },
+    {
+      "from": "PAUSED",
+      "to": "IDLE",
+      "allowed": false
+    },
+    {
+      "from": "PAUSED",
+      "to": "PREPARING",
+      "allowed": true
+    },
+    {
+      "from": "PAUSED",
+      "to": "SLICE_RUNNING",
+      "allowed": true
+    },
+    {
+      "from": "PAUSED",
+      "to": "VERIFYING",
+      "allowed": true
+    },
+    {
+      "from": "PAUSED",
+      "to": "COMMITTING",
+      "allowed": true
+    },
+    {
+      "from": "PAUSED",
+      "to": "CHECKPOINTING",
+      "allowed": true
+    },
+    {
+      "from": "PAUSED",
+      "to": "COMPACTION_WAIT",
+      "allowed": true
+    },
+    {
+      "from": "PAUSED",
+      "to": "SOURCE_INTERRUPTING",
+      "allowed": true
+    },
+    {
+      "from": "PAUSED",
+      "to": "HANDOFF_EXPORTING",
+      "allowed": true
+    },
+    {
+      "from": "PAUSED",
+      "to": "CONTINUATION_STARTING",
+      "allowed": true
+    },
+    {
+      "from": "PAUSED",
+      "to": "PAUSED",
+      "allowed": false
+    },
+    {
+      "from": "PAUSED",
+      "to": "NEEDS_USER",
+      "allowed": true
+    },
+    {
+      "from": "PAUSED",
+      "to": "DONE",
+      "allowed": false
+    },
+    {
+      "from": "PAUSED",
+      "to": "ABORTED",
+      "allowed": true
+    },
+    {
+      "from": "NEEDS_USER",
+      "to": "IDLE",
+      "allowed": false
+    },
+    {
+      "from": "NEEDS_USER",
+      "to": "PREPARING",
+      "allowed": true
+    },
+    {
+      "from": "NEEDS_USER",
+      "to": "SLICE_RUNNING",
+      "allowed": true
+    },
+    {
+      "from": "NEEDS_USER",
+      "to": "VERIFYING",
+      "allowed": true
+    },
+    {
+      "from": "NEEDS_USER",
+      "to": "COMMITTING",
+      "allowed": true
+    },
+    {
+      "from": "NEEDS_USER",
+      "to": "CHECKPOINTING",
+      "allowed": true
+    },
+    {
+      "from": "NEEDS_USER",
+      "to": "COMPACTION_WAIT",
+      "allowed": true
+    },
+    {
+      "from": "NEEDS_USER",
+      "to": "SOURCE_INTERRUPTING",
+      "allowed": true
+    },
+    {
+      "from": "NEEDS_USER",
+      "to": "HANDOFF_EXPORTING",
+      "allowed": true
+    },
+    {
+      "from": "NEEDS_USER",
+      "to": "CONTINUATION_STARTING",
+      "allowed": true
+    },
+    {
+      "from": "NEEDS_USER",
+      "to": "PAUSED",
+      "allowed": false
+    },
+    {
+      "from": "NEEDS_USER",
+      "to": "NEEDS_USER",
+      "allowed": false
+    },
+    {
+      "from": "NEEDS_USER",
+      "to": "DONE",
+      "allowed": false
+    },
+    {
+      "from": "NEEDS_USER",
+      "to": "ABORTED",
+      "allowed": true
+    },
+    {
+      "from": "DONE",
+      "to": "IDLE",
+      "allowed": false
+    },
+    {
+      "from": "DONE",
+      "to": "PREPARING",
+      "allowed": false
+    },
+    {
+      "from": "DONE",
+      "to": "SLICE_RUNNING",
+      "allowed": false
+    },
+    {
+      "from": "DONE",
+      "to": "VERIFYING",
+      "allowed": false
+    },
+    {
+      "from": "DONE",
+      "to": "COMMITTING",
+      "allowed": false
+    },
+    {
+      "from": "DONE",
+      "to": "CHECKPOINTING",
+      "allowed": false
+    },
+    {
+      "from": "DONE",
+      "to": "COMPACTION_WAIT",
+      "allowed": false
+    },
+    {
+      "from": "DONE",
+      "to": "SOURCE_INTERRUPTING",
+      "allowed": false
+    },
+    {
+      "from": "DONE",
+      "to": "HANDOFF_EXPORTING",
+      "allowed": false
+    },
+    {
+      "from": "DONE",
+      "to": "CONTINUATION_STARTING",
+      "allowed": false
+    },
+    {
+      "from": "DONE",
+      "to": "PAUSED",
+      "allowed": false
+    },
+    {
+      "from": "DONE",
+      "to": "NEEDS_USER",
+      "allowed": false
+    },
+    {
+      "from": "DONE",
+      "to": "DONE",
+      "allowed": false
+    },
+    {
+      "from": "DONE",
+      "to": "ABORTED",
+      "allowed": false
+    },
+    {
+      "from": "ABORTED",
+      "to": "IDLE",
+      "allowed": false
+    },
+    {
+      "from": "ABORTED",
+      "to": "PREPARING",
+      "allowed": false
+    },
+    {
+      "from": "ABORTED",
+      "to": "SLICE_RUNNING",
+      "allowed": false
+    },
+    {
+      "from": "ABORTED",
+      "to": "VERIFYING",
+      "allowed": false
+    },
+    {
+      "from": "ABORTED",
+      "to": "COMMITTING",
+      "allowed": false
+    },
+    {
+      "from": "ABORTED",
+      "to": "CHECKPOINTING",
+      "allowed": false
+    },
+    {
+      "from": "ABORTED",
+      "to": "COMPACTION_WAIT",
+      "allowed": false
+    },
+    {
+      "from": "ABORTED",
+      "to": "SOURCE_INTERRUPTING",
+      "allowed": false
+    },
+    {
+      "from": "ABORTED",
+      "to": "HANDOFF_EXPORTING",
+      "allowed": false
+    },
+    {
+      "from": "ABORTED",
+      "to": "CONTINUATION_STARTING",
+      "allowed": false
+    },
+    {
+      "from": "ABORTED",
+      "to": "PAUSED",
+      "allowed": false
+    },
+    {
+      "from": "ABORTED",
+      "to": "NEEDS_USER",
+      "allowed": false
+    },
+    {
+      "from": "ABORTED",
+      "to": "DONE",
+      "allowed": false
+    },
+    {
+      "from": "ABORTED",
+      "to": "ABORTED",
+      "allowed": false
+    }
+  ]
+}

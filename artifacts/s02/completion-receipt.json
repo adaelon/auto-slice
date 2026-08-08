@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "slice_id": "S02",
+  "contract_digest": "sha256:44ddff75f353160659331c24d2ae9e780ab7c380bec5b05eb6edf01b47e5a1e0",
+  "input_digests": [
+    {
+      "path": "artifacts/s01/completion-receipt.json",
+      "digest": "sha256:244e7b2d75a27ff77e9e0747a8553c09b21d6b79372133bf22e7474e1cbc4ef9"
+    },
+    {
+      "path": "artifacts/s01/frozen-contracts.json",
+      "digest": "sha256:d7c96460e3bcff340b56258849ecf54178856a2e86d783a7a8c27436646d762b"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec"
+    }
+  ],
+  "output_digests": [
+    {
+      "path": "artifacts/s02/crash-recovery-report.json",
+      "digest": "sha256:3a8a5fcf46108def2ff2c3112565a39fdfc6df30f9645b415017a16a676c5ad6"
+    },
+    {
+      "path": "artifacts/s02/state-transition-matrix.json",
+      "digest": "sha256:1210077f77538f867a97ea1754135166897c5a6eabdba5626c70af66282f2208"
+    },
+    {
+      "path": "contracts/slices/S02.json",
+      "digest": "sha256:44ddff75f353160659331c24d2ae9e780ab7c380bec5b05eb6edf01b47e5a1e0"
+    },
+    {
+      "path": "docs/adr/0005-directory-event-store.md",
+      "digest": "sha256:fa5797d3133d8c8168080337ce3e34c4fe7d4415c5860ed8b3497e8b9f2d021b"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:fb51f1d7e88b1aad1041d566efe29c8a9238e5e4563b2c49c6373b5e5f5614fd"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:6be288e1ba4635e8df97c5e829814c7361712d3cf866f0e7cd945e74d538bf8d"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:9fc6dbe7a03d975950c7dbb0e05d1df34a2fd0de97fd2ba043c1a916fa865615"
+    },
+    {
+      "path": "scripts/replay-run-events.mjs",
+      "digest": "sha256:77ca4a7917d583fb8879fedfc8aa4a06af43fbc3f566abad42e39b4b64038b65"
+    },
+    {
+      "path": "scripts/verify-s02-replay.mjs",
+      "digest": "sha256:979ebf2df0616bef82d5d0ac07bff66462f122e8b60f52a92f27c8db05eac07b"
+    },
+    {
+      "path": "scripts/verify-s02.mjs",
+      "digest": "sha256:dc80881e5fc2b9db0a9d6dca151d421e835f444e5d5611ec21c402c43bc99ca2"
+    },
+    {
+      "path": "src/controller/state/canonical-json.ts",
+      "digest": "sha256:303877163d4eb5e0c587777e12a3b20ad225a6d7812d5b4bc3b000a115e3fdb4"
+    },
+    {
+      "path": "src/controller/state/errors.ts",
+      "digest": "sha256:96ebf4223ec0c3c538e121b5040bd48857fe42d832e4a6f9c1747e0a8a60fcce"
+    },
+    {
+      "path": "src/controller/state/factory.ts",
+      "digest": "sha256:283da24fbcd92a91f13320ffa1a4f8392370620a2c4dbbe5b1f1d69eb0f435ba"
+    },
+    {
+      "path": "src/controller/state/file-run-store.ts",
+      "digest": "sha256:6f42e085e9d19d7ab7292546ca6e78c9ff1f1d343bda58b475b0e522497cbe45"
+    },
+    {
+      "path": "src/controller/state/index.ts",
+      "digest": "sha256:6b5d48a1b0eb1c004d28f149a31c3f778a2e507c70f29af8c039870321bad2c1"
+    },
+    {
+      "path": "src/controller/state/schema.ts",
+      "digest": "sha256:6270d0a77fa48c2d4b04cd804df2b858fec20ce22f292e7385583fcd6e81927b"
+    },
+    {
+      "path": "src/controller/state/transitions.ts",
+      "digest": "sha256:cc0b27432921e4a73656a8b086e7acf0a1a953c05b25bcc181b170ed2687e2cd"
+    },
+    {
+      "path": "src/controller/state/types.ts",
+      "digest": "sha256:74907ac88d0e0ef74740be4258b3fa8698047927e06080ebc280326935384277"
+    },
+    {
+      "path": "src/controller/state/validation.ts",
+      "digest": "sha256:29b9df88193f4a4b743d27f12a8042f1f69c7fdaa5b7786ee207d55f0834d6ce"
+    },
+    {
+      "path": "test/fixtures/state/event-log.golden.json",
+      "digest": "sha256:a587a1b6c1824638465a26c5851bce2712f6fd9509032fdcbbb88e73611ec509"
+    },
+    {
+      "path": "test/helpers/cas-worker.ts",
+      "digest": "sha256:1235697a9625f87aa061f4e77d140d07c84b1ae04fa8e744bc451fcd68d253f5"
+    },
+    {
+      "path": "test/run-store.test.ts",
+      "digest": "sha256:37e858ebc2bdd36ce0d16a0cd21eedc1bcc5c5bc78c8ca8b30edf8cea69962ce"
+    }
+  ],
+  "touched_paths": [
+    "artifacts/s02/completion-receipt.json",
+    "artifacts/s02/crash-recovery-report.json",
+    "artifacts/s02/state-transition-matrix.json",
+    "contracts/slices/S02.json",
+    "docs/adr/0005-directory-event-store.md",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "package.json",
+    "scripts/replay-run-events.mjs",
+    "scripts/verify-s02-replay.mjs",
+    "scripts/verify-s02.mjs",
+    "src/controller/state/canonical-json.ts",
+    "src/controller/state/errors.ts",
+    "src/controller/state/factory.ts",
+    "src/controller/state/file-run-store.ts",
+    "src/controller/state/index.ts",
+    "src/controller/state/schema.ts",
+    "src/controller/state/transitions.ts",
+    "src/controller/state/types.ts",
+    "src/controller/state/validation.ts",
+    "test/fixtures/state/event-log.golden.json",
+    "test/helpers/cas-worker.ts",
+    "test/run-store.test.ts"
+  ],
+  "check_receipts": [
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ca622aa6b87a4fbd135ae14f841cd92016f6ce189674c007da77682d9bc3fe7a",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 2398
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b4d5eeaf054ffadd6ba18423f31f81288f54bd16be7a5390eafbb745eeba53dc",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 2212
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:d41f8f2f98005ed8ec75634b250c6a0d64c84c07eab7c2c518ce4dfe29e71b0f",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 5253
+    },
+    {
+      "check_id": "event_replay_tool",
+      "argv": [
+        "node",
+        "scripts/verify-s02-replay.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:f5f8239527a4687ddcd7d311af412e5d1ec87ca3d4db43ff2b0bc35bc399fd87",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 689
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:50bf418d3f46fa3975eade28b9f81047ee52461d61415cc22546263c0cca2afe",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 8049
+    }
+  ],
+  "start_head": "4a0baac862897bd75fa26b0fb83bf110ff39146d",
+  "end_head": null,
+  "owned_diff_digest": "sha256:8e3088bb8c3327059b21491c6529ed66ac3889d6f4a4a4f9858ae982404759f6",
+  "completed_at": "2026-08-08T13:03:54.137Z"
+}

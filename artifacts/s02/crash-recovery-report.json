@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "slice_id": "S02",
+  "scenarios": [
+    {
+      "id": "event_persisted_snapshot_stale",
+      "injected_at": "after_run_event_persisted",
+      "operation_result": "state_persist_failed",
+      "recovered_state_version": 1,
+      "recovered_status": "PREPARING",
+      "recovered_from_event_log": true,
+      "result": "PASS"
+    },
+    {
+      "id": "effect_intent_without_receipt",
+      "injected_at": "after_effect_intent_persisted",
+      "operation_result": "state_persist_failed",
+      "recovered_incomplete_count": 1,
+      "recovered_effect_status": "INTENDED",
+      "result": "PASS"
+    },
+    {
+      "id": "effect_receipt_before_run_snapshot_update",
+      "injected_at": "after_effect_completion_persisted",
+      "operation_result": "state_persist_failed",
+      "snapshot_state_version": 0,
+      "recovered_incomplete_count": 0,
+      "recovered_effect_status": "COMPLETED",
+      "result": "PASS"
+    }
+  ],
+  "golden_fixture": {
+    "path": "test/fixtures/state/event-log.golden.json",
+    "digest": "sha256:a587a1b6c1824638465a26c5851bce2712f6fd9509032fdcbbb88e73611ec509"
+  }
+}
