@@ -1,0 +1,19 @@
+{
+  "name": "auto-slice",
+  "version": "0.1.0",
+  "description": "Run verified development slices through a local Codex controller.",
+  "author": {
+    "name": "Auto Slice contributors"
+  },
+  "interface": {
+    "displayName": "Auto Slice",
+    "shortDescription": "Execute local development plans one verified slice at a time.",
+    "longDescription": "Auto Slice provides a local controller for sequential, deterministic development slices with auditable handoffs.",
+    "developerName": "Auto Slice contributors",
+    "category": "Productivity",
+    "capabilities": [],
+    "defaultPrompt": [
+      "Load this workspace's frozen Auto Slice contracts."
+    ]
+  }
+}

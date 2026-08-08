@@ -1,0 +1,272 @@
+{
+  "schema_version": 1,
+  "slice_id": "S01",
+  "contract_digest": "sha256:65bf82aaec4e6362b8971323c1a7e169eabf456455dc7603344df8beaedf448d",
+  "input_digests": [
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec"
+    },
+    {
+      "path": "docs/adr/0002-deterministic-model-routing.md",
+      "digest": "sha256:d0752d65132aa27689cf7c6f20a56cfeefaa144a537722c56a7a7a237950dc1a"
+    },
+    {
+      "path": "docs/adr/0003-commit-and-checkpoint-order.md",
+      "digest": "sha256:f687019a8868b1442fe96426063c7c267084b915c0991ae9aa2f570206c5fe55"
+    },
+    {
+      "path": "docs/adr/0004-compaction-timeout-handoff.md",
+      "digest": "sha256:3c76c8af78e292890e5ecd6743a0ad538886916858f2265f119dce9a96e12886"
+    }
+  ],
+  "output_digests": [
+    {
+      "path": ".codex-plugin/plugin.json",
+      "digest": "sha256:3b66ecb06403e25e97fff0e81aa4eb06d7de00adc1c2b54cddeb4b753091ee63"
+    },
+    {
+      "path": ".gitattributes",
+      "digest": "sha256:9c4027605a9ac2a7131eaf88730ddcff050b0b96145243687630192c4bd2d680"
+    },
+    {
+      "path": ".gitignore",
+      "digest": "sha256:ed05d0a2ee67a19f6319d2e33ba49de701b30fb7d172ece3a909d0fbbbcc9e48"
+    },
+    {
+      "path": "artifacts/s01/frozen-contracts.json",
+      "digest": "sha256:d7c96460e3bcff340b56258849ecf54178856a2e86d783a7a8c27436646d762b"
+    },
+    {
+      "path": "contracts/frozen-contracts.json",
+      "digest": "sha256:8e3f0f3973db5623e3aaad0e63c952c82c9c4ff7a826394f17a246c0abfa1097"
+    },
+    {
+      "path": "contracts/slices/S01.json",
+      "digest": "sha256:65bf82aaec4e6362b8971323c1a7e169eabf456455dc7603344df8beaedf448d"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:156d0e510eb06321f2ba2cf2ce7c6621b55a280a1c97e7b2eb268a071ce3fac4"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:3d8c94715b74c6a92886111b12be1f65733c2922e588d8d48a56068b131b7835"
+    },
+    {
+      "path": "eslint.config.mjs",
+      "digest": "sha256:663dd981a816a4e534482104d06ae2897c8d16f9f80099ea6685241011f6c33d"
+    },
+    {
+      "path": "package-lock.json",
+      "digest": "sha256:54d2c633ea13317ce15b7377f7e582ba348cb06978ae3b31c7f2f6ecd0ed85dd"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:9a90f7a9a32dd7b04429bf78fa77c8998216c5f8c0433b8c252f1e8a4b9a45dd"
+    },
+    {
+      "path": "scripts/run-tests.mjs",
+      "digest": "sha256:1f2e0cd18112c52e92ae5ef7596de3225ecf995a7c9b8675b7f963731162c7db"
+    },
+    {
+      "path": "scripts/validate-plugin.mjs",
+      "digest": "sha256:0ec952e4edcd13886ec5704a03ff314d792a90dc5b5c388624e6dd90330d08e0"
+    },
+    {
+      "path": "scripts/verify-s01.mjs",
+      "digest": "sha256:6f1ca16cf8960e8f8b503b54c6861aa3d7c72d23f912519ec5d5abb29369aa6a"
+    },
+    {
+      "path": "src/contracts/errors.ts",
+      "digest": "sha256:3858f6d940d012dfa2c884bbf6d79d40ab8c887b37982163099913ce35a072ca"
+    },
+    {
+      "path": "src/contracts/index.ts",
+      "digest": "sha256:18df73e32f614f5e031adc78103d6b581e2b261f24781edfca4fb84da99f1ea4"
+    },
+    {
+      "path": "src/contracts/load-frozen-contracts.ts",
+      "digest": "sha256:b1a8473eddeba2ec23e68d511138f07712c154e5cff70895d4838a752868faae"
+    },
+    {
+      "path": "src/contracts/types.ts",
+      "digest": "sha256:f39f9b0e0fa1eb76140aa15a51899f2da3ebedd98ce3b7c6266099c2832e0fee"
+    },
+    {
+      "path": "src/contracts/workspace-identity.ts",
+      "digest": "sha256:3d4b0afa4acabc132c88897bfac896bdaf52b340b9aec2904a12b80247851364"
+    },
+    {
+      "path": "src/controller/main.ts",
+      "digest": "sha256:7db41911a6f50bfc35cb09d8ba9593902c1ac92b2f62674b1a6bef4f5738f4cb"
+    },
+    {
+      "path": "test/controller.test.ts",
+      "digest": "sha256:e50456bb62cdf6a301167710b197a6feab2a3f5ca175e9527aed5a6770aacd7c"
+    },
+    {
+      "path": "test/fixtures/frozen-contracts.snapshot.json",
+      "digest": "sha256:874deba81d0cc689f9e94a2c700a11fff163c07c3f3b17375ed219e349f287fe"
+    },
+    {
+      "path": "test/fixtures/frozen-workspace/.codex-plugin/plugin.json",
+      "digest": "sha256:9d353fc24327ef3585c237d88deeea68bda191e0a20e8cd3f7220c7cde3b3547"
+    },
+    {
+      "path": "test/fixtures/frozen-workspace/CONTEXT.md",
+      "digest": "sha256:ba771b91f0c026ad245116e037992d99bdd4ad22aaa53518deb621fbee473d54"
+    },
+    {
+      "path": "test/fixtures/frozen-workspace/contracts/frozen-contracts.json",
+      "digest": "sha256:8e3f0f3973db5623e3aaad0e63c952c82c9c4ff7a826394f17a246c0abfa1097"
+    },
+    {
+      "path": "test/fixtures/frozen-workspace/docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:94795f3a8efa0e2fcbff3f375b856da0934312dfa8fba23bacec9f1a62ec5e92"
+    },
+    {
+      "path": "test/fixtures/frozen-workspace/docs/adr/0002-deterministic-model-routing.md",
+      "digest": "sha256:146fd3036b31655375c755493e23b23e4caf246dcc213cf88a9bac0a6a4ea8ab"
+    },
+    {
+      "path": "test/fixtures/frozen-workspace/docs/adr/0003-commit-and-checkpoint-order.md",
+      "digest": "sha256:fe6eabc221a19b0eb474c75e3daa7048ae6a63041c0176656acb0498d122cdb8"
+    },
+    {
+      "path": "test/fixtures/frozen-workspace/docs/adr/0004-compaction-timeout-handoff.md",
+      "digest": "sha256:e166cf0b3768dbcdc8c0c46ac139fd647c077c72b1ce23db22416f946d3231af"
+    },
+    {
+      "path": "test/fixtures/frozen-workspace/docs/auto-slice-design.md",
+      "digest": "sha256:72be6cf7ed75bfbf846b8ee64f48264531f5cb710433ab48d1086c59f72a5951"
+    },
+    {
+      "path": "test/helpers/frozen-workspace.ts",
+      "digest": "sha256:121245eca4f4e8f01a37b477bfb6c765e51454b68ca9e64698118f2b4d16be5e"
+    },
+    {
+      "path": "test/load-frozen-contracts.test.ts",
+      "digest": "sha256:df9d561a53cb689d392e43ef0a246b1b6d489ab196bc7ecf325cff818b0b2713"
+    },
+    {
+      "path": "tsconfig.build.json",
+      "digest": "sha256:602b6a6d912f1249d3e8d8f70ee6d3ed1866260ee008ed580682da4771b23cc3"
+    },
+    {
+      "path": "tsconfig.json",
+      "digest": "sha256:392242a69d400492dd0c01b19f1502b945bb5772fb1b7c9fb9340938a110a2ca"
+    }
+  ],
+  "touched_paths": [
+    ".codex-plugin/plugin.json",
+    ".gitattributes",
+    ".gitignore",
+    "artifacts/s01/completion-receipt.json",
+    "artifacts/s01/frozen-contracts.json",
+    "contracts/frozen-contracts.json",
+    "contracts/slices/S01.json",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "eslint.config.mjs",
+    "package-lock.json",
+    "package.json",
+    "scripts/run-tests.mjs",
+    "scripts/validate-plugin.mjs",
+    "scripts/verify-s01.mjs",
+    "src/contracts/errors.ts",
+    "src/contracts/index.ts",
+    "src/contracts/load-frozen-contracts.ts",
+    "src/contracts/types.ts",
+    "src/contracts/workspace-identity.ts",
+    "src/controller/main.ts",
+    "test/controller.test.ts",
+    "test/fixtures/frozen-contracts.snapshot.json",
+    "test/fixtures/frozen-workspace/.codex-plugin/plugin.json",
+    "test/fixtures/frozen-workspace/CONTEXT.md",
+    "test/fixtures/frozen-workspace/contracts/frozen-contracts.json",
+    "test/fixtures/frozen-workspace/docs/adr/0001-local-controller-and-task-isolation.md",
+    "test/fixtures/frozen-workspace/docs/adr/0002-deterministic-model-routing.md",
+    "test/fixtures/frozen-workspace/docs/adr/0003-commit-and-checkpoint-order.md",
+    "test/fixtures/frozen-workspace/docs/adr/0004-compaction-timeout-handoff.md",
+    "test/fixtures/frozen-workspace/docs/auto-slice-design.md",
+    "test/helpers/frozen-workspace.ts",
+    "test/load-frozen-contracts.test.ts",
+    "tsconfig.build.json",
+    "tsconfig.json"
+  ],
+  "check_receipts": [
+    {
+      "check_id": "plugin_manifest",
+      "argv": [
+        "node",
+        "scripts/validate-plugin.mjs",
+        "."
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:5f9494424f616d124a39f7f0f65948993fe8aa8d1f951ead90e1c2491b17df7f",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 730
+    },
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ca622aa6b87a4fbd135ae14f841cd92016f6ce189674c007da77682d9bc3fe7a",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 3359
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b4d5eeaf054ffadd6ba18423f31f81288f54bd16be7a5390eafbb745eeba53dc",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 2845
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:397a768025d3389b71892faf1b58da2c51e2f72c9333b765ea47dac7553a3a33",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 5316
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:50bf418d3f46fa3975eade28b9f81047ee52461d61415cc22546263c0cca2afe",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 10060
+    }
+  ],
+  "start_head": "d43d7b9fc1936998428b1e0e31af6fbfc7a0b4e0",
+  "end_head": null,
+  "owned_diff_digest": "sha256:7e68f3e3c209232b9d6f356d71adf0376e886fcb4df4930348283c8b1521541b",
+  "completed_at": "2026-08-08T12:10:37.257Z"
+}

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "plugin_ids": [
+    "auto-slice"
+  ],
+  "context_path": "CONTEXT.md",
+  "design_path": "docs/auto-slice-design.md",
+  "adr_paths": [
+    "docs/adr/0001-local-controller-and-task-isolation.md",
+    "docs/adr/0002-deterministic-model-routing.md",
+    "docs/adr/0003-commit-and-checkpoint-order.md",
+    "docs/adr/0004-compaction-timeout-handoff.md"
+  ]
+}

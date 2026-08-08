@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "context_digest": "sha256:ba771b91f0c026ad245116e037992d99bdd4ad22aaa53518deb621fbee473d54",
+  "design_digest": "sha256:72be6cf7ed75bfbf846b8ee64f48264531f5cb710433ab48d1086c59f72a5951",
+  "adr_digests": [
+    "sha256:94795f3a8efa0e2fcbff3f375b856da0934312dfa8fba23bacec9f1a62ec5e92",
+    "sha256:146fd3036b31655375c755493e23b23e4caf246dcc213cf88a9bac0a6a4ea8ab",
+    "sha256:fe6eabc221a19b0eb474c75e3daa7048ae6a63041c0176656acb0498d122cdb8",
+    "sha256:e166cf0b3768dbcdc8c0c46ac139fd647c077c72b1ce23db22416f946d3231af"
+  ],
+  "workspace_identity": {
+    "canonical_root": "<FIXTURE_ROOT>",
+    "filesystem_identity": "<FILESYSTEM_IDENTITY>"
+  }
+}

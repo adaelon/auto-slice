@@ -1,0 +1,30 @@
+{
+  "name": "auto-slice",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Deterministic local controller for verified Codex development slices.",
+  "bin": {
+    "auto-slice-controller": "./dist/src/controller/main.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "pretest": "npm run build --silent",
+    "test": "node scripts/run-tests.mjs",
+    "lint": "eslint . --max-warnings 0",
+    "validate:plugin": "node scripts/validate-plugin.mjs .",
+    "verify:s01": "node scripts/verify-s01.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/node": "^26.2.0",
+    "eslint": "^10.8.1",
+    "globals": "^17.9.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.66.0"
+  }
+}

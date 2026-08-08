@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "context_digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef",
+  "design_digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a",
+  "adr_digests": [
+    "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec",
+    "sha256:d0752d65132aa27689cf7c6f20a56cfeefaa144a537722c56a7a7a237950dc1a",
+    "sha256:f687019a8868b1442fe96426063c7c267084b915c0991ae9aa2f570206c5fe55",
+    "sha256:3c76c8af78e292890e5ecd6743a0ad538886916858f2265f119dce9a96e12886"
+  ],
+  "workspace_identity": {
+    "canonical_root": "E:\\allwork\\download\\agent\\auto-slice",
+    "filesystem_identity": "win32:sha256:3e3940376927e170b31729b5f044f8f7f2bd464943e2d38bdf2b2c09e1ff3e68"
+  }
+}
