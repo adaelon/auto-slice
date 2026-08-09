@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "result": "PASS",
+  "lease_id": "lease-s10-evidence-success",
+  "old_epoch": 1,
+  "granted_epoch": 2,
+  "lease_events": [
+    {
+      "action": "ACQUIRED",
+      "epoch": 1,
+      "status": "ACTIVE"
+    },
+    {
+      "action": "FROZEN",
+      "epoch": 1,
+      "status": "FROZEN"
+    },
+    {
+      "action": "EPOCH_ROTATED",
+      "epoch": 2,
+      "status": "ACTIVE"
+    }
+  ],
+  "old_epoch_rejected": true,
+  "granted_epoch_active": true,
+  "ready_before_grant": true,
+  "pre_ready_write_allowed": false
+}

@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "result": "PASS",
+  "source_thread_id": "00000000-0000-7000-8000-000000001101",
+  "compression_task_id": "00000000-0000-7000-8000-000000001102",
+  "continuation_task_id": "00000000-0000-7000-8000-000000001103",
+  "uuid_distinct": true,
+  "run_id_preserved": true,
+  "slice_id_preserved": true,
+  "owned_diff_digest_preserved": true,
+  "ready_before_grant": true,
+  "pre_ready_write_allowed": false,
+  "handoff_read": true,
+  "persisted_rollout_verified": true,
+  "first_draft_before_evidence": true,
+  "targeted_reads": 1,
+  "broad_search_count": 0,
+  "full_file_reread_count": 0,
+  "rollout_digest": "sha256:5852ba03372eca914aafe4ee7a63c5af884e161c62f7b67ab5d14b0960fc9b14",
+  "rollout_events": [
+    {
+      "sequence": 1,
+      "type": "HANDOFF_READ",
+      "artifact_digest": "sha256:3300318013f1d9d91497f53ca2ddb505097ffcbea5b2de77e052f549204b5fad"
+    },
+    {
+      "sequence": 2,
+      "type": "FIRST_DRAFT_PUBLISHED",
+      "digest": "sha256:e9788622a7d057eab4a7f47e087f2f4d1522604bc4ea6ee22b53aa0d0aca88bb"
+    },
+    {
+      "sequence": 3,
+      "type": "TARGETED_EVIDENCE_READ",
+      "reason": "claim_verification"
+    }
+  ],
+  "final_status": "SLICE_RUNNING",
+  "source_replaced": true,
+  "compaction_gate_cleared": true,
+  "handoff_preserved": true,
+  "trace": [
+    {
+      "sequence": 1,
+      "action": "START_READ_ONLY"
+    },
+    {
+      "sequence": 2,
+      "action": "READY",
+      "write_access": false
+    },
+    {
+      "sequence": 3,
+      "action": "WRITE_GRANTED",
+      "write_epoch": 2
+    },
+    {
+      "sequence": 4,
+      "action": "DURABLE_PROGRESS"
+    }
+  ]
+}

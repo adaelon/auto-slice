@@ -1,0 +1,206 @@
+{
+  "schema_version": 1,
+  "slice_id": "S10",
+  "contract_digest": "sha256:2bbb3b73223e71c65cc08f92373aa31c2851422a8563bfc69acd8b94353be269",
+  "input_digests": [
+    {
+      "path": "contracts/slices/S03.json",
+      "digest": "sha256:2f3b231fc9652b6a464a8787e7705d9853091b539adc360e08f5ca9ac327b922"
+    },
+    {
+      "path": "artifacts/s03/completion-receipt.json",
+      "digest": "sha256:2272647e961ac4adacb39d74eb53c68145b4206d28be2f3f679eb5a05730d02e"
+    },
+    {
+      "path": "contracts/slices/S04.json",
+      "digest": "sha256:14abc23f94f6d8f75f291c0dfb04b318434f0edaae5d702b1c10485066ca63e4"
+    },
+    {
+      "path": "artifacts/s04/completion-receipt.json",
+      "digest": "sha256:6f4b8e43ed3d82d294c46049b904bb20723583a901a1d930d48cfb4d4b41110a"
+    },
+    {
+      "path": "contracts/slices/S09.json",
+      "digest": "sha256:74bce51247ca22f0276fe7284d3312608dae7e6b5a8adc1cb37c044dac1c5bc1"
+    },
+    {
+      "path": "artifacts/s09/completion-receipt.json",
+      "digest": "sha256:f749c280d37481343eac9ef04b9a965a43b7c1c54a092b559507c15d81f320ec"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec"
+    },
+    {
+      "path": "docs/adr/0002-deterministic-model-routing.md",
+      "digest": "sha256:d0752d65132aa27689cf7c6f20a56cfeefaa144a537722c56a7a7a237950dc1a"
+    },
+    {
+      "path": "docs/adr/0004-compaction-timeout-handoff.md",
+      "digest": "sha256:3c76c8af78e292890e5ecd6743a0ad538886916858f2265f119dce9a96e12886"
+    },
+    {
+      "path": "docs/adr/0006-project-write-lease-log.md",
+      "digest": "sha256:73a015f9bb6ea8c5fc7bfa17027fcbc1ad1e1f8ae0de0447c8c9011d21448661"
+    }
+  ],
+  "output_digests": [
+    {
+      "path": "artifacts/s10/continuation-trace.json",
+      "digest": "sha256:a44d5b025b82dba1fd3d0d18b0e9dda4be7ea47b64b1fdec58559077c7216cfb"
+    },
+    {
+      "path": "artifacts/s10/failure-closure-matrix.json",
+      "digest": "sha256:05d3594779602ab4d94a18dd7e5c9aef50cdee75be39ac896eed42ea9bb1df49"
+    },
+    {
+      "path": "artifacts/s10/lease-rotation-log.json",
+      "digest": "sha256:3e60c26faef81bf2728326a65d772eaf021cac54c9a537c08a5b48426f88f14f"
+    },
+    {
+      "path": "artifacts/s10/progress-receipt.json",
+      "digest": "sha256:42ba25fe1324e655c911cae199feb1a161b43221bf7033cc52aecad822bc6d20"
+    },
+    {
+      "path": "contracts/slices/S10.json",
+      "digest": "sha256:2bbb3b73223e71c65cc08f92373aa31c2851422a8563bfc69acd8b94353be269"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:38335d71971e05842ae42de85708009b3f7540a5027a9c7fe35f405babf27d51"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:72f1ec58ef22df27f10c31de8414488fcc6189481e6020758bdaaafa21b3b33b"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:18bd440fc4a85b1977ed94c0cb59fa5f304f2eee1dec6a49e362c1ae18fe22fc"
+    },
+    {
+      "path": "scripts/verify-s10-evidence.mjs",
+      "digest": "sha256:e220762adb6b6fe9842665430f253a5903807a89e5ab8c751d28471755e76387"
+    },
+    {
+      "path": "scripts/verify-s10.mjs",
+      "digest": "sha256:f1188af18c13849a8d3eded4ee870ad49d7f2411a8bb50d0d2452d748bf93afb"
+    },
+    {
+      "path": "src/controller/continuation/continuation-coordinator.ts",
+      "digest": "sha256:839a8b701cae88dbd90b914815aeac3e2853ce8b565f98b3c280a6760259224c"
+    },
+    {
+      "path": "src/controller/continuation/errors.ts",
+      "digest": "sha256:9e83c597eafd635ffa8a7e9e7f79367f0aac2b459b64c30d32f3a223d07fad89"
+    },
+    {
+      "path": "src/controller/continuation/index.ts",
+      "digest": "sha256:3a736702d56f8989f7661755632b5f9e26e0c1bed2642d0e3ef9b0e52e26eb7b"
+    },
+    {
+      "path": "src/controller/continuation/types.ts",
+      "digest": "sha256:fcdc78ae98e2c2c2b1d838485f5055fcff6c4c8ab014c66a4af296c536c7194e"
+    },
+    {
+      "path": "test/continuation.test.ts",
+      "digest": "sha256:e793bf469ded2d261c9bc4bfca4e45f37bd3c22513666f7b3044b4104aa4298a"
+    }
+  ],
+  "touched_paths": [
+    "artifacts/s10/completion-receipt.json",
+    "artifacts/s10/continuation-trace.json",
+    "artifacts/s10/failure-closure-matrix.json",
+    "artifacts/s10/lease-rotation-log.json",
+    "artifacts/s10/progress-receipt.json",
+    "contracts/slices/S10.json",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "package.json",
+    "scripts/verify-s10-evidence.mjs",
+    "scripts/verify-s10.mjs",
+    "src/controller/continuation/continuation-coordinator.ts",
+    "src/controller/continuation/errors.ts",
+    "src/controller/continuation/index.ts",
+    "src/controller/continuation/types.ts",
+    "test/continuation.test.ts"
+  ],
+  "check_receipts": [
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ca622aa6b87a4fbd135ae14f841cd92016f6ce189674c007da77682d9bc3fe7a",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 3083
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b4d5eeaf054ffadd6ba18423f31f81288f54bd16be7a5390eafbb745eeba53dc",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 2735
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:96cd695bcf349a55521f45e61c48d475612a78d240b91900727a52340dafc8ed",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 94442
+    },
+    {
+      "check_id": "s10_evidence",
+      "argv": [
+        "node",
+        "scripts/verify-s10-evidence.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:89c57263246563a40bbe576e5388c6c924db24bfa6ba4b6662b5439ee8acee61",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 4653
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:50bf418d3f46fa3975eade28b9f81047ee52461d61415cc22546263c0cca2afe",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 10863
+    }
+  ],
+  "start_head": "5e50a442ff2f464f252fa5bd7a9a33504f339c86",
+  "baseline_index_tree": "3005d3423e2256e90885251c613d79f89e5de54f",
+  "baseline_staged_paths": [],
+  "end_head": null,
+  "owned_diff_digest": "sha256:387598a5a986e4d0d9f83cc362327518cd16975aec175743181539acf03bcef6",
+  "completed_at": "2026-08-09T09:25:26.716Z"
+}

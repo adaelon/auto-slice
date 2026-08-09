@@ -1,0 +1,6 @@
+{
+  "task_id": "00000000-0000-7000-8000-000000001103",
+  "slice_id": "fixture-current-slice",
+  "durable_artifact_digest": "sha256:69184790de0b3995f172a997d2baf7237065636d9d84986a2033544a353a9cb0",
+  "observed_state_version": 7
+}

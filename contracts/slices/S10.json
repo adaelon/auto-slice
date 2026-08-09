@@ -1,0 +1,289 @@
+{
+  "id": "S10",
+  "contract_version": 1,
+  "requires": [
+    "S03",
+    "S04",
+    "S09"
+  ],
+  "objective": "创建与 Source Thread、Compression Task 两两不同的只读 Continuation Task，复验 Handoff 与 workspace 绑定，遵守 synthesize-first consumer contract，授予 S08 已轮换的新 write epoch，并在首个持久进展回执成立后原子恢复同一 Run/Slice。",
+  "exclusions": [
+    "不复用 Source Thread 或 Compression Task，也不把续接视为新 Slice",
+    "不在 ReadyReceipt 与 Handoff 复验成立前授予写权限",
+    "不允许 commentary、普通静默或未变化 digest 充当持久进展",
+    "不恢复旧 Source 的 write epoch，不创建 S11 控制面",
+    "不执行 Git commit 或 push"
+  ],
+  "inputs": [
+    {
+      "path": "contracts/slices/S03.json",
+      "digest": "sha256:2f3b231fc9652b6a464a8787e7705d9853091b539adc360e08f5ca9ac327b922",
+      "producer_slice": "S03"
+    },
+    {
+      "path": "artifacts/s03/completion-receipt.json",
+      "digest": "sha256:2272647e961ac4adacb39d74eb53c68145b4206d28be2f3f679eb5a05730d02e",
+      "producer_slice": "S03"
+    },
+    {
+      "path": "contracts/slices/S04.json",
+      "digest": "sha256:14abc23f94f6d8f75f291c0dfb04b318434f0edaae5d702b1c10485066ca63e4",
+      "producer_slice": "S04"
+    },
+    {
+      "path": "artifacts/s04/completion-receipt.json",
+      "digest": "sha256:6f4b8e43ed3d82d294c46049b904bb20723583a901a1d930d48cfb4d4b41110a",
+      "producer_slice": "S04"
+    },
+    {
+      "path": "contracts/slices/S09.json",
+      "digest": "sha256:74bce51247ca22f0276fe7284d3312608dae7e6b5a8adc1cb37c044dac1c5bc1",
+      "producer_slice": "S09"
+    },
+    {
+      "path": "artifacts/s09/completion-receipt.json",
+      "digest": "sha256:f749c280d37481343eac9ef04b9a965a43b7c1c54a092b559507c15d81f320ec",
+      "producer_slice": "S09"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0002-deterministic-model-routing.md",
+      "digest": "sha256:d0752d65132aa27689cf7c6f20a56cfeefaa144a537722c56a7a7a237950dc1a",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0004-compaction-timeout-handoff.md",
+      "digest": "sha256:3c76c8af78e292890e5ecd6743a0ad538886916858f2265f119dce9a96e12886",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0006-project-write-lease-log.md",
+      "digest": "sha256:73a015f9bb6ea8c5fc7bfa17027fcbc1ad1e1f8ae0de0447c8c9011d21448661",
+      "producer_slice": "S03"
+    }
+  ],
+  "owned_paths": [
+    "contracts/slices/S10.json",
+    "src/controller/continuation/**",
+    "test/continuation.test.ts",
+    "scripts/verify-s10-evidence.mjs",
+    "scripts/verify-s10.mjs",
+    "package.json",
+    "artifacts/s10/**",
+    "docs/代码链路.md",
+    "docs/架构.md"
+  ],
+  "ports": [
+    {
+      "name": "start_continuation_task",
+      "signature": "ContinuationLauncher.start(envelope, model_decision) -> ContinuationTaskId | continuation_start_failed"
+    },
+    {
+      "name": "await_continuation_ready",
+      "signature": "ContinuationLauncher.awaitReady(task_id) -> ReadyReceipt | continuation_start_failed"
+    },
+    {
+      "name": "grant_continuation_write",
+      "signature": "ContinuationLauncher.grantWrite(task_id, new_write_epoch) -> LeaseReceipt | continuation_start_failed"
+    },
+    {
+      "name": "await_continuation_progress",
+      "signature": "ContinuationLauncher.awaitProgress(task_id) -> ProgressReceipt | continuation_start_failed"
+    },
+    {
+      "name": "coordinate_continuation",
+      "signature": "ContinuationCoordinator.continueFromHandoff(input) -> ContinuationDecision | ContinuationError"
+    }
+  ],
+  "allowed_transitions": [
+    "CONTINUATION_STARTING -> SLICE_RUNNING",
+    "CONTINUATION_STARTING -> NEEDS_USER"
+  ],
+  "failure_codes": [
+    "continuation_start_failed",
+    "handoff_integrity_failed",
+    "model_policy_unavailable",
+    "run_not_found",
+    "invalid_transition",
+    "stale_state",
+    "state_persist_failed",
+    "state_corrupt",
+    "unsupported_state_schema"
+  ],
+  "checks": [
+    {
+      "id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        "dist/src/controller/continuation/index.js"
+      ]
+    },
+    {
+      "id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "cwd": ".",
+      "timeout_ms": 300000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "s10_evidence",
+      "argv": [
+        "node",
+        "scripts/verify-s10-evidence.mjs"
+      ],
+      "cwd": ".",
+      "timeout_ms": 180000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    }
+  ],
+  "expected_artifacts": [
+    {
+      "path": "artifacts/s10/continuation-trace.json",
+      "kind": "three_task_continuation_trace"
+    },
+    {
+      "path": "artifacts/s10/lease-rotation-log.json",
+      "kind": "write_epoch_rotation_and_grant_log"
+    },
+    {
+      "path": "artifacts/s10/progress-receipt.json",
+      "kind": "durable_progress_receipt"
+    },
+    {
+      "path": "artifacts/s10/failure-closure-matrix.json",
+      "kind": "continuation_failure_matrix"
+    },
+    {
+      "path": "artifacts/s10/completion-receipt.json",
+      "kind": "completion_receipt"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "kind": "code_path_index"
+    },
+    {
+      "path": "docs/架构.md",
+      "kind": "implementation_architecture"
+    }
+  ],
+  "unlocks": [
+    "S11",
+    "S12"
+  ]
+}
