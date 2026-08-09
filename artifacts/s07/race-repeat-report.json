@@ -1,0 +1,10 @@
+{
+  "schema_version": 1,
+  "slice_id": "S07",
+  "iterations": 12,
+  "contender_processes_per_iteration": 2,
+  "one_transition_per_iteration": true,
+  "one_noop_loser_per_iteration": true,
+  "final_event_count_per_iteration": 5,
+  "result": "PASS"
+}

@@ -20,6 +20,7 @@
     "verify:s04": "node scripts/verify-s04.mjs",
     "verify:s05": "node scripts/verify-s05.mjs",
     "verify:s06": "node scripts/verify-s06.mjs",
+    "verify:s07": "node scripts/verify-s07.mjs",
     "state:replay": "node scripts/replay-run-events.mjs"
   },
   "engines": {

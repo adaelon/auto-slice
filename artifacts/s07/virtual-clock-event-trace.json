@@ -1,0 +1,96 @@
+{
+  "schema_version": 1,
+  "slice_id": "S07",
+  "timeout_ms": 30000,
+  "scenarios": [
+    {
+      "id": "completion_29_999",
+      "completed_at": "2026-08-08T00:00:29.999Z",
+      "deadline_at": "2026-08-08T00:00:30.000Z",
+      "outcome": "RECOVERED",
+      "final_status": "SLICE_RUNNING",
+      "final_state_version": 4,
+      "event_actions": [
+        "create_run:IDLE",
+        "prepare_s07_evidence:PREPARING",
+        "start_s07_evidence:SLICE_RUNNING",
+        "observe_auto_compaction_started:COMPACTION_WAIT",
+        "observe_auto_compaction_completed:SLICE_RUNNING"
+      ]
+    },
+    {
+      "id": "completion_30_000",
+      "completed_at": "2026-08-08T00:00:30.000Z",
+      "deadline_at": "2026-08-08T00:00:30.000Z",
+      "outcome": "RECOVERED",
+      "final_status": "SLICE_RUNNING",
+      "final_state_version": 4,
+      "event_actions": [
+        "create_run:IDLE",
+        "prepare_s07_evidence:PREPARING",
+        "start_s07_evidence:SLICE_RUNNING",
+        "observe_auto_compaction_started:COMPACTION_WAIT",
+        "observe_auto_compaction_completed:SLICE_RUNNING"
+      ]
+    },
+    {
+      "id": "completion_30_001",
+      "completed_at": "2026-08-08T00:00:30.001Z",
+      "deadline_at": "2026-08-08T00:00:30.000Z",
+      "outcome": "TIMED_OUT",
+      "final_status": "SOURCE_INTERRUPTING",
+      "final_state_version": 4,
+      "event_actions": [
+        "create_run:IDLE",
+        "prepare_s07_evidence:PREPARING",
+        "start_s07_evidence:SLICE_RUNNING",
+        "observe_auto_compaction_started:COMPACTION_WAIT",
+        "observe_auto_compaction_deadline:SOURCE_INTERRUPTING"
+      ]
+    },
+    {
+      "id": "restart_before_deadline",
+      "completed_at": null,
+      "deadline_at": "2026-08-08T00:00:30.000Z",
+      "outcome": "WAITING",
+      "final_status": "SOURCE_INTERRUPTING",
+      "final_state_version": 4,
+      "event_actions": [
+        "create_run:IDLE",
+        "prepare_s07_evidence:PREPARING",
+        "start_s07_evidence:SLICE_RUNNING",
+        "observe_auto_compaction_started:COMPACTION_WAIT",
+        "observe_auto_compaction_deadline:SOURCE_INTERRUPTING"
+      ]
+    },
+    {
+      "id": "restart_after_deadline",
+      "completed_at": null,
+      "deadline_at": "2026-08-08T00:00:30.000Z",
+      "outcome": "TIMED_OUT",
+      "final_status": "SOURCE_INTERRUPTING",
+      "final_state_version": 4,
+      "event_actions": [
+        "create_run:IDLE",
+        "prepare_s07_evidence:PREPARING",
+        "start_s07_evidence:SLICE_RUNNING",
+        "observe_auto_compaction_started:COMPACTION_WAIT",
+        "observe_auto_compaction_deadline:SOURCE_INTERRUPTING"
+      ]
+    },
+    {
+      "id": "silent_60_without_started",
+      "completed_at": null,
+      "deadline_at": null,
+      "outcome": "NOOP",
+      "final_status": "SLICE_RUNNING",
+      "final_state_version": 2,
+      "event_actions": [
+        "create_run:IDLE",
+        "prepare_s07_evidence:PREPARING",
+        "start_s07_evidence:SLICE_RUNNING"
+      ]
+    }
+  ],
+  "result": "PASS"
+}

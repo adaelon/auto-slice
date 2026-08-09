@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "slice_id": "S07",
+  "scenarios": [
+    {
+      "id": "stable_compaction_ids",
+      "failure_code": "compaction_observability_unavailable",
+      "reason": "stable_compaction_id_unavailable",
+      "scheduled_timers": 0,
+      "final_status": "SLICE_RUNNING",
+      "final_state_version": 2
+    },
+    {
+      "id": "structured_phase_events",
+      "failure_code": "compaction_observability_unavailable",
+      "reason": "structured_phase_unavailable",
+      "scheduled_timers": 0,
+      "final_status": "SLICE_RUNNING",
+      "final_state_version": 2
+    },
+    {
+      "id": "ordered_host_sequence",
+      "failure_code": "compaction_observability_unavailable",
+      "reason": "ordered_sequence_unavailable",
+      "scheduled_timers": 0,
+      "final_status": "SLICE_RUNNING",
+      "final_state_version": 2
+    }
+  ],
+  "result": "PASS"
+}

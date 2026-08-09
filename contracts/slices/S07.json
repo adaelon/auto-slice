@@ -1,0 +1,246 @@
+{
+  "id": "S07",
+  "contract_version": 1,
+  "requires": [
+    "S02"
+  ],
+  "objective": "接收 Host 的结构化自动压缩事件，持久化 compaction_id 与 30 秒 deadline，并以 RunStore CAS 确定性裁决完成、超时和重启竞态。",
+  "exclusions": [
+    "不根据普通静默、日志文本或模型自述推断自动压缩",
+    "不中断、删除、归档或清空 Source Thread",
+    "不冻结或轮换 Project Write Lease",
+    "不创建 Compression Task 或 Continuation Task"
+  ],
+  "inputs": [
+    {
+      "path": "artifacts/s02/completion-receipt.json",
+      "digest": "sha256:21897c4a55c145e285109ea2c0f065356f94249616497b2d8dd2225762032d98",
+      "producer_slice": "S02"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0004-compaction-timeout-handoff.md",
+      "digest": "sha256:3c76c8af78e292890e5ecd6743a0ad538886916858f2265f119dce9a96e12886",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0005-directory-event-store.md",
+      "digest": "sha256:fa5797d3133d8c8168080337ce3e34c4fe7d4415c5860ed8b3497e8b9f2d021b",
+      "producer_slice": "S02"
+    }
+  ],
+  "owned_paths": [
+    "contracts/slices/S07.json",
+    "src/controller/compaction-monitor/**",
+    "test/compaction-monitor.test.ts",
+    "test/helpers/compaction-race-worker.ts",
+    "scripts/verify-s07-evidence.mjs",
+    "scripts/verify-s07.mjs",
+    "package.json",
+    "artifacts/s07/**",
+    "docs/代码链路.md",
+    "docs/架构.md"
+  ],
+  "ports": [
+    {
+      "name": "observe_compaction_event",
+      "signature": "CompactionMonitor.onEvent(run_id, event, expected_state_version) -> MonitorDecision | CompactionMonitorError"
+    },
+    {
+      "name": "observe_compaction_deadline",
+      "signature": "CompactionMonitor.onDeadline(run_id, compaction_id, fired_at, expected_state_version) -> MonitorDecision | CompactionMonitorError"
+    },
+    {
+      "name": "recover_compaction_timer",
+      "signature": "CompactionMonitor.recover(run_id, expected_state_version) -> MonitorDecision | CompactionMonitorError"
+    }
+  ],
+  "allowed_transitions": [
+    "SLICE_RUNNING -> COMPACTION_WAIT",
+    "COMPACTION_WAIT -> SLICE_RUNNING",
+    "COMPACTION_WAIT -> SOURCE_INTERRUPTING"
+  ],
+  "failure_codes": [
+    "compaction_observability_unavailable",
+    "invalid_compaction_event",
+    "clock_unavailable",
+    "scheduler_failed",
+    "run_not_found",
+    "invalid_transition",
+    "stale_state",
+    "state_persist_failed",
+    "state_corrupt",
+    "unsupported_state_schema"
+  ],
+  "checks": [
+    {
+      "id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        "dist/src/controller/compaction-monitor/index.js"
+      ]
+    },
+    {
+      "id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "cwd": ".",
+      "timeout_ms": 300000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "s07_evidence",
+      "argv": [
+        "node",
+        "scripts/verify-s07-evidence.mjs"
+      ],
+      "cwd": ".",
+      "timeout_ms": 180000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    }
+  ],
+  "expected_artifacts": [
+    {
+      "path": "artifacts/s07/virtual-clock-event-trace.json",
+      "kind": "virtual_clock_event_trace"
+    },
+    {
+      "path": "artifacts/s07/race-repeat-report.json",
+      "kind": "process_race_repeat_report"
+    },
+    {
+      "path": "artifacts/s07/observability-failure-matrix.json",
+      "kind": "host_observability_failure_matrix"
+    },
+    {
+      "path": "artifacts/s07/completion-receipt.json",
+      "kind": "completion_receipt"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "kind": "code_path_index"
+    },
+    {
+      "path": "docs/架构.md",
+      "kind": "implementation_architecture"
+    }
+  ],
+  "unlocks": [
+    "S08"
+  ]
+}

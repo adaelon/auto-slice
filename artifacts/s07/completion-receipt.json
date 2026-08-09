@@ -1,0 +1,185 @@
+{
+  "schema_version": 1,
+  "slice_id": "S07",
+  "contract_digest": "sha256:59f4695702105d7807f8984bab2d0cada941db486d831cc9681ef7c0868778b2",
+  "input_digests": [
+    {
+      "path": "artifacts/s02/completion-receipt.json",
+      "digest": "sha256:21897c4a55c145e285109ea2c0f065356f94249616497b2d8dd2225762032d98"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec"
+    },
+    {
+      "path": "docs/adr/0004-compaction-timeout-handoff.md",
+      "digest": "sha256:3c76c8af78e292890e5ecd6743a0ad538886916858f2265f119dce9a96e12886"
+    },
+    {
+      "path": "docs/adr/0005-directory-event-store.md",
+      "digest": "sha256:fa5797d3133d8c8168080337ce3e34c4fe7d4415c5860ed8b3497e8b9f2d021b"
+    }
+  ],
+  "output_digests": [
+    {
+      "path": "artifacts/s07/observability-failure-matrix.json",
+      "digest": "sha256:5dd107e30b7e2ea1e8dcf60e466566c668411397cee1a0433c30b306d825e662"
+    },
+    {
+      "path": "artifacts/s07/race-repeat-report.json",
+      "digest": "sha256:ed93639eb3c9fddf92df122450499ecd0e10026ee683ec1e7f905ca2d32ac334"
+    },
+    {
+      "path": "artifacts/s07/virtual-clock-event-trace.json",
+      "digest": "sha256:0826155bbcc0561be10da3576df65c7ac33d9aa8f1cfd384640c349a886fc3e8"
+    },
+    {
+      "path": "contracts/slices/S07.json",
+      "digest": "sha256:59f4695702105d7807f8984bab2d0cada941db486d831cc9681ef7c0868778b2"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:f831e11444e2f4f27e24b2f6b63e1fda8e7f4202ceb427e984dbcc65d409b453"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:7e01be739db96b2d8eb0cbc7246a44c0c22ab7380f0cd0f5f9959db8a1d112a6"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:e493dcf832e771e66172fd96360dbdb79527030f11309362553b8a5a803cfd75"
+    },
+    {
+      "path": "scripts/verify-s07-evidence.mjs",
+      "digest": "sha256:1f41fb7d16224badfd979a3b81c139cc916c3e697c51c529b429c6930f85f84f"
+    },
+    {
+      "path": "scripts/verify-s07.mjs",
+      "digest": "sha256:3b77c1f5fa7364bdcb2d99d9e69f17e14aaabfb3229b5dcad067a56060b9d90e"
+    },
+    {
+      "path": "src/controller/compaction-monitor/compaction-monitor.ts",
+      "digest": "sha256:7648fa3dd7732632df0ef079382997fae9d04652848bda9a77c0386747b8ad36"
+    },
+    {
+      "path": "src/controller/compaction-monitor/errors.ts",
+      "digest": "sha256:175b91f423d8ac64b0a54adb4dee652ebed6ec4902a4326593c6e37a34bac63b"
+    },
+    {
+      "path": "src/controller/compaction-monitor/index.ts",
+      "digest": "sha256:a6b02550baa1286989290feb4efe4c24d87e187a8d9e36ab0d7e16e521c8da2a"
+    },
+    {
+      "path": "src/controller/compaction-monitor/timeout-scheduler.ts",
+      "digest": "sha256:5e6619ca8d12c76347a66db4f79b914dbf57f92d9ae4f69da91f80cd80b1d40c"
+    },
+    {
+      "path": "src/controller/compaction-monitor/types.ts",
+      "digest": "sha256:258e4d9ebe5d582d2339de58beea55a6893cc329f1092c481ab08240b61f7fe3"
+    },
+    {
+      "path": "test/compaction-monitor.test.ts",
+      "digest": "sha256:9a7aeee0dfe1c4e2a336a8b23cb927ec4746bfb2d72ff4860012142f13d83672"
+    },
+    {
+      "path": "test/helpers/compaction-race-worker.ts",
+      "digest": "sha256:6fa979e20d5418912e915347e17d364fcdebb3046b5d253cb20443107d3cbf3e"
+    }
+  ],
+  "touched_paths": [
+    "artifacts/s07/completion-receipt.json",
+    "artifacts/s07/observability-failure-matrix.json",
+    "artifacts/s07/race-repeat-report.json",
+    "artifacts/s07/virtual-clock-event-trace.json",
+    "contracts/slices/S07.json",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "package.json",
+    "scripts/verify-s07-evidence.mjs",
+    "scripts/verify-s07.mjs",
+    "src/controller/compaction-monitor/compaction-monitor.ts",
+    "src/controller/compaction-monitor/errors.ts",
+    "src/controller/compaction-monitor/index.ts",
+    "src/controller/compaction-monitor/timeout-scheduler.ts",
+    "src/controller/compaction-monitor/types.ts",
+    "test/compaction-monitor.test.ts",
+    "test/helpers/compaction-race-worker.ts"
+  ],
+  "check_receipts": [
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ca622aa6b87a4fbd135ae14f841cd92016f6ce189674c007da77682d9bc3fe7a",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 3699
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b4d5eeaf054ffadd6ba18423f31f81288f54bd16be7a5390eafbb745eeba53dc",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 4222
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:4a1017d5f78f7e297f1661ba168628066dcc53737679d9106c93cdb08829f896",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 93118
+    },
+    {
+      "check_id": "s07_evidence",
+      "argv": [
+        "node",
+        "scripts/verify-s07-evidence.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:a07b20ef3c88aa9c1feac9762eaf4598b4258994c0f94174151163748977605e",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 5751
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:50bf418d3f46fa3975eade28b9f81047ee52461d61415cc22546263c0cca2afe",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 9097
+    }
+  ],
+  "start_head": "50b7fccfe0a93abb822f21522282d39fc3ecc41c",
+  "end_head": null,
+  "owned_diff_digest": "sha256:ba80d3c0dc279a540e9265d5f173d82685f2d79ad023c69d79a4074a323e7a99",
+  "completed_at": "2026-08-09T01:49:36.496Z"
+}
