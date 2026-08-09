@@ -35,8 +35,15 @@ const FORWARD_TRANSITIONS: Readonly<Record<RunStatus, readonly RunStatus[]>> = {
 
 const TERMINAL_STATUSES = new Set<RunStatus>(["DONE", "ABORTED"]);
 
-export function isRunTransitionAllowed(from: RunStatus, to: RunStatus): boolean {
-  if (from === to || TERMINAL_STATUSES.has(from)) {
+export function isRunTransitionAllowed(
+  from: RunStatus,
+  to: RunStatus,
+  action?: string,
+): boolean {
+  if (from === to) {
+    return from === "HANDOFF_EXPORTING" && action === "mark_handoff_attempted";
+  }
+  if (TERMINAL_STATUSES.has(from)) {
     return false;
   }
   if (FORWARD_TRANSITIONS[from].includes(to)) {

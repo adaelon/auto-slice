@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "slice_id": "S09",
+  "source_thread_id": "00000000-0000-7000-8000-0000000000c0",
+  "compression_task_id": "00000000-0000-7000-8000-0000000009c0",
+  "uuid_distinct": true,
+  "workspace_identity_equal": true,
+  "history_empty": true,
+  "project_write_lease": false,
+  "model": "gpt-5.6-sol",
+  "reasoning_effort": "medium",
+  "workflow_version": "v2",
+  "source_revision": "sha256:033e31986e5152e27c4a9bca2b1623b078138d218aeb4b464cea24e6315af2eb",
+  "frame_digest": "sha256:ebe6ffead1903c68d2a88fec04bfc0502669124361988a9e543771e3babdc97e",
+  "handoff_digest": "sha256:6fa198dc3c95b02b7b25207ec6f4c746144cab7bf6abf794377c872d89047ab5",
+  "evidence_index_digest": "sha256:1ce57764e9acd456eac5b55b47312995ef7e762f5b01783b3ad2e21adcb993b9",
+  "structural_digest": "sha256:84a1558a4ac3581af349afb7be9e598dcfba77d4de11b460aeabc19fa336e222",
+  "reduce_preflight_digest": "sha256:3977d31e0c50245b083b833b56b8c3738e2591e42e61fc4816b6f12652d82e91",
+  "verify_evidence": "PASS",
+  "map_worker_processes": 2,
+  "initial_maps": 2,
+  "consumer_contract": {
+    "formatVersion": 1,
+    "kind": "codex-handoff-synthesize-first-consumer-contract",
+    "mode": "synthesize_first",
+    "firstDeliverableIds": [
+      "flow-explanation"
+    ],
+    "preDraftEvidenceReads": 0,
+    "maxTargetedReads": 2,
+    "allowedReadReasons": [
+      "claim_verification",
+      "named_uncertainty"
+    ],
+    "forbidBroadSearch": true,
+    "forbidFullFileReread": true
+  },
+  "output_chars": 2367,
+  "evidence_index_chars": 12706,
+  "result": "PASS"
+}

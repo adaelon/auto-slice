@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "slice_id": "S09",
+  "scenarios": [
+    {
+      "reason": "worker_unavailable",
+      "failure_code": "handoff_export_failed",
+      "final_status": "NEEDS_USER",
+      "handoff_attempted": true,
+      "automatic_retry_allowed": false,
+      "continuation_started": false
+    },
+    {
+      "reason": "skill_budget_failed",
+      "failure_code": "handoff_export_failed",
+      "final_status": "NEEDS_USER",
+      "handoff_attempted": true,
+      "automatic_retry_allowed": false,
+      "continuation_started": false
+    },
+    {
+      "reason": "source_revision_mismatch",
+      "failure_code": "handoff_export_failed",
+      "final_status": "NEEDS_USER",
+      "handoff_attempted": true,
+      "automatic_retry_allowed": false,
+      "continuation_started": false
+    },
+    {
+      "reason": "handoff_workflow_version_mismatch",
+      "failure_code": "handoff_integrity_failed",
+      "final_status": "NEEDS_USER",
+      "handoff_attempted": true,
+      "automatic_retry_allowed": false,
+      "continuation_started": false
+    },
+    {
+      "reason": "handoff_artifact_missing",
+      "failure_code": "handoff_integrity_failed",
+      "final_status": "NEEDS_USER",
+      "handoff_attempted": true,
+      "automatic_retry_allowed": false,
+      "continuation_started": false
+    },
+    {
+      "reason": "handoff_artifact_digest_mismatch",
+      "failure_code": "handoff_integrity_failed",
+      "final_status": "NEEDS_USER",
+      "handoff_attempted": true,
+      "automatic_retry_allowed": false,
+      "continuation_started": false
+    },
+    {
+      "reason": "handoff_verify_failed",
+      "failure_code": "handoff_integrity_failed",
+      "final_status": "NEEDS_USER",
+      "handoff_attempted": true,
+      "automatic_retry_allowed": false,
+      "continuation_started": false
+    }
+  ],
+  "result": "PASS"
+}

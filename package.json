@@ -22,6 +22,7 @@
     "verify:s06": "node scripts/verify-s06.mjs",
     "verify:s07": "node scripts/verify-s07.mjs",
     "verify:s08": "node scripts/verify-s08.mjs",
+    "verify:s09": "node scripts/verify-s09.mjs",
     "state:replay": "node scripts/replay-run-events.mjs"
   },
   "engines": {

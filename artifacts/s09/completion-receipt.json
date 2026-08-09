@@ -1,0 +1,220 @@
+{
+  "schema_version": 1,
+  "slice_id": "S09",
+  "contract_digest": "sha256:74bce51247ca22f0276fe7284d3312608dae7e6b5a8adc1cb37c044dac1c5bc1",
+  "input_digests": [
+    {
+      "path": "contracts/slices/S02.json",
+      "digest": "sha256:44ddff75f353160659331c24d2ae9e780ab7c380bec5b05eb6edf01b47e5a1e0"
+    },
+    {
+      "path": "artifacts/s02/completion-receipt.json",
+      "digest": "sha256:21897c4a55c145e285109ea2c0f065356f94249616497b2d8dd2225762032d98"
+    },
+    {
+      "path": "contracts/slices/S04.json",
+      "digest": "sha256:14abc23f94f6d8f75f291c0dfb04b318434f0edaae5d702b1c10485066ca63e4"
+    },
+    {
+      "path": "artifacts/s04/completion-receipt.json",
+      "digest": "sha256:6f4b8e43ed3d82d294c46049b904bb20723583a901a1d930d48cfb4d4b41110a"
+    },
+    {
+      "path": "contracts/slices/S08.json",
+      "digest": "sha256:7dd872284c0b9cf9dcd24e5672cc8a44f93130fd7149a9c02ddce0bc1f807f4e"
+    },
+    {
+      "path": "artifacts/s08/completion-receipt.json",
+      "digest": "sha256:a9a6239e512319c8beb40cd1b08ec983f050dd8881a021d7227c4e344803de7b"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec"
+    },
+    {
+      "path": "docs/adr/0002-deterministic-model-routing.md",
+      "digest": "sha256:d0752d65132aa27689cf7c6f20a56cfeefaa144a537722c56a7a7a237950dc1a"
+    },
+    {
+      "path": "docs/adr/0004-compaction-timeout-handoff.md",
+      "digest": "sha256:3c76c8af78e292890e5ecd6743a0ad538886916858f2265f119dce9a96e12886"
+    }
+  ],
+  "output_digests": [
+    {
+      "path": "artifacts/s09/compression-task-report.json",
+      "digest": "sha256:14439b9c8a6d050e0a0c4e559860e8bcf5448c25bbb0e8ebf83c38363dedb88c"
+    },
+    {
+      "path": "artifacts/s09/failure-closure-matrix.json",
+      "digest": "sha256:01d7e7ad7a7f8372271c36fa675532e256c473cd6cfb43aa95e20bae31b4208b"
+    },
+    {
+      "path": "artifacts/s09/helper-fixture/source-rollout.jsonl",
+      "digest": "sha256:033e31986e5152e27c4a9bca2b1623b078138d218aeb4b464cea24e6315af2eb"
+    },
+    {
+      "path": "artifacts/s09/verified-test-handoff.evidence.json",
+      "digest": "sha256:1ce57764e9acd456eac5b55b47312995ef7e762f5b01783b3ad2e21adcb993b9"
+    },
+    {
+      "path": "artifacts/s09/verified-test-handoff.md",
+      "digest": "sha256:6fa198dc3c95b02b7b25207ec6f4c746144cab7bf6abf794377c872d89047ab5"
+    },
+    {
+      "path": "contracts/slices/S09.json",
+      "digest": "sha256:74bce51247ca22f0276fe7284d3312608dae7e6b5a8adc1cb37c044dac1c5bc1"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:60cb6375b4080a4eb6f2a5c6bad448e5fff7ce7969dd6578b1a68acdacb979d7"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:e9cb40637e46657406c2f44e27e0eb3eafa1645df06d17b02adf9bb2ccc5f22c"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:ed0e859e679391de14c0981c2605f49f497e86c2269c5aa6612959a8f0f47644"
+    },
+    {
+      "path": "scripts/verify-s09-evidence.mjs",
+      "digest": "sha256:8cbc8158bcabc0a6626389999c022822d117fcee5ef4acd3a63f631cd1da2603"
+    },
+    {
+      "path": "scripts/verify-s09.mjs",
+      "digest": "sha256:14049eafa148f50c1c77e3492294b3044e4648b4e629be4f8ab4f0d8b4cf5302"
+    },
+    {
+      "path": "src/controller/handoff/compression-handoff-coordinator.ts",
+      "digest": "sha256:2cc138eeb3fcc5ceef36e617b34eb77577943cca97c588cb81d73d141329cd7d"
+    },
+    {
+      "path": "src/controller/handoff/errors.ts",
+      "digest": "sha256:d54f54e9f1dc601b390be37e07f8e19d07225235b45e33d1229d5742fb513572"
+    },
+    {
+      "path": "src/controller/handoff/index.ts",
+      "digest": "sha256:a7f3c4d108ab9087a870ba3017143f07322432b306b390848e5990edb590ee13"
+    },
+    {
+      "path": "src/controller/handoff/types.ts",
+      "digest": "sha256:1a54185e29ca4a38a57223501953a23871fee5e0da2fcc900c594352ef90e7c8"
+    },
+    {
+      "path": "src/controller/state/file-run-store.ts",
+      "digest": "sha256:c1ca7fd92c624e4b745e81e29c44d3c14d86b5adf1ca701f927d954812ce9fdb"
+    },
+    {
+      "path": "src/controller/state/transitions.ts",
+      "digest": "sha256:cc78c5f3821b92617e41ca6fe7b35ebaf384654dca03ae3d8480d4badfaccc6e"
+    },
+    {
+      "path": "test/handoff.test.ts",
+      "digest": "sha256:79d287267cfec5a5163f03d4975f6d37d86b4d0ad9893ff472d71a2c5f3e5b8b"
+    },
+    {
+      "path": "test/run-store.test.ts",
+      "digest": "sha256:ad27cdfa00700cd27f68e6dedf951bf72d57a2b57fdb11d9ca1a9f10bd7d6ae0"
+    }
+  ],
+  "touched_paths": [
+    "artifacts/s09/completion-receipt.json",
+    "artifacts/s09/compression-task-report.json",
+    "artifacts/s09/failure-closure-matrix.json",
+    "artifacts/s09/helper-fixture/source-rollout.jsonl",
+    "artifacts/s09/verified-test-handoff.evidence.json",
+    "artifacts/s09/verified-test-handoff.md",
+    "contracts/slices/S09.json",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "package.json",
+    "scripts/verify-s09-evidence.mjs",
+    "scripts/verify-s09.mjs",
+    "src/controller/handoff/compression-handoff-coordinator.ts",
+    "src/controller/handoff/errors.ts",
+    "src/controller/handoff/index.ts",
+    "src/controller/handoff/types.ts",
+    "src/controller/state/file-run-store.ts",
+    "src/controller/state/transitions.ts",
+    "test/handoff.test.ts",
+    "test/run-store.test.ts"
+  ],
+  "check_receipts": [
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ca622aa6b87a4fbd135ae14f841cd92016f6ce189674c007da77682d9bc3fe7a",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 3748
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b4d5eeaf054ffadd6ba18423f31f81288f54bd16be7a5390eafbb745eeba53dc",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 2792
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:cdf20ca2598b3c3fa3eed0dea746e09504a50b02aec225042b62db0f2c5843da",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 99476
+    },
+    {
+      "check_id": "s09_evidence",
+      "argv": [
+        "node",
+        "scripts/verify-s09-evidence.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:86bb3d96fd8994a5c9c75a901c92ca864166f8d163f90cd4dc3c66b287751ba6",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 1332
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:50bf418d3f46fa3975eade28b9f81047ee52461d61415cc22546263c0cca2afe",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 10866
+    }
+  ],
+  "start_head": "db5088cc9e8b1fd6bdef5a470ae89af0d3b5fdc8",
+  "end_head": null,
+  "owned_diff_digest": "sha256:8b570ae88bff20be91df340227068ee01045a5991d973e201566be2dfc99fb47",
+  "completed_at": "2026-08-09T06:01:14.885Z"
+}

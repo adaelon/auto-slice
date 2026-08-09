@@ -1,0 +1,282 @@
+{
+  "id": "S09",
+  "contract_version": 1,
+  "requires": [
+    "S02",
+    "S04",
+    "S08"
+  ],
+  "objective": "在 HANDOFF_EXPORTING 中以 CAS 单次认领 compaction_id，创建全新只读 Compression Task，调用 export-codex-handoff 并只接受原子发布、来源 revision 一致且 verify-evidence 通过的 Handoff v2 回执。",
+  "exclusions": [
+    "不复用、修改、归档、删除或恢复 Source Thread",
+    "不复制 Source Thread 历史到 Compression Task",
+    "不授予 Compression Task Project Write Lease 或继续当前 Slice 开发",
+    "不创建 Continuation Task 或消费已发布 Handoff",
+    "不对同一 compaction_id 自动创建第二个 Compression Task",
+    "不执行 Git commit 或 push"
+  ],
+  "inputs": [
+    {
+      "path": "contracts/slices/S02.json",
+      "digest": "sha256:44ddff75f353160659331c24d2ae9e780ab7c380bec5b05eb6edf01b47e5a1e0",
+      "producer_slice": "S02"
+    },
+    {
+      "path": "artifacts/s02/completion-receipt.json",
+      "digest": "sha256:21897c4a55c145e285109ea2c0f065356f94249616497b2d8dd2225762032d98",
+      "producer_slice": "S02"
+    },
+    {
+      "path": "contracts/slices/S04.json",
+      "digest": "sha256:14abc23f94f6d8f75f291c0dfb04b318434f0edaae5d702b1c10485066ca63e4",
+      "producer_slice": "S04"
+    },
+    {
+      "path": "artifacts/s04/completion-receipt.json",
+      "digest": "sha256:6f4b8e43ed3d82d294c46049b904bb20723583a901a1d930d48cfb4d4b41110a",
+      "producer_slice": "S04"
+    },
+    {
+      "path": "contracts/slices/S08.json",
+      "digest": "sha256:7dd872284c0b9cf9dcd24e5672cc8a44f93130fd7149a9c02ddce0bc1f807f4e",
+      "producer_slice": "S08"
+    },
+    {
+      "path": "artifacts/s08/completion-receipt.json",
+      "digest": "sha256:a9a6239e512319c8beb40cd1b08ec983f050dd8881a021d7227c4e344803de7b",
+      "producer_slice": "S08"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0002-deterministic-model-routing.md",
+      "digest": "sha256:d0752d65132aa27689cf7c6f20a56cfeefaa144a537722c56a7a7a237950dc1a",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0004-compaction-timeout-handoff.md",
+      "digest": "sha256:3c76c8af78e292890e5ecd6743a0ad538886916858f2265f119dce9a96e12886",
+      "producer_slice": "frozen-design"
+    }
+  ],
+  "owned_paths": [
+    "contracts/slices/S09.json",
+    "src/controller/handoff/**",
+    "src/controller/state/file-run-store.ts",
+    "src/controller/state/transitions.ts",
+    "test/handoff.test.ts",
+    "test/run-store.test.ts",
+    "test/fixtures/handoff/**",
+    "scripts/verify-s09-evidence.mjs",
+    "scripts/verify-s09.mjs",
+    "package.json",
+    "artifacts/s09/**",
+    "docs/代码链路.md",
+    "docs/架构.md"
+  ],
+  "ports": [
+    {
+      "name": "start_compression_task",
+      "signature": "CompressionTaskLauncher.start(request) -> CompressionTaskLaunchReceipt | handoff_export_failed"
+    },
+    {
+      "name": "await_handoff",
+      "signature": "CompressionTaskLauncher.awaitHandoff(compression_task_id, idempotency_key) -> HandoffReceipt | handoff_export_failed"
+    },
+    {
+      "name": "coordinate_handoff_export",
+      "signature": "CompressionHandoffCoordinator.exportHandoff(run_id, interrupt_receipt, model_decision, expected_state_version) -> CompressionHandoffDecision | CompressionHandoffError"
+    }
+  ],
+  "allowed_transitions": [
+    "HANDOFF_EXPORTING -> HANDOFF_EXPORTING (mark_handoff_attempted)",
+    "HANDOFF_EXPORTING -> CONTINUATION_STARTING",
+    "HANDOFF_EXPORTING -> NEEDS_USER"
+  ],
+  "failure_codes": [
+    "handoff_export_failed",
+    "handoff_integrity_failed",
+    "model_policy_unavailable",
+    "run_not_found",
+    "invalid_transition",
+    "stale_state",
+    "state_persist_failed",
+    "state_corrupt",
+    "unsupported_state_schema"
+  ],
+  "checks": [
+    {
+      "id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        "dist/src/controller/handoff/index.js"
+      ]
+    },
+    {
+      "id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "cwd": ".",
+      "timeout_ms": 300000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "s09_evidence",
+      "argv": [
+        "node",
+        "scripts/verify-s09-evidence.mjs"
+      ],
+      "cwd": ".",
+      "timeout_ms": 300000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP",
+        "AUTO_SLICE_EXPORT_HANDOFF_SKILL_DIR"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    }
+  ],
+  "expected_artifacts": [
+    {
+      "path": "artifacts/s09/verified-test-handoff.md",
+      "kind": "verified_handoff_v2"
+    },
+    {
+      "path": "artifacts/s09/verified-test-handoff.evidence.json",
+      "kind": "verified_evidence_index"
+    },
+    {
+      "path": "artifacts/s09/compression-task-report.json",
+      "kind": "compression_task_isolation_report"
+    },
+    {
+      "path": "artifacts/s09/failure-closure-matrix.json",
+      "kind": "handoff_failure_matrix"
+    },
+    {
+      "path": "artifacts/s09/completion-receipt.json",
+      "kind": "completion_receipt"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "kind": "code_path_index"
+    },
+    {
+      "path": "docs/架构.md",
+      "kind": "implementation_architecture"
+    }
+  ],
+  "unlocks": [
+    "S10"
+  ]
+}

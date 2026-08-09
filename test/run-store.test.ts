@@ -210,6 +210,64 @@ void test("rejects an illegal transition without appending an event", (context) 
   assert.deepEqual(after, before);
 });
 
+void test("allows only the digest-bound S09 attempt claim as a same-state transition", (context) => {
+  const storageRoot = temporaryDirectory(context);
+  const store = openStore(storageRoot);
+  unwrap(store.create(initialState("handoff-claim")));
+  unwrap(store.compareAndSwap("handoff-claim", 0, {
+    action: "prepare_handoff_claim",
+    to: "PREPARING",
+  }));
+  unwrap(store.compareAndSwap("handoff-claim", 1, {
+    action: "start_handoff_claim",
+    to: "SLICE_RUNNING",
+  }));
+  unwrap(store.compareAndSwap("handoff-claim", 2, {
+    action: "observe_handoff_claim",
+    to: "COMPACTION_WAIT",
+    updates: {
+      compaction: {
+        compaction_id: "compaction-claim",
+        observed_started_at: FIXED_TIME,
+        deadline_at: "2026-08-08T00:00:30.000Z",
+        handoff_attempted: false,
+      },
+    },
+  }));
+  unwrap(store.compareAndSwap("handoff-claim", 3, {
+    action: "deadline_handoff_claim",
+    to: "SOURCE_INTERRUPTING",
+  }));
+  const exporting = unwrap(store.compareAndSwap("handoff-claim", 4, {
+    action: "interrupt_handoff_claim",
+    to: "HANDOFF_EXPORTING",
+  }));
+  assert.ok(exporting.state.compaction !== undefined);
+
+  expectError(store.compareAndSwap("handoff-claim", 5, {
+    action: "arbitrary_same_state_change",
+    to: "HANDOFF_EXPORTING",
+    updates: { source_thread_id: "not-allowed" },
+  }), "invalid_transition");
+  const claimed = unwrap(store.compareAndSwap("handoff-claim", 5, {
+    action: "mark_handoff_attempted",
+    to: "HANDOFF_EXPORTING",
+    updates: {
+      compaction: {
+        ...exporting.state.compaction,
+        handoff_attempted: true,
+      },
+    },
+  }));
+  assert.equal(claimed.state.compaction?.handoff_attempted, true);
+  assert.deepEqual(unwrap(store.replayRunEvents("handoff-claim")).state, claimed.state);
+  expectError(store.compareAndSwap("handoff-claim", 6, {
+    action: "mark_handoff_attempted",
+    to: "HANDOFF_EXPORTING",
+    updates: { compaction: claimed.state.compaction },
+  }), "invalid_transition");
+});
+
 interface WorkerResult {
   readonly outcome: "stored" | "error";
   readonly version?: number;

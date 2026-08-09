@@ -398,6 +398,40 @@ function cloneRunState(value: RunState): RunState {
   return decodeRunState(JSON.parse(canonicalJson(value)) as unknown, "invalid_state");
 }
 
+function assertMetadataTransition(
+  before: RunState,
+  after: RunState,
+  action: string,
+  code: "invalid_transition" | "state_corrupt",
+): void {
+  if (before.status !== after.status) {
+    return;
+  }
+  if (
+    action !== "mark_handoff_attempted" ||
+    before.status !== "HANDOFF_EXPORTING" ||
+    before.compaction === undefined ||
+    before.compaction.handoff_attempted ||
+    after.compaction === undefined
+  ) {
+    throw new StateStoreError(code, "The same-state Run transition is not a valid Handoff attempt claim.");
+  }
+  const expected = {
+    ...before,
+    state_version: before.state_version + 1,
+    compaction: {
+      ...before.compaction,
+      handoff_attempted: true,
+    },
+  } satisfies RunState;
+  if (canonicalJson(after) !== canonicalJson(expected)) {
+    throw new StateStoreError(
+      code,
+      "mark_handoff_attempted may only change compaction.handoff_attempted from false to true.",
+    );
+  }
+}
+
 function applyStateUpdates(state: RunState, transition: RunTransition): RunState {
   if (typeof transition.action !== "string" || transition.action.length === 0) {
     throw new StateStoreError("invalid_transition", "Run transition action must be a non-empty string.");
@@ -405,7 +439,7 @@ function applyStateUpdates(state: RunState, transition: RunTransition): RunState
   if (typeof transition.to !== "string" || !RUN_STATUS_SET.has(transition.to)) {
     throw new StateStoreError("invalid_transition", `Unknown Run status: ${transition.to}.`);
   }
-  if (!isRunTransitionAllowed(state.status, transition.to)) {
+  if (!isRunTransitionAllowed(state.status, transition.to, transition.action)) {
     throw new StateStoreError(
       "invalid_transition",
       `Run transition ${state.status} -> ${transition.to} is not allowed.`,
@@ -444,7 +478,9 @@ function applyStateUpdates(state: RunState, transition: RunTransition): RunState
       }
     }
   }
-  return decodeRunState(next, "invalid_state");
+  const decoded = decodeRunState(next, "invalid_state");
+  assertMetadataTransition(state, decoded, transition.action, "invalid_transition");
+  return decoded;
 }
 
 function createEffectIntentEvent(
@@ -997,10 +1033,20 @@ export class FileRunStore {
           event.before_state_digest !== sha256Json(previousState) ||
           canonicalJson(event.before_state) !== canonicalJson(previousState) ||
           event.after_state.state_version !== previousState.state_version + 1 ||
-          !isRunTransitionAllowed(previousState.status, event.after_state.status)
+          !isRunTransitionAllowed(
+            previousState.status,
+            event.after_state.status,
+            event.action,
+          )
         ) {
           throw new StateStoreError("state_corrupt", `Run event ${filename} breaks the event chain.`);
         }
+        assertMetadataTransition(
+          previousState,
+          event.after_state,
+          event.action,
+          "state_corrupt",
+        );
         assertImmutableRunFields(previousState, event.after_state);
       }
       if (
