@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "slice_id": "S08",
+  "contract_digest": "sha256:7dd872284c0b9cf9dcd24e5672cc8a44f93130fd7149a9c02ddce0bc1f807f4e",
+  "input_digests": [
+    {
+      "path": "contracts/slices/S03.json",
+      "digest": "sha256:2f3b231fc9652b6a464a8787e7705d9853091b539adc360e08f5ca9ac327b922"
+    },
+    {
+      "path": "artifacts/s03/completion-receipt.json",
+      "digest": "sha256:2272647e961ac4adacb39d74eb53c68145b4206d28be2f3f679eb5a05730d02e"
+    },
+    {
+      "path": "contracts/slices/S07.json",
+      "digest": "sha256:59f4695702105d7807f8984bab2d0cada941db486d831cc9681ef7c0868778b2"
+    },
+    {
+      "path": "artifacts/s07/completion-receipt.json",
+      "digest": "sha256:0d96833541fd3c3b5ac499d3a04563533298c48efe02ae06790cb42b41606508"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec"
+    },
+    {
+      "path": "docs/adr/0004-compaction-timeout-handoff.md",
+      "digest": "sha256:3c76c8af78e292890e5ecd6743a0ad538886916858f2265f119dce9a96e12886"
+    },
+    {
+      "path": "docs/adr/0005-directory-event-store.md",
+      "digest": "sha256:fa5797d3133d8c8168080337ce3e34c4fe7d4415c5860ed8b3497e8b9f2d021b"
+    },
+    {
+      "path": "docs/adr/0006-project-write-lease-log.md",
+      "digest": "sha256:73a015f9bb6ea8c5fc7bfa17027fcbc1ad1e1f8ae0de0447c8c9011d21448661"
+    }
+  ],
+  "output_digests": [
+    {
+      "path": "artifacts/s08/failure-closure-matrix.json",
+      "digest": "sha256:c56d19701cb22ba165ce2a1c09fc817ddf34ff0cb4547aff4ed33bb124cf3905"
+    },
+    {
+      "path": "artifacts/s08/late-write-report.json",
+      "digest": "sha256:d01a5fbc441fe871227d1f7f0c1f6bb3d3933efb4f5ac4799d1d51c6e7500bb0"
+    },
+    {
+      "path": "artifacts/s08/thread-adapter-contract-report.json",
+      "digest": "sha256:934082acb1cc2b2707eb402767dc2c18425ba62ad9167e7b257de2dbd25ef9b3"
+    },
+    {
+      "path": "contracts/slices/S08.json",
+      "digest": "sha256:7dd872284c0b9cf9dcd24e5672cc8a44f93130fd7149a9c02ddce0bc1f807f4e"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:9daae863f2a1f0c87158665dc49a74570acd00700fb0047c58dced0d2a1603b2"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:e0eff06a2a551e5b83ebcfad65f72e0db802f7d79553743dc920a39a41108fd3"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:53aa17f28e9504a2005bddf8d824ffa0d0ccb77deeac8a908513ba00197e6921"
+    },
+    {
+      "path": "scripts/verify-s08-evidence.mjs",
+      "digest": "sha256:afbb0de8101c325142c99de935870f39f6972972bc1aa178d306dbc72059427f"
+    },
+    {
+      "path": "scripts/verify-s08.mjs",
+      "digest": "sha256:79f5010bb45dce13a33bc0d7c8a14826dd416314a7169d6eb0ffd28192c7828e"
+    },
+    {
+      "path": "src/controller/thread-control/errors.ts",
+      "digest": "sha256:2d2f4a063615a5fdd543672e0790183bb5d18fbd0133001f593d96b12948eb49"
+    },
+    {
+      "path": "src/controller/thread-control/index.ts",
+      "digest": "sha256:da0c62f54e5ba2f568b28e8784d993f184e6d3ddb77be369b44c7be144c49286"
+    },
+    {
+      "path": "src/controller/thread-control/source-interruption-coordinator.ts",
+      "digest": "sha256:8464ae4ed0547dcf0a774a93b6d743e940694959ba9424cb3a526a55f43083d4"
+    },
+    {
+      "path": "src/controller/thread-control/types.ts",
+      "digest": "sha256:e1aee615d05c3bcbcf7fcf84f14b7b33eeca4ead2e2ad1e01a97e39df752c8a7"
+    },
+    {
+      "path": "test/thread-control.test.ts",
+      "digest": "sha256:27f7cf0ee157d96274be2ec2576395f3e1f7d3cb1154a7f24e8aafe139a40585"
+    }
+  ],
+  "touched_paths": [
+    "artifacts/s08/completion-receipt.json",
+    "artifacts/s08/failure-closure-matrix.json",
+    "artifacts/s08/late-write-report.json",
+    "artifacts/s08/thread-adapter-contract-report.json",
+    "contracts/slices/S08.json",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "package.json",
+    "scripts/verify-s08-evidence.mjs",
+    "scripts/verify-s08.mjs",
+    "src/controller/thread-control/errors.ts",
+    "src/controller/thread-control/index.ts",
+    "src/controller/thread-control/source-interruption-coordinator.ts",
+    "src/controller/thread-control/types.ts",
+    "test/thread-control.test.ts"
+  ],
+  "check_receipts": [
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ca622aa6b87a4fbd135ae14f841cd92016f6ce189674c007da77682d9bc3fe7a",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 5000
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b4d5eeaf054ffadd6ba18423f31f81288f54bd16be7a5390eafbb745eeba53dc",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 4295
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:4813c0892e13d029d25956abff78e5b2009e00d6779272cb6b1aa729a3e65a41",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 145365
+    },
+    {
+      "check_id": "s08_evidence",
+      "argv": [
+        "node",
+        "scripts/verify-s08-evidence.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:d5f36d864d03265c550f84fc99b3701bc9aa069466ea839c34e930be5707143c",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 4220
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:50bf418d3f46fa3975eade28b9f81047ee52461d61415cc22546263c0cca2afe",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 16552
+    }
+  ],
+  "start_head": "e1e328f139617fbf1e5c378433aca60cbce04835",
+  "end_head": null,
+  "owned_diff_digest": "sha256:e2093dd8e9796f538a3f3ac89bf98eec29ff8d8a06755f484b3469515d98f4c7",
+  "completed_at": "2026-08-09T03:33:01.127Z"
+}

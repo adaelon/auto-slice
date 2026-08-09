@@ -1,0 +1,88 @@
+{
+  "schema_version": 1,
+  "slice_id": "S08",
+  "scenarios": [
+    {
+      "id": "interrupt_timeout",
+      "failure_code": "source_interrupt_failed",
+      "reason": "interrupt_timeout",
+      "final_status": "NEEDS_USER",
+      "lease_status": "FROZEN",
+      "epoch_rotated": false,
+      "handoff_exporting_reached": false
+    },
+    {
+      "id": "thread_missing",
+      "failure_code": "source_interrupt_failed",
+      "reason": "thread_not_persisted",
+      "final_status": "NEEDS_USER",
+      "lease_status": "FROZEN",
+      "epoch_rotated": false,
+      "handoff_exporting_reached": false
+    },
+    {
+      "id": "thread_archived",
+      "failure_code": "source_interrupt_failed",
+      "reason": "thread_not_persisted",
+      "final_status": "NEEDS_USER",
+      "lease_status": "FROZEN",
+      "epoch_rotated": false,
+      "handoff_exporting_reached": false
+    },
+    {
+      "id": "thread_unreadable",
+      "failure_code": "source_interrupt_failed",
+      "reason": "thread_not_persisted",
+      "final_status": "NEEDS_USER",
+      "lease_status": "FROZEN",
+      "epoch_rotated": false,
+      "handoff_exporting_reached": false
+    },
+    {
+      "id": "receipt_identity_mismatch",
+      "failure_code": "source_interrupt_failed",
+      "reason": "interrupt_receipt_identity_mismatch",
+      "final_status": "NEEDS_USER",
+      "lease_status": "FROZEN",
+      "epoch_rotated": false,
+      "handoff_exporting_reached": false
+    },
+    {
+      "id": "revision_mismatch",
+      "failure_code": "source_interrupt_failed",
+      "reason": "thread_revision_mismatch",
+      "final_status": "NEEDS_USER",
+      "lease_status": "FROZEN",
+      "epoch_rotated": false,
+      "handoff_exporting_reached": false
+    },
+    {
+      "id": "interrupt_call_failed",
+      "failure_code": "source_interrupt_failed",
+      "reason": "interrupt_call_failed",
+      "final_status": "NEEDS_USER",
+      "lease_status": "FROZEN",
+      "epoch_rotated": false,
+      "handoff_exporting_reached": false
+    },
+    {
+      "id": "thread_inspection_failed",
+      "failure_code": "source_interrupt_failed",
+      "reason": "thread_inspection_failed",
+      "final_status": "NEEDS_USER",
+      "lease_status": "FROZEN",
+      "epoch_rotated": false,
+      "handoff_exporting_reached": false
+    },
+    {
+      "id": "write_epoch_rotation_failed",
+      "failure_code": "source_interrupt_failed",
+      "reason": "write_epoch_rotation_failed",
+      "final_status": "NEEDS_USER",
+      "lease_status": "FROZEN",
+      "epoch_rotated": false,
+      "handoff_exporting_reached": false
+    }
+  ],
+  "result": "PASS"
+}

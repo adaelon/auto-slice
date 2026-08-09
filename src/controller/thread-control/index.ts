@@ -1,0 +1,15 @@
+export { SourceInterruptionError } from "./errors.js";
+export { SourceInterruptionCoordinator } from "./source-interruption-coordinator.js";
+export {
+  DEFAULT_SOURCE_INTERRUPT_TIMEOUT_MS,
+  type InterruptReceipt,
+  type SourceInterruptionCoordinatorOptions,
+  type SourceInterruptionDecision,
+  type SourceInterruptionFailureCode,
+  type SourceInterruptionFailureReason,
+  type SourceInterruptionOutcome,
+  type SourceInterruptionRunStorePort,
+  type SourceInterruptionWorkspaceGuardPort,
+  type ThreadControlPort,
+  type ThreadInspection,
+} from "./types.js";

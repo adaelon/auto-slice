@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "slice_id": "S08",
+  "freeze_observed_before_interrupt": true,
+  "status_while_interrupt_pending": "SOURCE_INTERRUPTING",
+  "frozen_period_old_capability": "lease_lost",
+  "post_success_old_capability": "stale_write_epoch",
+  "post_success_new_capability": "ACTIVE",
+  "lease_actions": [
+    "ACQUIRED",
+    "FROZEN",
+    "EPOCH_ROTATED"
+  ],
+  "result": "PASS"
+}

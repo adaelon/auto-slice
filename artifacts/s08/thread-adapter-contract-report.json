@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "slice_id": "S08",
+  "interrupt_invocations": 2,
+  "interrupt_side_effects": 1,
+  "same_terminal_receipt": true,
+  "receipt_digest": "sha256:52a8df8938d5bd83e3adb6c4d25391b290f121a6a1cf3b36a0cd863b00752a10",
+  "source_thread_id": "thread-source-s08-evidence",
+  "source_thread_uuid_preserved": true,
+  "persisted_revision": "revision-s08-evidence-0001",
+  "persisted_revision_readable": true,
+  "final_status": "HANDOFF_EXPORTING",
+  "final_state_version": 5,
+  "result": "PASS"
+}

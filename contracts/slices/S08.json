@@ -1,0 +1,267 @@
+{
+  "id": "S08",
+  "contract_version": 1,
+  "requires": [
+    "S03",
+    "S07"
+  ],
+  "objective": "在 SOURCE_INTERRUPTING 中先冻结 Project Write Lease，再幂等停止并独立核验 Source Thread 仍持久可读，最后轮换 write epoch 并进入 HANDOFF_EXPORTING。",
+  "exclusions": [
+    "不删除、归档或清空 Source Thread",
+    "不创建 Compression Task 或 Continuation Task",
+    "不启动 Handoff 导出或消费 Handoff",
+    "不在可信 InterruptReceipt 和独立线程检查成立前轮换 write epoch",
+    "不执行 Git commit 或 push"
+  ],
+  "inputs": [
+    {
+      "path": "contracts/slices/S03.json",
+      "digest": "sha256:2f3b231fc9652b6a464a8787e7705d9853091b539adc360e08f5ca9ac327b922",
+      "producer_slice": "S03"
+    },
+    {
+      "path": "artifacts/s03/completion-receipt.json",
+      "digest": "sha256:2272647e961ac4adacb39d74eb53c68145b4206d28be2f3f679eb5a05730d02e",
+      "producer_slice": "S03"
+    },
+    {
+      "path": "contracts/slices/S07.json",
+      "digest": "sha256:59f4695702105d7807f8984bab2d0cada941db486d831cc9681ef7c0868778b2",
+      "producer_slice": "S07"
+    },
+    {
+      "path": "artifacts/s07/completion-receipt.json",
+      "digest": "sha256:0d96833541fd3c3b5ac499d3a04563533298c48efe02ae06790cb42b41606508",
+      "producer_slice": "S07"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0004-compaction-timeout-handoff.md",
+      "digest": "sha256:3c76c8af78e292890e5ecd6743a0ad538886916858f2265f119dce9a96e12886",
+      "producer_slice": "frozen-design"
+    },
+    {
+      "path": "docs/adr/0005-directory-event-store.md",
+      "digest": "sha256:fa5797d3133d8c8168080337ce3e34c4fe7d4415c5860ed8b3497e8b9f2d021b",
+      "producer_slice": "S02"
+    },
+    {
+      "path": "docs/adr/0006-project-write-lease-log.md",
+      "digest": "sha256:73a015f9bb6ea8c5fc7bfa17027fcbc1ad1e1f8ae0de0447c8c9011d21448661",
+      "producer_slice": "S03"
+    }
+  ],
+  "owned_paths": [
+    "contracts/slices/S08.json",
+    "src/controller/thread-control/**",
+    "test/thread-control.test.ts",
+    "scripts/verify-s08-evidence.mjs",
+    "scripts/verify-s08.mjs",
+    "package.json",
+    "artifacts/s08/**",
+    "docs/代码链路.md",
+    "docs/架构.md"
+  ],
+  "ports": [
+    {
+      "name": "interrupt_source_thread",
+      "signature": "ThreadControl.interrupt(thread_id, idempotency_key) -> InterruptReceipt | source_interrupt_failed"
+    },
+    {
+      "name": "inspect_source_thread",
+      "signature": "ThreadControl.inspect(thread_id) -> ThreadInspection | source_interrupt_failed"
+    },
+    {
+      "name": "coordinate_source_interruption",
+      "signature": "SourceInterruptionCoordinator.interruptSource(run_id, lease_id, expected_write_epoch, expected_state_version) -> SourceInterruptionDecision | SourceInterruptionError"
+    }
+  ],
+  "allowed_transitions": [
+    "SOURCE_INTERRUPTING -> HANDOFF_EXPORTING",
+    "SOURCE_INTERRUPTING -> NEEDS_USER"
+  ],
+  "failure_codes": [
+    "source_interrupt_failed",
+    "run_not_found",
+    "invalid_transition",
+    "stale_state",
+    "state_persist_failed",
+    "state_corrupt",
+    "unsupported_state_schema",
+    "lease_lost",
+    "stale_write_epoch",
+    "workspace_guard_persist_failed",
+    "workspace_guard_corrupt"
+  ],
+  "checks": [
+    {
+      "id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": [
+        "dist/src/controller/thread-control/index.js"
+      ]
+    },
+    {
+      "id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "cwd": ".",
+      "timeout_ms": 300000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "s08_evidence",
+      "argv": [
+        "node",
+        "scripts/verify-s08-evidence.mjs"
+      ],
+      "cwd": ".",
+      "timeout_ms": 180000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    },
+    {
+      "id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "cwd": ".",
+      "timeout_ms": 120000,
+      "env_allowlist": [
+        "PATH",
+        "SystemRoot",
+        "ComSpec",
+        "PATHEXT",
+        "USERPROFILE",
+        "HOME",
+        "APPDATA",
+        "LOCALAPPDATA",
+        "TEMP",
+        "TMP"
+      ],
+      "expected_exit_code": 0,
+      "expected_artifacts": []
+    }
+  ],
+  "expected_artifacts": [
+    {
+      "path": "artifacts/s08/thread-adapter-contract-report.json",
+      "kind": "thread_adapter_contract_report"
+    },
+    {
+      "path": "artifacts/s08/late-write-report.json",
+      "kind": "late_write_isolation_report"
+    },
+    {
+      "path": "artifacts/s08/failure-closure-matrix.json",
+      "kind": "source_interrupt_failure_matrix"
+    },
+    {
+      "path": "artifacts/s08/completion-receipt.json",
+      "kind": "completion_receipt"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "kind": "code_path_index"
+    },
+    {
+      "path": "docs/架构.md",
+      "kind": "implementation_architecture"
+    }
+  ],
+  "unlocks": [
+    "S09"
+  ]
+}
