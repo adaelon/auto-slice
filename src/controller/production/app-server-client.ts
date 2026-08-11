@@ -56,6 +56,13 @@ export type AppServerNotification = Readonly<Record<string, unknown>>;
 export type ControllerSignalListener = (signal: ControllerSignal) => void;
 export type AppServerFailureListener = (error: ProductionRuntimeError) => void;
 
+export type AppServerPrivateNotificationRoute = "HANDLED" | "UNHANDLED";
+
+export interface AppServerPrivateNotificationRouter {
+  route(notification: AppServerNotification): AppServerPrivateNotificationRoute;
+  fail(error: ProductionRuntimeError): void;
+}
+
 export interface HostEventFirewallTask {
   readonly run_id: string;
   readonly slice_id: string;
@@ -388,6 +395,7 @@ export class CodexAppServerClient {
   private readonly failureListeners = new Set<AppServerFailureListener>();
   private readonly firewall: HostEventFirewall;
   private readonly hostCapabilitySnapshot: ProductionHostCapabilities;
+  private privateNotificationRouter: AppServerPrivateNotificationRouter | null = null;
   private child: ChildProcessWithoutNullStreams | null = null;
   private stdoutBuffer = Buffer.alloc(0);
   private stderrBytes = 0;
@@ -457,6 +465,23 @@ export class CodexAppServerClient {
     return () => {
       this.notificationListeners.delete(listener);
       this.failureListeners.delete(onFailure);
+    };
+  }
+
+  public attachPrivateNotificationRouter(
+    router: AppServerPrivateNotificationRouter,
+  ): () => void {
+    if (this.disposed) {
+      throw runtimeProtocolError("Codex App Server client is already disposed.");
+    }
+    if (this.privateNotificationRouter !== null) {
+      throw runtimeProtocolError("Codex App Server client already has a private notification router.");
+    }
+    this.privateNotificationRouter = router;
+    return () => {
+      if (this.privateNotificationRouter === router) {
+        this.privateNotificationRouter = null;
+      }
     };
   }
 
@@ -682,10 +707,13 @@ export class CodexAppServerClient {
     }
     if (typeof message.method === "string" && !("id" in message)) {
       try {
-        const signal = this.firewall.project(message);
-        if (signal !== DROP) {
-          for (const listener of this.notificationListeners) {
-            listener(signal);
+        const privateRoute = this.privateNotificationRouter?.route(message) ?? "UNHANDLED";
+        if (privateRoute === "UNHANDLED") {
+          const signal = this.firewall.project(message);
+          if (signal !== DROP) {
+            for (const listener of this.notificationListeners) {
+              listener(signal);
+            }
           }
         }
       } catch (error: unknown) {
@@ -751,6 +779,11 @@ export class CodexAppServerClient {
       request.reject(error);
     }
     this.pending.clear();
+    try {
+      this.privateNotificationRouter?.fail(error);
+    } catch {
+      // Connection failure remains authoritative even if a private waiter is already closed.
+    }
     for (const listener of this.failureListeners) {
       listener(error);
     }

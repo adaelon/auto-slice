@@ -889,7 +889,38 @@ export-codex-handoff -> SourceEvidenceRevision sha256 authority
 
 **Unlocks**：S19。
 
-## 20. 计划级验收矩阵
+## 20. S19 Fresh-task App Server session 基座
+
+**状态**：COMPLETE；发布证据见 `artifacts/s19/session-foundation-report.json` 与 `artifacts/s19/completion-receipt.json`。
+
+**Requires**：S17、S18、ADR-0011 与三任务接力切片方案 `## S19`。
+
+**Objective**：让默认 Task Host 以一个共享 App Server client 承载 Source 与 fresh task，并提供 fresh-root 证明、顺序 Turn 注册/终态等待和有界私有 completed-item 投影。
+
+**Exclusions**：不调用 export skill；不构造 HandoffReceipt/ReadyReceipt；不实现生产 Compression/Continuation launcher；不授予 Project Write Lease；不调用 resume/fork/steer。
+
+**Owned outputs**：`contracts/slices/S19.json`、`app-server-fresh-task-session.ts`、client raw demux、Task Host shared ownership、fake App Server 失败矩阵、`verify-s19` 与发布证据。
+
+**Session contract**：
+
+```text
+TaskHost -> exactly one initialized CodexAppServerClient
+thread/start -> canonical fresh root, sessionId=id, persistent, parentless, unforked, turns=[]
+READY|TURN_TERMINAL -> TURN_STARTING -> TURN_ACTIVE -> TURN_TERMINAL
+item/completed -> registered thread/turn + allowlisted type + bounded bytes/count
+turn/completed -> terminal identity/status/time only
+private HANDLED event -> FreshTaskSession only
+UNHANDLED event -> existing HostEventFirewall
+identity/order/budget violation -> app_server_protocol_error without raw content
+```
+
+**Deterministic checks**：同连接一次 initialize 并创建三个 distinct root；顺序双 Turn 通过、两个 active Turn 拒绝；session mismatch、ephemeral、parent、fork、history、Source/既有 root 复用与非法 UUID 拒绝；交叉 thread/turn、迟到 item 与超量 item 关闭连接；Controller listener 与错误详情零 private canary；dispose Promise 唯一；build、typecheck、目标/全量测试、lint、插件、Markdown 与 diff check 全绿。
+
+**Completion evidence**：shared connection/fresh root/turn registry/private projection surface digest、负向矩阵、全量门禁回执与 S19 `CompletionReceipt`。
+
+**Unlocks**：S20、S21。
+
+## 21. 计划级验收矩阵
 
 实现开始前和每个切片完成后，使用下表检查计划没有被悄悄削弱：
 
@@ -912,5 +943,6 @@ export-codex-handoff -> SourceEvidenceRevision sha256 authority
 | 控制信号和持久成本与 Worker Content 大小无关 | S14 | S16 |
 | App Server 0.146.0 exact wire 字段与 discriminant fail closed | S17 | S22 |
 | Source interruption revisionless 且 export 独占内容 revision | S18 | S22 |
+| fresh task 共用单 client、顺序 Turn 且私有内容不进 Controller | S19 | S22 |
 
 任何一行缺少对应测试、回执或产物 digest，相关切片不得标记 `COMPLETE`。

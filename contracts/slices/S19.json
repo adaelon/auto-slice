@@ -1,0 +1,80 @@
+{
+  "id": "S19",
+  "contract_version": 1,
+  "requires": ["S17", "S18"],
+  "objective": "让 CodexAppServerTaskHost 以一个共享且只初始化一次的 App Server client 承载 Source、Compression 与 Continuation root，并提供 fail-closed 的 fresh-root、单 active Turn、顺序 terminal 和 bounded private completed-item session 基座。",
+  "exclusions": [
+    "不解析或调用 export-codex-handoff skill",
+    "不构造 HandoffReceipt 或 ReadyReceipt",
+    "不实现 CompressionTaskLauncher 或 ContinuationLauncher 的生产行为",
+    "不授予或轮换 Project Write Lease",
+    "不把 private item、raw notification 或其正文写入 ControllerSignal、RunStore、日志或错误详情",
+    "不调用 thread/resume、thread/fork 或 turn/steer"
+  ],
+  "inputs": [
+    {
+      "path": "artifacts/s17/completion-receipt.json",
+      "digest": "sha256:0d37c3821893197fd9c07aea0a851c22a4ef0a9f090ba05c59af6734747b2ec2",
+      "producer_slice": "S17"
+    },
+    {
+      "path": "artifacts/s18/completion-receipt.json",
+      "digest": "sha256:2268cf6f76d9bc93c18d54420fe5cafffb0a351da7f6434b146f84dd5e179686",
+      "producer_slice": "S18"
+    }
+  ],
+  "owned_paths": [
+    "contracts/slices/S19.json",
+    "src/controller/production/app-server-client.ts",
+    "src/controller/production/app-server-fresh-task-session.ts",
+    "src/controller/production/codex-app-server-development-task.ts",
+    "src/controller/production/codex-app-server-task-host.ts",
+    "src/controller/production/index.ts",
+    "test/app-server-fresh-task-session.test.ts",
+    "test/fixtures/process/fake-s19-app-server.mjs",
+    "scripts/verify-s19.mjs",
+    "package.json",
+    "docs/implementation-slices.md",
+    "docs/架构.md",
+    "docs/代码链路.md",
+    "artifacts/s19/**"
+  ],
+  "budgets": {
+    "shared_app_server_clients_per_host": 1,
+    "active_turns_per_fresh_thread": 1,
+    "maximum_turns_per_fresh_thread": 16,
+    "maximum_completed_items_per_turn": 64,
+    "maximum_completed_item_bytes": 1048576,
+    "maximum_turn_projection_bytes": 2097152,
+    "controller_raw_content_fields": 0
+  },
+  "checks": [
+    { "id": "surface", "argv": ["node", "scripts/verify-s19.mjs", "--surface-only"], "expected_exit_code": 0 },
+    { "id": "build", "argv": ["npm", "run", "build"], "expected_exit_code": 0 },
+    { "id": "typecheck", "argv": ["npm", "run", "typecheck"], "expected_exit_code": 0 },
+    {
+      "id": "target_test",
+      "argv": [
+        "node",
+        "--test",
+        "dist/test/app-server-fresh-task-session.test.js",
+        "dist/test/app-server-client.test.js",
+        "dist/test/app-server-development-task.test.js",
+        "dist/test/file-production-runtime.test.js"
+      ],
+      "expected_exit_code": 0
+    },
+    { "id": "test", "argv": ["npm", "run", "test"], "expected_exit_code": 0 },
+    { "id": "lint", "argv": ["npm", "run", "lint"], "expected_exit_code": 0 },
+    { "id": "plugin_validation", "argv": ["npm", "run", "validate:plugin"], "expected_exit_code": 0 },
+    { "id": "markdown_links", "argv": ["npm", "run", "verify:markdown-links"], "expected_exit_code": 0 },
+    { "id": "diff_check", "argv": ["git", "diff", "HEAD", "--check", "--"], "expected_exit_code": 0 }
+  ],
+  "expected_artifacts": [
+    { "path": "artifacts/s19/session-foundation-report.json", "kind": "fresh_task_session_protocol_evidence" },
+    { "path": "artifacts/s19/completion-receipt.json", "kind": "completion_receipt" },
+    { "path": "docs/代码链路.md", "kind": "code_path_index" },
+    { "path": "docs/架构.md", "kind": "implementation_architecture" }
+  ],
+  "unlocks": ["S20", "S21"]
+}

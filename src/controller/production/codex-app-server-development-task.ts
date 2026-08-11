@@ -260,6 +260,7 @@ export class CodexAppServerThreadMetadataPort implements ThreadMetadataPort {
 
 export class CodexAppServerDevelopmentTask implements DevelopmentTaskPort, ThreadControlPort {
   private readonly client: CodexAppServerClient;
+  private readonly ownsClient: boolean;
   private readonly now: () => Date;
   private readonly compactionContentProbe: CompactionContentProbePort | undefined;
   private readonly compactionProbeScheduler: DeadlineScheduler;
@@ -270,8 +271,12 @@ export class CodexAppServerDevelopmentTask implements DevelopmentTaskPort, Threa
   private unsubscribe: (() => void) | null = null;
   private active: TaskSession | null = null;
 
-  public constructor(options: CodexAppServerDevelopmentTaskOptions = {}) {
-    this.client = new CodexAppServerClient(options);
+  public constructor(
+    options: CodexAppServerDevelopmentTaskOptions = {},
+    sharedClient?: CodexAppServerClient,
+  ) {
+    this.client = sharedClient ?? new CodexAppServerClient(options);
+    this.ownsClient = sharedClient === undefined;
     this.now = options.now ?? (() => new Date());
     this.compactionContentProbe = options.compaction_content_probe;
     this.compactionProbeScheduler = options.compaction_probe_scheduler ?? new TimeoutDeadlineScheduler({
@@ -452,7 +457,7 @@ export class CodexAppServerDevelopmentTask implements DevelopmentTaskPort, Threa
     }
     this.unsubscribe?.();
     this.unsubscribe = null;
-    return this.client.dispose();
+    return this.ownsClient ? this.client.dispose() : Promise.resolve();
   }
 
   private validateRequest(request: DevelopmentTaskRequest): ProductionRuntimeError | null {

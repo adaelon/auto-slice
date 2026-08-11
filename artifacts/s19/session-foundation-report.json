@@ -1,0 +1,74 @@
+{
+  "schema_version": 1,
+  "shared_connection": {
+    "clients_per_task_host": 1,
+    "initialization_count": 1,
+    "roots_in_trace": 3,
+    "distinct_root_uuids": true,
+    "dispose_once": true
+  },
+  "fresh_root": {
+    "method": "thread/start",
+    "resume_calls": 0,
+    "fork_calls": 0,
+    "requires_session_id_equal_id": true,
+    "requires_parentless_unforked_persistent_empty_history": true
+  },
+  "turn_registry": {
+    "active_turns_per_thread": 1,
+    "maximum_turns_per_session": 16,
+    "transition": "TURN_ACTIVE -> TURN_TERMINAL -> TURN_ACTIVE",
+    "rejects_cross_thread": true,
+    "rejects_cross_turn": true,
+    "rejects_late_item": true
+  },
+  "private_projection": {
+    "maximum_completed_items_per_turn": 64,
+    "maximum_completed_item_bytes": 1048576,
+    "maximum_turn_projection_bytes": 2097152,
+    "completed_item_type_allowlist": true,
+    "controller_raw_content_fields": 0,
+    "raw_content_in_error_details": false
+  },
+  "surfaces": [
+    {
+      "path": "src/controller/production/app-server-client.ts",
+      "digest": "sha256:d43a9bd862613459b86ca7bee830fd5a2ee4b1a82703d8ec007e8f27ede7d896"
+    },
+    {
+      "path": "src/controller/production/app-server-fresh-task-session.ts",
+      "digest": "sha256:2cc1580d87731ba1f1b4a097cb33d542d67b736c73337778c40a94f9be711841"
+    },
+    {
+      "path": "src/controller/production/codex-app-server-development-task.ts",
+      "digest": "sha256:f5d0636ff86d9a24b01b678f008c1623a321f8dba51a4c51c97b619c19ed1d94"
+    },
+    {
+      "path": "src/controller/production/codex-app-server-task-host.ts",
+      "digest": "sha256:e628d495215587fb859cd91c095efca3cf0dbcbe41411088a8d4028fc8e4c401"
+    },
+    {
+      "path": "src/controller/production/index.ts",
+      "digest": "sha256:67c0b54f09a6d412efd4606a2c82cc5f62d6a5ad0d53f23d1ec74efde207cec6"
+    },
+    {
+      "path": "test/app-server-fresh-task-session.test.ts",
+      "digest": "sha256:5def6877580b4930bcb22505accdf24235765654641262559c3c8b7be7835f61"
+    },
+    {
+      "path": "test/fixtures/process/fake-s19-app-server.mjs",
+      "digest": "sha256:699941b840403a657d64e680da1e694b817cd6f00e5cf180b07ef6f29482b20e"
+    }
+  ],
+  "slice_id": "S19",
+  "result": "PASS",
+  "surface_digest": "sha256:4588abd2540dd301fcdc1cf264e5b4b7d01c45a82be4d351eb32fa919e32c9f9",
+  "negative_contracts": [
+    "two active Turns rejected",
+    "late completed item rejected",
+    "cross-thread and cross-Turn private events rejected",
+    "ephemeral, parented, forked, reused, or non-empty roots rejected",
+    "oversized private item rejected without content leakage",
+    "Controller listeners receive zero private item content"
+  ]
+}
