@@ -1,0 +1,556 @@
+{
+  "schema_version": 1,
+  "projection_digest": "sha256:9b1406d7c49772ee8fb27dcfe08e32d37befac5064890a8baf86076e95c789fe",
+  "projection": {
+    "schemaVersion": 1,
+    "codexCliVersion": "0.146.0",
+    "officialFacts": [
+      "https://developers.openai.com/codex/app-server/"
+    ],
+    "generationCommands": [
+      "codex app-server generate-ts --experimental --out <temp>/ts",
+      "codex app-server generate-json-schema --experimental --out <temp>/json"
+    ],
+    "threadStart": {
+      "jsonRequired": [],
+      "sandboxModes": [
+        "read-only",
+        "workspace-write",
+        "danger-full-access"
+      ],
+      "threadResponseJsonRequired": [
+        "approvalPolicy",
+        "approvalsReviewer",
+        "cwd",
+        "model",
+        "modelProvider",
+        "sandbox",
+        "thread"
+      ],
+      "threadJsonRequired": [
+        "cliVersion",
+        "createdAt",
+        "cwd",
+        "ephemeral",
+        "id",
+        "modelProvider",
+        "preview",
+        "sessionId",
+        "source",
+        "status",
+        "turns",
+        "updatedAt"
+      ],
+      "projectedThreadTypescriptRequired": [
+        "id",
+        "sessionId",
+        "forkedFromId",
+        "parentThreadId",
+        "ephemeral",
+        "turns"
+      ]
+    },
+    "threadRead": {
+      "paramsJsonRequired": [
+        "threadId"
+      ],
+      "responseJsonRequired": [
+        "thread"
+      ],
+      "threadJsonRequired": [
+        "cliVersion",
+        "createdAt",
+        "cwd",
+        "ephemeral",
+        "id",
+        "modelProvider",
+        "preview",
+        "sessionId",
+        "source",
+        "status",
+        "turns",
+        "updatedAt"
+      ]
+    },
+    "skillsList": {
+      "paramsJsonRequired": [],
+      "paramsTypescriptFields": [
+        {
+          "name": "cwds",
+          "required": false
+        },
+        {
+          "name": "forceReload",
+          "required": false
+        }
+      ],
+      "responseJsonRequired": [
+        "data"
+      ],
+      "entryJsonRequired": [
+        "cwd",
+        "errors",
+        "skills"
+      ],
+      "metadataJsonRequired": [
+        "description",
+        "enabled",
+        "name",
+        "path",
+        "scope"
+      ],
+      "metadataTypescriptRequired": [
+        "name",
+        "description",
+        "path",
+        "scope",
+        "enabled"
+      ],
+      "scopes": [
+        "user",
+        "repo",
+        "system",
+        "admin"
+      ]
+    },
+    "turnStart": {
+      "paramsJsonRequired": [
+        "input",
+        "threadId"
+      ],
+      "userInputVariants": [
+        {
+          "type": "text",
+          "jsonRequired": [
+            "text",
+            "type"
+          ],
+          "defaults": {
+            "text_elements": []
+          },
+          "typescriptRequired": [
+            "type",
+            "text",
+            "text_elements"
+          ]
+        },
+        {
+          "type": "image",
+          "jsonRequired": [
+            "type",
+            "url"
+          ],
+          "defaults": {
+            "detail": null
+          },
+          "typescriptRequired": [
+            "type",
+            "url"
+          ]
+        },
+        {
+          "type": "localImage",
+          "jsonRequired": [
+            "path",
+            "type"
+          ],
+          "defaults": {
+            "detail": null
+          },
+          "typescriptRequired": [
+            "type",
+            "path"
+          ]
+        },
+        {
+          "type": "audio",
+          "jsonRequired": [
+            "type",
+            "url"
+          ],
+          "defaults": {},
+          "typescriptRequired": [
+            "type",
+            "url"
+          ]
+        },
+        {
+          "type": "localAudio",
+          "jsonRequired": [
+            "path",
+            "type"
+          ],
+          "defaults": {},
+          "typescriptRequired": [
+            "type",
+            "path"
+          ]
+        },
+        {
+          "type": "skill",
+          "jsonRequired": [
+            "name",
+            "path",
+            "type"
+          ],
+          "defaults": {},
+          "typescriptRequired": [
+            "type",
+            "name",
+            "path"
+          ]
+        },
+        {
+          "type": "mention",
+          "jsonRequired": [
+            "name",
+            "path",
+            "type"
+          ],
+          "defaults": {},
+          "typescriptRequired": [
+            "type",
+            "name",
+            "path"
+          ]
+        }
+      ],
+      "sandboxPolicyVariants": [
+        {
+          "type": "dangerFullAccess",
+          "jsonRequired": [
+            "type"
+          ],
+          "defaults": {},
+          "typescriptRequired": [
+            "type"
+          ]
+        },
+        {
+          "type": "readOnly",
+          "jsonRequired": [
+            "type"
+          ],
+          "defaults": {
+            "networkAccess": false
+          },
+          "typescriptRequired": [
+            "type",
+            "networkAccess"
+          ]
+        },
+        {
+          "type": "externalSandbox",
+          "jsonRequired": [
+            "type"
+          ],
+          "defaults": {
+            "networkAccess": "restricted"
+          },
+          "typescriptRequired": [
+            "type",
+            "networkAccess"
+          ]
+        },
+        {
+          "type": "workspaceWrite",
+          "jsonRequired": [
+            "type"
+          ],
+          "defaults": {
+            "excludeSlashTmp": false,
+            "excludeTmpdirEnvVar": false,
+            "networkAccess": false,
+            "writableRoots": []
+          },
+          "typescriptRequired": [
+            "type",
+            "writableRoots",
+            "networkAccess",
+            "excludeTmpdirEnvVar",
+            "excludeSlashTmp"
+          ]
+        }
+      ]
+    },
+    "notifications": {
+      "itemStartedJsonRequired": [
+        "item",
+        "startedAtMs",
+        "threadId",
+        "turnId"
+      ],
+      "itemCompletedJsonRequired": [
+        "completedAtMs",
+        "item",
+        "threadId",
+        "turnId"
+      ],
+      "turnCompletedJsonRequired": [
+        "threadId",
+        "turn"
+      ]
+    },
+    "threadItems": {
+      "knownDiscriminants": [
+        "userMessage",
+        "hookPrompt",
+        "agentMessage",
+        "plan",
+        "reasoning",
+        "commandExecution",
+        "fileChange",
+        "mcpToolCall",
+        "dynamicToolCall",
+        "collabAgentToolCall",
+        "subAgentActivity",
+        "webSearch",
+        "imageView",
+        "sleep",
+        "imageGeneration",
+        "enteredReviewMode",
+        "exitedReviewMode",
+        "contextCompaction"
+      ],
+      "selected": [
+        {
+          "type": "agentMessage",
+          "jsonRequired": [
+            "id",
+            "text",
+            "type"
+          ],
+          "defaults": {
+            "memoryCitation": null,
+            "phase": null
+          },
+          "typescriptRequired": [
+            "type",
+            "id",
+            "text",
+            "phase",
+            "memoryCitation"
+          ]
+        },
+        {
+          "type": "commandExecution",
+          "jsonRequired": [
+            "command",
+            "commandActions",
+            "cwd",
+            "id",
+            "status",
+            "type"
+          ],
+          "defaults": {
+            "pluginId": null,
+            "scriptPath": null,
+            "source": "agent"
+          },
+          "typescriptRequired": [
+            "type",
+            "id",
+            "pluginId",
+            "scriptPath",
+            "command",
+            "cwd",
+            "processId",
+            "source",
+            "status",
+            "commandActions",
+            "aggregatedOutput",
+            "exitCode",
+            "durationMs"
+          ]
+        },
+        {
+          "type": "fileChange",
+          "jsonRequired": [
+            "changes",
+            "id",
+            "status",
+            "type"
+          ],
+          "defaults": {},
+          "typescriptRequired": [
+            "type",
+            "id",
+            "changes",
+            "status"
+          ]
+        },
+        {
+          "type": "mcpToolCall",
+          "jsonRequired": [
+            "arguments",
+            "id",
+            "server",
+            "status",
+            "tool",
+            "type"
+          ],
+          "defaults": {},
+          "typescriptRequired": [
+            "type",
+            "id",
+            "server",
+            "tool",
+            "status",
+            "arguments",
+            "appContext",
+            "pluginId",
+            "result",
+            "error",
+            "durationMs"
+          ]
+        },
+        {
+          "type": "dynamicToolCall",
+          "jsonRequired": [
+            "arguments",
+            "id",
+            "status",
+            "tool",
+            "type"
+          ],
+          "defaults": {},
+          "typescriptRequired": [
+            "type",
+            "id",
+            "namespace",
+            "tool",
+            "arguments",
+            "status",
+            "contentItems",
+            "success",
+            "durationMs"
+          ]
+        },
+        {
+          "type": "collabAgentToolCall",
+          "jsonRequired": [
+            "agentsStates",
+            "id",
+            "receiverThreadIds",
+            "senderThreadId",
+            "status",
+            "tool",
+            "type"
+          ],
+          "defaults": {},
+          "typescriptRequired": [
+            "type",
+            "id",
+            "tool",
+            "status",
+            "senderThreadId",
+            "receiverThreadIds",
+            "prompt",
+            "model",
+            "reasoningEffort",
+            "agentsStates"
+          ]
+        },
+        {
+          "type": "subAgentActivity",
+          "jsonRequired": [
+            "agentPath",
+            "agentThreadId",
+            "id",
+            "kind",
+            "type"
+          ],
+          "defaults": {},
+          "typescriptRequired": [
+            "type",
+            "id",
+            "kind",
+            "agentThreadId",
+            "agentPath"
+          ]
+        },
+        {
+          "type": "webSearch",
+          "jsonRequired": [
+            "id",
+            "query",
+            "type"
+          ],
+          "defaults": {
+            "results": null
+          },
+          "typescriptRequired": [
+            "type",
+            "id",
+            "query",
+            "action",
+            "results"
+          ]
+        }
+      ],
+      "commandStatuses": [
+        "inProgress",
+        "completed",
+        "failed",
+        "declined"
+      ],
+      "commandSources": [
+        "agent",
+        "userShell",
+        "unifiedExecStartup",
+        "unifiedExecInteraction"
+      ],
+      "patchStatuses": [
+        "inProgress",
+        "completed",
+        "failed",
+        "declined"
+      ],
+      "toolStatuses": [
+        "inProgress",
+        "completed",
+        "failed"
+      ],
+      "collabTools": [
+        "spawnAgent",
+        "sendInput",
+        "resumeAgent",
+        "wait",
+        "closeAgent"
+      ],
+      "subAgentActivityKinds": [
+        "started",
+        "interacted",
+        "interrupted"
+      ]
+    },
+    "turnCompleted": {
+      "turnJsonRequired": [
+        "id",
+        "items",
+        "status"
+      ],
+      "turnTypescriptRequired": [
+        "id",
+        "items",
+        "itemsView",
+        "status",
+        "error",
+        "startedAt",
+        "completedAt",
+        "durationMs"
+      ],
+      "statuses": [
+        "completed",
+        "interrupted",
+        "failed",
+        "inProgress"
+      ],
+      "itemViews": [
+        "notLoaded",
+        "summary",
+        "full"
+      ]
+    }
+  }
+}

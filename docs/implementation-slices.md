@@ -750,6 +750,8 @@ HostEventFirewall.project(notification) -> ControllerSignal | DROP
 
 ## 16. S15 元数据 Source revision
 
+> 历史状态：S15/S16 已按当时契约完成，但该双 revision 门禁不能在真实 Host 上启动 Compression Task，现由 [ADR-0011](adr/0011-export-owned-revision-and-fresh-task-launchers.md) 与[后续切片方案](切片方案-App-Server三任务接力解锁.md)取代；以下内容只保留为已完成实现的历史记录。
+
 **Requires**：S14、S08、S09、ADR-0009。
 
 **Objective**：用 Host 边界的稳定不透明 revision 和 summary-only thread 核验替代 `thread/read(includeTurns=true)`。
@@ -826,7 +828,39 @@ Revision provider 属于 Host Adapter 边界，只能返回定长不透明 token
 
 **Unlocks**：人工批准的长时间 Auto Slice 试运行；不自动启动。
 
-## 18. 计划级验收矩阵
+## 18. S17 App Server 0.146.0 最小 schema 投影
+
+**状态**：COMPLETE；发布证据见 `artifacts/s17/schema-projection-report.json` 与 `artifacts/s17/completion-receipt.json`。
+
+**Requires**：S16、ADR-0011 与 `docs/切片方案-App-Server三任务接力解锁.md`。
+
+**Objective**：把本机 `codex-cli 0.146.0` 生成协议收敛为 S18–S21 可复用的最小 fail-closed codec、fixture 与 release verifier。
+
+**Exclusions**：不改变 Controller state 或 Development Task 生命周期；不实现 launcher；不 vendoring 全量 TypeScript/JSON Schema；不把 JSON Schema 默认值当成发送方省略许可。
+
+**Owned outputs**：`contracts/slices/S17.json`、`production/app-server-protocol-v2.ts`、S17 协议测试、最小投影 fixture、`verify-s17`、schema 报告与 `CompletionReceipt`。
+
+**Projection contract**：
+
+```text
+0.146.0 generated TS + JSON Schema
+  -> thread/start kebab-case sandbox + fresh root turns=[]
+  -> turn/start camelCase SandboxPolicy + required text_elements/temp exclusions
+  -> skills/list unique enabled SkillMetadata
+  -> item started/completed selected command/agent/tool variants
+  -> turn/completed terminal Turn
+  -> unknown required discriminant => app_server_protocol_error
+```
+
+**Deterministic checks**：sandbox 大小写、缺 `text_elements`、workspaceWrite 缺 temp 位、缺 skill item、ambiguous/disabled skill、非空 fresh turns、缺 completed command 证明与未知 required variant 分别失败；本机生成投影、build、typecheck、目标/全量测试、lint、插件校验、Markdown links 与 `git diff --check` 全绿。
+
+**Failure closure**：普通单元测试仅在 Codex binary 不存在时显式 SKIP；`npm run verify:s17` 对 binary 缺失、版本非 `0.146.0`、生成失败或投影漂移一律失败。
+
+**Completion evidence**：CLI 入口与 digest、TS/JSON schema corpus digest、最小 projection digest、负向矩阵与 S17 `CompletionReceipt`。
+
+**Unlocks**：S18、S19。
+
+## 19. 计划级验收矩阵
 
 实现开始前和每个切片完成后，使用下表检查计划没有被悄悄削弱：
 
@@ -847,5 +881,6 @@ Revision provider 属于 Host Adapter 边界，只能返回定长不透明 token
 | Controller 零 Worker Content | S14 | S16 |
 | Source 持久性核验零 full-turn read | S15 | S16 |
 | 控制信号和持久成本与 Worker Content 大小无关 | S14 | S16 |
+| App Server 0.146.0 exact wire 字段与 discriminant fail closed | S17 | S22 |
 
 任何一行缺少对应测试、回执或产物 digest，相关切片不得标记 `COMPLETE`。

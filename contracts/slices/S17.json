@@ -1,0 +1,64 @@
+{
+  "id": "S17",
+  "contract_version": 1,
+  "requires": ["S16"],
+  "objective": "冻结 Codex App Server 0.146.0 的最小请求、线程、技能、Turn 与 item schema 投影，并以 fail-closed codec、负向测试和可重生成 release verifier 为 S18–S21 提供协议基线。",
+  "exclusions": [
+    "不改变 Controller state、Development Task、Source interruption 或任务生命周期",
+    "不实现 Compression 或 Continuation launcher",
+    "不 vendoring App Server 全量生成类型或 JSON Schema",
+    "不把 JSON Schema 默认值当作 TypeScript 发送方可省略字段",
+    "不允许 release verifier 在 Codex binary 缺失、版本不符或投影漂移时 SKIP",
+    "不执行 Git commit、push 或远端操作"
+  ],
+  "inputs": [
+    {
+      "path": "artifacts/s16/completion-receipt.json",
+      "digest": "sha256:e4a9407df3ad604761b5ac2a95cd8e5d022c69780e5e79a2bd3da880fec7169a",
+      "producer_slice": "S16"
+    }
+  ],
+  "owned_paths": [
+    "contracts/slices/S17.json",
+    "src/controller/production/app-server-protocol-v2.ts",
+    "src/controller/production/index.ts",
+    "test/app-server-protocol-v2.test.ts",
+    "test/fixtures/s17/app-server-0.146.0-schema-projection.json",
+    "scripts/verify-s17.mjs",
+    "package.json",
+    "CONTEXT.md",
+    "docs/adr/0001-local-controller-and-task-isolation.md",
+    "docs/adr/0008-goal-task-input-and-finish-ownership.md",
+    "docs/adr/0011-export-owned-revision-and-fresh-task-launchers.md",
+    "docs/implementation-slices.md",
+    "docs/切片方案-App-Server三任务接力解锁.md",
+    "docs/架构.md",
+    "docs/代码链路.md",
+    "artifacts/s17/**"
+  ],
+  "budgets": {
+    "codex_cli_version": "0.146.0",
+    "checked_in_generated_types": 0,
+    "full_schema_vendoring": false,
+    "release_binary_required": true
+  },
+  "checks": [
+    { "id": "schema_projection", "argv": ["node", "scripts/verify-s17.mjs", "--schema-only"], "expected_exit_code": 0 },
+    { "id": "build", "argv": ["npm", "run", "build"], "expected_exit_code": 0 },
+    { "id": "typecheck", "argv": ["npm", "run", "typecheck"], "expected_exit_code": 0 },
+    { "id": "target_test", "argv": ["node", "--test", "dist/test/app-server-protocol-v2.test.js"], "expected_exit_code": 0 },
+    { "id": "test", "argv": ["npm", "run", "test"], "expected_exit_code": 0 },
+    { "id": "lint", "argv": ["npm", "run", "lint"], "expected_exit_code": 0 },
+    { "id": "plugin_validation", "argv": ["npm", "run", "validate:plugin"], "expected_exit_code": 0 },
+    { "id": "markdown_links", "argv": ["npm", "run", "verify:markdown-links"], "expected_exit_code": 0 },
+    { "id": "diff_check", "argv": ["git", "diff", "HEAD", "--check", "--"], "expected_exit_code": 0 }
+  ],
+  "expected_artifacts": [
+    { "path": "test/fixtures/s17/app-server-0.146.0-schema-projection.json", "kind": "minimal_schema_projection_fixture" },
+    { "path": "artifacts/s17/schema-projection-report.json", "kind": "local_generated_schema_evidence" },
+    { "path": "artifacts/s17/completion-receipt.json", "kind": "completion_receipt" },
+    { "path": "docs/代码链路.md", "kind": "code_path_index" },
+    { "path": "docs/架构.md", "kind": "implementation_architecture" }
+  ],
+  "unlocks": ["S18", "S19"]
+}

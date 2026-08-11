@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "slice_id": "S17",
+  "result": "PASS",
+  "codex_cli": {
+    "version": "0.146.0",
+    "versionOutput": "codex-cli 0.146.0",
+    "identityPath": "D:/fate/nvm/nvm/v24.9.0/node_modules/@openai/codex/bin/codex.js",
+    "identityDigest": "sha256:134063e133f0b4244fa3b251acf973d4fe4b4aeeacbdc135211bf480f59f1477",
+    "launcherPath": "D:/fate/nvm/nvm/v24.9.0/node.exe",
+    "launcherDigest": "sha256:5f364598aa3017130b22908ff7c3db0fd05bd42d39fd65b79fd6bd3f73c73da6"
+  },
+  "generation": {
+    "commands": [
+      "codex app-server generate-ts --experimental --out <temp>/ts",
+      "codex app-server generate-json-schema --experimental --out <temp>/json"
+    ],
+    "typescript_corpus": {
+      "fileCount": 701,
+      "digest": "sha256:60a44c54bfb9fb8ead33154188d18e563e9d7e4a6ca5a36a79d51d6d6eab887d"
+    },
+    "json_schema_corpus": {
+      "fileCount": 349,
+      "digest": "sha256:bacca1a420623699223803d621783c9935c6903398c239ff61b00574d2393de3"
+    }
+  },
+  "projection": {
+    "fixture_path": "test/fixtures/s17/app-server-0.146.0-schema-projection.json",
+    "fixture_digest": "sha256:278d1e65622178d7f93791f51a1474c4467986de3a57588ac5c0a5e8bf925d69",
+    "projection_digest": "sha256:9b1406d7c49772ee8fb27dcfe08e32d37befac5064890a8baf86076e95c789fe"
+  },
+  "official_facts": [
+    "https://developers.openai.com/codex/app-server/"
+  ],
+  "negative_contracts": [
+    "thread sandbox casing",
+    "turn sandbox policy casing",
+    "text_elements required",
+    "workspaceWrite temp exclusions required",
+    "skill item required",
+    "ambiguous or disabled skill rejected",
+    "fresh turns empty",
+    "completed command evidence required",
+    "unknown required ThreadItem variant rejected"
+  ]
+}

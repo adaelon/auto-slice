@@ -17,16 +17,28 @@ _Avoid_: Step、顺手修改、模糊任务
 _Avoid_: Compression Task、Continuation Task
 
 **Source Interruption**:
-停止 Source Thread 的当前执行，同时保留其持久化记录和 UUID。
+以同 thread/turn 的结构化 interrupted 终态停止 Source Thread 当前执行，并以无 turns 的元数据读取确认其持久可读与 UUID；它不预取或签发 Source revision，也不伪造 archive/delete 的负事实。
 _Avoid_: 删除、归档、清空
 
 **Compression Task**:
 专门读取一个 Source Thread 并发布 Handoff 的全新 Codex 任务；它不继续源工作。
 _Avoid_: Source Thread、Continuation Task
 
+**Source Evidence Revision**:
+由 `export-codex-handoff` 对 Source Thread 持久 rollout 原始字节冻结、并在发布前复核的 `sha256:<64 lowercase hex>`；它是 Handoff 唯一的 Source revision 权威。
+_Avoid_: Host opaque token、`updatedAt`、InterruptReceipt revision
+
 **Handoff**:
 由 Compression Task 发布的可移植续接包，由 Markdown 摘要和 Evidence Index 共同组成。
 _Avoid_: 普通总结、聊天复制
+
+**Handoff Artifact Root**:
+由 Production Host 管理、位于 Slice-owned 路径之外、用于按 Run/Slice/attempt 保存唯一 Handoff 双文件的持久目录；它是 Compression 的发布能力边界，不授予 Project Write Lease。
+_Avoid_: Source 工作区默认文件名、覆盖旧 Handoff、Slice 开发写权限
+
+**Handoff Receipt**:
+Host launcher 只依据已绑定 Compression thread/turn 的 export helper 机器发布结果、Host 预分配路径、已发布文件字节和 `verify-evidence` 结果构造的有界接力证明。
+_Avoid_: 模型最终回复、请求字段回显、测试 launcher 自报
 
 **Continuation Task**:
 消费已验证 Handoff、恢复同一 Slice 工作的第二个全新 Codex 任务。

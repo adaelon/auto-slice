@@ -1,6 +1,6 @@
 # Goal Task 输入与完成所有权
 
-状态：一句话输入继续有效；Controller 验收部分由 [ADR-0010](0010-trusted-worker-completion.md) 取代。
+状态：Development Task 的一句话输入继续有效；Controller 验收部分由 [ADR-0010](0010-trusted-worker-completion.md) 取代；Compression/Continuation 输入由 [ADR-0011](0011-export-owned-revision-and-fresh-task-launchers.md) 取代。
 
 ### §1 一句话启动与任务侧收口
 
@@ -14,4 +14,4 @@
 
 **何时回头**:Codex 提供可直接创建 goal 且能原子附带 checkpoint/Handoff 引用的稳定宿主 API 时。
 
-开发输入固定为 `设定goal：阅读checkpoint，实现Sx，完成后[commit，]刷新checkpoint`；压缩输入固定为 `$export-codex-handoff <UUID>`；接力输入固定为“设定 goal、阅读 Handoff Markdown 绝对路径链接、继续实现 Sx、完成后可选 commit 并刷新 checkpoint”的一句话。
+开发输入固定为 `设定goal：阅读checkpoint，实现Sx，完成后[commit，]刷新checkpoint`。Compression 的“文本＋skill item”和 Continuation 的“goal＋已验证 Handoff 正文”输入见 ADR-0011。

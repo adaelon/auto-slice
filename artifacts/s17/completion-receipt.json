@@ -1,0 +1,149 @@
+{
+  "schema_version": 1,
+  "slice_id": "S17",
+  "result": "PASS",
+  "contract_digest": "sha256:adb27b324d1a57e134510069db4b0ed60947e78a0c77271a20a2a49f0167ddb6",
+  "projection_digest": "sha256:9b1406d7c49772ee8fb27dcfe08e32d37befac5064890a8baf86076e95c789fe",
+  "output_digests": [
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:4a6657efcd73dbe8e7c91a4a53a5eb419356e6f5db9278e1744f34732db5f39c"
+    },
+    {
+      "path": "artifacts/s17/schema-projection-report.json",
+      "digest": "sha256:bd3ddf066cc2d9e56961262d89f2c9a24b803623f6ad597159a0051b056f1d3f"
+    },
+    {
+      "path": "contracts/slices/S17.json",
+      "digest": "sha256:adb27b324d1a57e134510069db4b0ed60947e78a0c77271a20a2a49f0167ddb6"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:28047d6251230d2f4bc0235561a61056bab25daefa9e5fc910e6651dd332be5e"
+    },
+    {
+      "path": "docs/adr/0008-goal-task-input-and-finish-ownership.md",
+      "digest": "sha256:01acf1725352533608a2255f6b0cadb058269b84fe21ca86b65d0f6562b05cfa"
+    },
+    {
+      "path": "docs/adr/0011-export-owned-revision-and-fresh-task-launchers.md",
+      "digest": "sha256:ad88a6d62d1ff8417ac2688e23b4c619c1e1cc5c8fd2d985395a075e3a3b2cbe"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:c2a3a5724d62614bad331c9b6acf168617a9904728075c2f4b3cca83a98df159"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:e40d520cc4c8235c0a10a5d662fd7556d0270bed1cc185b9b274822315dcfa4f"
+    },
+    {
+      "path": "docs/切片方案-App-Server三任务接力解锁.md",
+      "digest": "sha256:6d1d6c32cc1c4730115c0a050b45ae5f74f3769553b323aed2e325bb78de5e28"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:9f95df241d7e9d83b412232c8fabe4cdf64bf059fdbc23bedae901af37568726"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:dfd0099adc9da0686bc71302c45615d9a76f26b0408f2c17d2e091d715693792"
+    },
+    {
+      "path": "scripts/verify-s17.mjs",
+      "digest": "sha256:8fa79fec58f67c4658017078113d2897b18e6d18e2999db90fb79f39a3fb562f"
+    },
+    {
+      "path": "src/controller/production/app-server-protocol-v2.ts",
+      "digest": "sha256:216768a4fdf03039a9888f1a9981274306357cde3857ba4a70a7826ff56667a6"
+    },
+    {
+      "path": "src/controller/production/index.ts",
+      "digest": "sha256:b67493403ec170052599280fcd64a3292905a609de0b6b976052fcf5370c2fa7"
+    },
+    {
+      "path": "test/app-server-protocol-v2.test.ts",
+      "digest": "sha256:11e5e747623f894294d721d39bdc50a57213192b806efc05d9ed49cd1e3aa6ed"
+    },
+    {
+      "path": "test/fixtures/s17/app-server-0.146.0-schema-projection.json",
+      "digest": "sha256:278d1e65622178d7f93791f51a1474c4467986de3a57588ac5c0a5e8bf925d69"
+    }
+  ],
+  "check_receipts": [
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "target_test",
+      "argv": [
+        "node",
+        "--test",
+        "dist/test/app-server-protocol-v2.test.js"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "plugin_validation",
+      "argv": [
+        "npm",
+        "run",
+        "validate:plugin"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "markdown_links",
+      "argv": [
+        "npm",
+        "run",
+        "verify:markdown-links"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "diff_check",
+      "argv": [
+        "git",
+        "diff",
+        "HEAD",
+        "--check",
+        "--"
+      ],
+      "exit_code": 0
+    }
+  ]
+}
