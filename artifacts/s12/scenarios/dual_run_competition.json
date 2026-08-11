@@ -1,0 +1,11 @@
+{
+  "id": "dual_run_competition",
+  "result": "PASS",
+  "assertions": {
+    "real_processes": 2,
+    "acquired_runs": 1,
+    "rejected_runs": 1,
+    "rejection_code": "project_lock_unavailable",
+    "simultaneous_writers": 1
+  }
+}

@@ -19,7 +19,10 @@ import { TextDecoder } from "node:util";
 import { canonicalJson, sha256Json } from "./canonical-json.js";
 import { StateStoreError } from "./errors.js";
 import { ensureStateStoreSchema } from "./schema.js";
-import { isRunTransitionAllowed } from "./transitions.js";
+import {
+  isRunTransitionAllowed,
+  isRunTransitionReplayCompatible,
+} from "./transitions.js";
 import {
   RUN_STATUSES,
   RUN_STORE_SCHEMA_VERSION,
@@ -387,8 +390,7 @@ function assertImmutableRunFields(before: RunState, after: RunState): void {
   if (
     before.run_id !== after.run_id ||
     canonicalJson(before.workspace_identity) !== canonicalJson(after.workspace_identity) ||
-    before.plan_digest !== after.plan_digest ||
-    before.protected_baseline_digest !== after.protected_baseline_digest
+    before.plan_digest !== after.plan_digest
   ) {
     throw new StateStoreError("state_corrupt", "A state event changed immutable RunState fields.");
   }
@@ -403,8 +405,66 @@ function assertMetadataTransition(
   after: RunState,
   action: string,
   code: "invalid_transition" | "state_corrupt",
+  replayCompatibility = false,
 ): void {
+  const sliceIdentityChanged = before.current_slice_id !== after.current_slice_id;
+  const protectedBaselineChanged = before.protected_baseline_digest !== after.protected_baseline_digest;
+  if (sliceIdentityChanged !== protectedBaselineChanged) {
+    throw new StateStoreError(
+      code,
+      "current_slice_id and protected_baseline_digest must change together.",
+    );
+  }
+  if (protectedBaselineChanged) {
+    const startsSlice = after.status === "SLICE_RUNNING" &&
+      (before.status === "PREPARING" || before.status === "CHECKPOINTING") &&
+      after.current_slice_id !== null;
+    if (!startsSlice) {
+      throw new StateStoreError(
+        code,
+        "protected_baseline_digest may change only when a prepared or checkpointed Run starts a Slice.",
+      );
+    }
+  }
   if (before.status !== after.status) {
+    return;
+  }
+  if (action === "override_slice_commit_mode" && before.status !== "DONE" && before.status !== "ABORTED") {
+    const beforeOverrides = before.slice_commit_mode_overrides ?? {};
+    const afterOverrides = after.slice_commit_mode_overrides ?? {};
+    const changedKeys = [...new Set([
+      ...Object.keys(beforeOverrides),
+      ...Object.keys(afterOverrides),
+    ])].filter((key) => beforeOverrides[key] !== afterOverrides[key]);
+    const expected = {
+      ...before,
+      state_version: before.state_version + 1,
+      slice_commit_mode_overrides: afterOverrides,
+    } satisfies RunState;
+    if (changedKeys.length !== 1 || canonicalJson(after) !== canonicalJson(expected)) {
+      throw new StateStoreError(
+        code,
+        "override_slice_commit_mode may change exactly one Slice commit-mode override.",
+      );
+    }
+    const effectiveStatus = before.status === "PAUSED"
+      ? before.paused_from_status
+      : before.status === "NEEDS_USER"
+        ? before.last_error?.last_successful_status
+        : before.status;
+    const currentSliceWasDispatched = effectiveStatus !== undefined &&
+      (effectiveStatus !== "IDLE" && effectiveStatus !== "PREPARING" ||
+        (effectiveStatus === "PREPARING" && before.source_thread_id !== null));
+    if (
+      !replayCompatibility &&
+      changedKeys[0] === before.current_slice_id &&
+      currentSliceWasDispatched
+    ) {
+      throw new StateStoreError(
+        code,
+        "The current Slice commit-mode override cannot change after dispatch.",
+      );
+    }
     return;
   }
   if (
@@ -454,12 +514,15 @@ function applyStateUpdates(state: RunState, transition: RunTransition): RunState
     const allowedUpdateKeys = new Set([
       "commit_mode",
       "current_slice_id",
+      "protected_baseline_digest",
       "project_lock_owner",
       "write_epoch",
       "source_thread_id",
       "compaction",
       "handoff",
       "last_error",
+      "paused_from_status",
+      "slice_commit_mode_overrides",
     ]);
     for (const key of Object.keys(updates)) {
       if (!allowedUpdateKeys.has(key)) {
@@ -471,7 +534,14 @@ function applyStateUpdates(state: RunState, transition: RunTransition): RunState
       if (value === undefined) {
         continue;
       }
-      if ((key === "compaction" || key === "handoff" || key === "last_error") && value === null) {
+      if (
+        (key === "compaction" ||
+          key === "handoff" ||
+          key === "last_error" ||
+          key === "paused_from_status" ||
+          key === "slice_commit_mode_overrides") &&
+        value === null
+      ) {
         Reflect.deleteProperty(next, key);
       } else {
         next[key] = value;
@@ -1033,7 +1103,7 @@ export class FileRunStore {
           event.before_state_digest !== sha256Json(previousState) ||
           canonicalJson(event.before_state) !== canonicalJson(previousState) ||
           event.after_state.state_version !== previousState.state_version + 1 ||
-          !isRunTransitionAllowed(
+          !isRunTransitionReplayCompatible(
             previousState.status,
             event.after_state.status,
             event.action,
@@ -1046,6 +1116,7 @@ export class FileRunStore {
           event.after_state,
           event.action,
           "state_corrupt",
+          true,
         );
         assertImmutableRunFields(previousState, event.after_state);
       }

@@ -1,0 +1,46 @@
+{
+  "schema_version": 1,
+  "slice_id": "S16",
+  "compaction_completed_29999": {
+    "elapsed_ms": 29999,
+    "run_status": "DONE",
+    "full_turn_read_count": 0
+  },
+  "available": {
+    "compression_task_id": "019feb16-0000-7000-8000-000000000003",
+    "continuation_task_id": "019feb16-0000-7000-8000-000000000004",
+    "final_source_is_continuation": true,
+    "outcome": "CONTINUATION_STARTED",
+    "run_status": "SLICE_RUNNING",
+    "source_thread_id": "019feb16-0000-7000-8000-000000000001",
+    "summary_only_thread_reads": 1
+  },
+  "probe_fallback": {
+    "outcome": "DONE",
+    "probe_calls": 1,
+    "probe_elapsed_ms": [
+      1200000
+    ],
+    "run_status": "DONE"
+  },
+  "unavailable": {
+    "compression_starts": 0,
+    "continuation_starts": 0,
+    "error_code": "source_interrupt_failed",
+    "full_turn_read_count": 0,
+    "outcome": "FAIL_CLOSED",
+    "run_status": "NEEDS_USER"
+  },
+  "failure_closure": {
+    "failed": {
+      "error_code": "slice_execution_failed",
+      "run_status": "NEEDS_USER"
+    },
+    "interrupted": {
+      "error_code": "slice_execution_failed",
+      "run_status": "NEEDS_USER"
+    },
+    "next_slice_starts": 0
+  },
+  "result": "PASS"
+}

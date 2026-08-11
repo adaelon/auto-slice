@@ -1,0 +1,60 @@
+{
+  "id": "S14",
+  "contract_version": 1,
+  "requires": ["S13"],
+  "objective": "在 App Server 传输与 Controller ports 之间建立 HostEventFirewall 白名单投影，只交付有界控制信号与无 Worker Content 的 DevelopmentTaskReceipt。",
+  "exclusions": [
+    "不改变 Source persisted revision 的获取方式或 thread/read(includeTurns=true) 的 S15 边界",
+    "不改变 30 秒 Compaction Timeout 与现有状态转换",
+    "不限制 Compression Task 读取 Source Thread",
+    "不重生成或改写 S13 CompletionReceipt",
+    "不在本切片实现 S15 metadata revision 或 S16 内容预算 E2E 门禁"
+  ],
+  "inputs": [
+    { "path": "artifacts/s13/completion-receipt.json", "digest": "sha256:d8ea9df68eb8e46078bc60f5fffa60eb6c91a936c65b0d0c4221f9d3ab3b2bbf", "producer_slice": "S13" },
+    { "path": "CONTEXT.md", "digest": "sha256:34f0bd669d970ea4befa580004229219c0a79f4aa0d355ca667dc5bee575fb9f", "producer_slice": "content-blind-boundary" },
+    { "path": "docs/adr/0009-content-blind-controller.md", "digest": "sha256:0c9b7285fc06475c5438c983653fe94e34801fa0c6306d07c738f6f5a2f646c4", "producer_slice": "content-blind-boundary" },
+    { "path": "docs/auto-slice-design.md", "digest": "sha256:b753253c76fd511d8501fa580c4edb57be64efff22631701d79cdd563b724368", "producer_slice": "frozen-design" },
+    { "path": "docs/implementation-slices.md", "digest": "sha256:4efa4ee4f37152e27edd00775d4ab3979b25072c228a8f60e096aa7994136b6a", "producer_slice": "frozen-design" }
+  ],
+  "owned_paths": [
+    "contracts/slices/S14.json",
+    "src/controller/production/app-server-client.ts",
+    "src/controller/production/codex-app-server-development-task.ts",
+    "src/controller/production/index.ts",
+    "src/controller/production/production-orchestrator.ts",
+    "src/controller/production/types.ts",
+    "test/app-server-client.test.ts",
+    "test/app-server-development-task.test.ts",
+    "test/file-production-runtime.test.ts",
+    "test/production-orchestrator.test.ts",
+    "test/fixtures/process/fake-codex-app-server.mjs",
+    "test/fixtures/process/run-s14-production-with-fake-host.mjs",
+    "scripts/run-s14-firewall.mjs",
+    "scripts/verify-s14.mjs",
+    "package.json",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "artifacts/s14/**"
+  ],
+  "checks": [
+    { "id": "build", "argv": ["npm", "run", "build"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": ["dist/src/controller/production/app-server-client.js", "dist/src/controller/production/codex-app-server-development-task.js"] },
+    { "id": "typecheck", "argv": ["npm", "run", "typecheck"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "target_test", "argv": ["node", "--test", "dist/test/app-server-client.test.js", "dist/test/app-server-development-task.test.js", "dist/test/file-production-runtime.test.js", "dist/test/production-orchestrator.test.js"], "cwd": ".", "timeout_ms": 180000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "test", "argv": ["npm", "run", "test"], "cwd": ".", "timeout_ms": 300000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "firewall_evidence_first", "argv": ["node", "scripts/run-s14-firewall.mjs"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "firewall_evidence_repeat", "argv": ["node", "scripts/run-s14-firewall.mjs"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "markdown_links", "argv": ["node", "scripts/check-markdown-links.mjs"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "plugin_validation", "argv": ["npm", "run", "validate:plugin"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP", "CODEX_HOME", "PYTHON"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "lint", "argv": ["npm", "run", "lint"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] }
+  ],
+  "expected_artifacts": [
+    { "path": "artifacts/s14/event-whitelist-report.json", "kind": "host_event_firewall_whitelist_report" },
+    { "path": "artifacts/s14/canary-leak-report.json", "kind": "worker_content_canary_report" },
+    { "path": "artifacts/s14/content-equivalence-receipt.json", "kind": "short_large_content_equivalence_receipt" },
+    { "path": "artifacts/s14/completion-receipt.json", "kind": "completion_receipt" },
+    { "path": "docs/代码链路.md", "kind": "code_path_index" },
+    { "path": "docs/架构.md", "kind": "implementation_architecture" }
+  ],
+  "unlocks": ["S15"]
+}

@@ -1,0 +1,298 @@
+{
+  "schema_version": 1,
+  "slice_id": "S13",
+  "contract_digest": "sha256:2743968d8833125764212d80470a6422de4d7eaa33d933624de7750b2f04ae1d",
+  "input_digests": [
+    {
+      "path": "contracts/slices/S12.json",
+      "digest": "sha256:d720d72f50196b0b3bc0918dd49d317450189cfacf40a38315acb9e68df639e8"
+    },
+    {
+      "path": "artifacts/s12/completion-receipt.json",
+      "digest": "sha256:a684a4578212037b07dde6bd58a2142e5b2ba3cacd9bcbcf3830f878449bea72"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a"
+    }
+  ],
+  "output_digests": [
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:9a2659e5840f746d190e1129a0ef20ea17c771293b6d803bd2ff4447d58fe573"
+    },
+    {
+      "path": "artifacts/s13/production-entry-report.json",
+      "digest": "sha256:12b25fe651cbc0d6685a60e6f28f28aab324d0a8b547c6ec3925dd54ac397142"
+    },
+    {
+      "path": "artifacts/s13/release-readiness-checklist.json",
+      "digest": "sha256:56d8ef63133a437a8750e756adc2ff9eaf71cc300996e964faad9ad10da6ef6b"
+    },
+    {
+      "path": "contracts/slices/S13.json",
+      "digest": "sha256:2743968d8833125764212d80470a6422de4d7eaa33d933624de7750b2f04ae1d"
+    },
+    {
+      "path": "docs/adr/0007-codex-app-server-production-adapter.md",
+      "digest": "sha256:f86bf88028a34659fea3f92eea7633bd1a66ca405e7890180114683d912b1843"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:40a5a16f520bace7a7a3860362f85ec3adad77f94afe6c8905cd7548cc2a75e9"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:35a342c90064f41a5fd2f6b209c089762502fd232176b55bc67f34e99b62e2a0"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:1161225d4b6361b4d79f18b89635578b7211d191e36a02fd7172e429cb5d86dd"
+    },
+    {
+      "path": "scripts/run-s13-production-entry.mjs",
+      "digest": "sha256:12b27defc0d08e5ffabee75f87ff24872940e8454a958e25c67815f95889bd45"
+    },
+    {
+      "path": "scripts/verify-s13.mjs",
+      "digest": "sha256:3a9ac4404bcff22d24bd0a2e3bb41d14febc54453e6df2b57143e22c9f2cdb3a"
+    },
+    {
+      "path": "src/controller/main.ts",
+      "digest": "sha256:0907435a480e0ac5ad79e1179787463b58da97886ec91d5e81f927f2f64ea537"
+    },
+    {
+      "path": "src/controller/production/app-server-client.ts",
+      "digest": "sha256:b40332be3403961d9ed98fafc748705309ad362a34e3e5b76337161001ee682b"
+    },
+    {
+      "path": "src/controller/production/codex-app-server-development-task.ts",
+      "digest": "sha256:bc5f86ee95536091156be777161a8dd606c909f6ea63ccc58f88b94f36376cb8"
+    },
+    {
+      "path": "src/controller/production/codex-app-server-task-host.ts",
+      "digest": "sha256:1b692c33665f4753bdbbae4fbfb2c3ddbb7ad177d7e097ebbce7821a5a681c36"
+    },
+    {
+      "path": "src/controller/production/errors.ts",
+      "digest": "sha256:094a387d226754b371a8eb24187ed14c4f0da9a72e3895b66faa1624b40ecde3"
+    },
+    {
+      "path": "src/controller/production/file-production-runtime.ts",
+      "digest": "sha256:355463e7b69cd1cd2f677d6432c1ead0a8a9cd2e2f8e32b75bdf55f69b4933c3"
+    },
+    {
+      "path": "src/controller/production/index.ts",
+      "digest": "sha256:78d53bcbb56125e873d474bd0206a5ba30e10909a5e0af4dc68ddef828dbb091"
+    },
+    {
+      "path": "src/controller/production/plan-parser.ts",
+      "digest": "sha256:c08e7195d60b5b6e06bb4882d3f54b11041282aadee0da35ddbecbf469cb68a6"
+    },
+    {
+      "path": "src/controller/production/production-cli.ts",
+      "digest": "sha256:6ee59fef2b28ee092117920b35af0283c93e56cf85c4a60c0593049f8c57ca15"
+    },
+    {
+      "path": "src/controller/production/production-orchestrator.ts",
+      "digest": "sha256:88148383cac3100c1a6efb5a789364fd1bd743f51e5245af5e51a1bce53fc2bd"
+    },
+    {
+      "path": "src/controller/production/prompt-builder.ts",
+      "digest": "sha256:2e072f50b2d512e660a1ad7f5437d3c2f3653894991d4ec5067c6265994fcf1f"
+    },
+    {
+      "path": "src/controller/production/types.ts",
+      "digest": "sha256:18d17284315b59863bfc476c9e4b2ef5ac13639e4097f37849a120307ab6066f"
+    },
+    {
+      "path": "src/controller/state/file-run-store.ts",
+      "digest": "sha256:4760492a305ebafcf551a76940b4803e3841d4c7925391b31ad6a8a584840cb7"
+    },
+    {
+      "path": "src/controller/state/index.ts",
+      "digest": "sha256:8ccdb005d202f487ba2471897402e02946485b338f16e663709142ada8bf36ae"
+    },
+    {
+      "path": "src/controller/state/transitions.ts",
+      "digest": "sha256:7a5c015820caaf5a0549ebf545895e55a136545a405cdcaabc052ff913cc126d"
+    },
+    {
+      "path": "src/controller/state/types.ts",
+      "digest": "sha256:6c8071fbf84b00d89d13f0715969e122a69d322d4aa4cfd708d08c9bc2c4f3b1"
+    },
+    {
+      "path": "src/controller/state/validation.ts",
+      "digest": "sha256:c1e2dbf0bfe99dc4c788b112ea6ac8ad434eea9d6378a1b2bec5d14e1013afb7"
+    },
+    {
+      "path": "test/app-server-development-task.test.ts",
+      "digest": "sha256:e554270b95ea362b71a1d3a67c1f21ed88b0105f051b3f9cd1995c02eafebc28"
+    },
+    {
+      "path": "test/controller.test.ts",
+      "digest": "sha256:caf0953e547491bebd3ad07c9e6363368dcd4da780746ede4d354a314a56387b"
+    },
+    {
+      "path": "test/file-production-runtime.test.ts",
+      "digest": "sha256:7808e8bfdfc64f68429ef722218c7825b150010585311f22b5bddbd584071fe5"
+    },
+    {
+      "path": "test/fixtures/process/fake-codex-app-server.mjs",
+      "digest": "sha256:a471839084f83a6ebd352d79ce9a647c982b561effb3757c062d1a7faed52312"
+    },
+    {
+      "path": "test/fixtures/process/run-production-cli-with-fake-host.mjs",
+      "digest": "sha256:c2c52df06c07d092459fc7caac069e7e1be4134864879fd8fa402b5df509624e"
+    },
+    {
+      "path": "test/production-orchestrator.test.ts",
+      "digest": "sha256:779cd35b8ac78c51e8303c24d5ec40091ae1869a00772a6f6875ab9db6f1e3a9"
+    },
+    {
+      "path": "test/production-plan.test.ts",
+      "digest": "sha256:ea06579804fd75bca38c3849f11d987a09cf4cae7c54489f58b5dee38bdcdc03"
+    },
+    {
+      "path": "test/run-store.test.ts",
+      "digest": "sha256:c5e982d77c03cafdc568968248167e6e560d75a9b4fc0b2c434efab43b2bf228"
+    }
+  ],
+  "touched_paths": [
+    "CONTEXT.md",
+    "artifacts/s13/completion-receipt.json",
+    "artifacts/s13/production-entry-report.json",
+    "artifacts/s13/release-readiness-checklist.json",
+    "contracts/slices/S13.json",
+    "docs/adr/0007-codex-app-server-production-adapter.md",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "package.json",
+    "scripts/run-s13-production-entry.mjs",
+    "scripts/verify-s13.mjs",
+    "src/controller/main.ts",
+    "src/controller/production/app-server-client.ts",
+    "src/controller/production/codex-app-server-development-task.ts",
+    "src/controller/production/codex-app-server-task-host.ts",
+    "src/controller/production/errors.ts",
+    "src/controller/production/file-production-runtime.ts",
+    "src/controller/production/index.ts",
+    "src/controller/production/plan-parser.ts",
+    "src/controller/production/production-cli.ts",
+    "src/controller/production/production-orchestrator.ts",
+    "src/controller/production/prompt-builder.ts",
+    "src/controller/production/types.ts",
+    "src/controller/state/file-run-store.ts",
+    "src/controller/state/index.ts",
+    "src/controller/state/transitions.ts",
+    "src/controller/state/types.ts",
+    "src/controller/state/validation.ts",
+    "test/app-server-development-task.test.ts",
+    "test/controller.test.ts",
+    "test/file-production-runtime.test.ts",
+    "test/fixtures/process/fake-codex-app-server.mjs",
+    "test/fixtures/process/run-production-cli-with-fake-host.mjs",
+    "test/production-orchestrator.test.ts",
+    "test/production-plan.test.ts",
+    "test/run-store.test.ts"
+  ],
+  "check_receipts": [
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ca622aa6b87a4fbd135ae14f841cd92016f6ce189674c007da77682d9bc3fe7a",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 3535
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b4d5eeaf054ffadd6ba18423f31f81288f54bd16be7a5390eafbb745eeba53dc",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 2819
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:f711d1f3dbd5cda5041f09cc8fc2a0dc1997000c6c1e17b8f0fca91cecff0ebd",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 97579
+    },
+    {
+      "check_id": "production_entry_first",
+      "argv": [
+        "node",
+        "scripts/run-s13-production-entry.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ea559f25fe66c7b51075b76f11e8366b723f3a5490c6e43b5b9890bef4776fc7",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 10168
+    },
+    {
+      "check_id": "production_entry_repeat",
+      "argv": [
+        "node",
+        "scripts/run-s13-production-entry.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ea559f25fe66c7b51075b76f11e8366b723f3a5490c6e43b5b9890bef4776fc7",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 10008
+    },
+    {
+      "check_id": "markdown_links",
+      "argv": [
+        "node",
+        "scripts/check-markdown-links.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ba484f272daa9371550e4bfb8046f58ea328266ebcd6718616675fa31501c4d4",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 228
+    },
+    {
+      "check_id": "plugin_validation",
+      "argv": [
+        "npm",
+        "run",
+        "validate:plugin"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:8d2e71d28f84282b4ff2b50b55581cefb572fb55a11155cce10787d1f93dfea5",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 1365
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:50bf418d3f46fa3975eade28b9f81047ee52461d61415cc22546263c0cca2afe",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 11661
+    }
+  ],
+  "start_head": "9b95aed63572560e000314a7ca71fe10b1de95ee",
+  "end_head": null,
+  "owned_diff_digest": "sha256:efced5e42fe9459d5d299e78066ac8fae5eb9216f6a341c4354709c09e883d41",
+  "completed_at": "2026-08-09T16:17:35.801Z"
+}

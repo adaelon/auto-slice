@@ -1,0 +1,96 @@
+{
+  "id": "S11",
+  "contract_version": 1,
+  "requires": ["S02", "S05", "S06", "S10"],
+  "objective": "提供可执行插件控制面，以持久 command_id、乐观 state_version、脱敏 RunSnapshot 与错误匹配的显式恢复，安全暴露 start/status/pause/resume/abort 和 Slice commit-mode override。",
+  "exclusions": [
+    "不提供远程服务，不连接或写入 Git 远端",
+    "不静默选择近似模型或降低 reasoning effort",
+    "不在用户未选择 RecoveryResolution 时试探恢复",
+    "不投影原始 provider、工具或 last_error.message 输出",
+    "不允许已进入 VERIFYING 的目标 Slice 修改 commit mode"
+  ],
+  "inputs": [
+    { "path": "contracts/slices/S02.json", "digest": "sha256:44ddff75f353160659331c24d2ae9e780ab7c380bec5b05eb6edf01b47e5a1e0", "producer_slice": "S02" },
+    { "path": "artifacts/s02/completion-receipt.json", "digest": "sha256:21897c4a55c145e285109ea2c0f065356f94249616497b2d8dd2225762032d98", "producer_slice": "S02" },
+    { "path": "contracts/slices/S05.json", "digest": "sha256:d785aefe0a2215e4c58c74bcccf4e8a2ab97a5f6288c815b84fdfb7e8f5bcd5a", "producer_slice": "S05" },
+    { "path": "artifacts/s05/completion-receipt.json", "digest": "sha256:d89d90ac8e26712b8b1d52243fcb983d1346a83a8c55331d6b6416cc6ebf9454", "producer_slice": "S05" },
+    { "path": "contracts/slices/S06.json", "digest": "sha256:22ca58a7eb60fbda3cf9218d6a6e16fc54be61d2b867130946a66b762e194861", "producer_slice": "S06" },
+    { "path": "artifacts/s06/completion-receipt.json", "digest": "sha256:aae657083738032e51a1e3c980ae64c9e53f789d7cc970e96d64a2c46e790735", "producer_slice": "S06" },
+    { "path": "contracts/slices/S10.json", "digest": "sha256:2bbb3b73223e71c65cc08f92373aa31c2851422a8563bfc69acd8b94353be269", "producer_slice": "S10" },
+    { "path": "artifacts/s10/completion-receipt.json", "digest": "sha256:fd72be19f5f36168dea8b3f70ec4d14a24814ab3bbf09d7fa87dbf7804c493b1", "producer_slice": "S10" },
+    { "path": "CONTEXT.md", "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef", "producer_slice": "frozen-design" },
+    { "path": "docs/auto-slice-design.md", "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a", "producer_slice": "frozen-design" },
+    { "path": "docs/implementation-slices.md", "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8", "producer_slice": "frozen-design" },
+    { "path": "docs/adr/0001-local-controller-and-task-isolation.md", "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec", "producer_slice": "frozen-design" },
+    { "path": "docs/adr/0002-deterministic-model-routing.md", "digest": "sha256:d0752d65132aa27689cf7c6f20a56cfeefaa144a537722c56a7a7a237950dc1a", "producer_slice": "frozen-design" },
+    { "path": "docs/adr/0003-commit-and-checkpoint-order.md", "digest": "sha256:f687019a8868b1442fe96426063c7c267084b915c0991ae9aa2f570206c5fe55", "producer_slice": "frozen-design" },
+    { "path": "docs/adr/0006-project-write-lease-log.md", "digest": "sha256:73a015f9bb6ea8c5fc7bfa17027fcbc1ad1e1f8ae0de0447c8c9011d21448661", "producer_slice": "S03" }
+  ],
+  "owned_paths": [
+    ".codex-plugin/plugin.json",
+    "skills/auto-slice-control/**",
+    "contracts/slices/S11.json",
+    "src/controller/control-plane/**",
+    "src/controller/main.ts",
+    "src/controller/state/types.ts",
+    "src/controller/state/index.ts",
+    "src/controller/state/validation.ts",
+    "src/controller/state/transitions.ts",
+    "src/controller/state/file-run-store.ts",
+    "test/control-plane.test.ts",
+    "test/controller.test.ts",
+    "scripts/verify-s11-evidence.mjs",
+    "scripts/verify-s11.mjs",
+    "package.json",
+    "artifacts/s11/**",
+    "docs/代码链路.md",
+    "docs/架构.md"
+  ],
+  "ports": [
+    { "name": "dispatch_control_command", "signature": "ControlPlane.execute(command, envelope) -> ControlCommandReceipt | ControlPlaneError" },
+    { "name": "project_run_status", "signature": "projectRunSnapshot(run) -> RunSnapshot" },
+    { "name": "persist_command_receipt", "signature": "FileCommandJournal.begin/complete(command_id, envelope_digest, receipt)" },
+    { "name": "resolve_needs_user", "signature": "ExplicitRecoveryPort.resolve(run, resolution, evidence, command_id) -> RecoveryPortReceipt" }
+  ],
+  "allowed_transitions": [
+    "nonterminal except NEEDS_USER/PAUSED -> PAUSED",
+    "PAUSED -> persisted paused_from_status",
+    "NEEDS_USER -> last_successful_status with matching explicit resolution",
+    "any nonterminal -> ABORTED",
+    "pre-VERIFYING target Slice -> same Run status with one commit-mode override"
+  ],
+  "failure_codes": [
+    "invalid_command_envelope",
+    "command_replay_conflict",
+    "command_in_progress",
+    "command_not_allowed",
+    "invalid_recovery_resolution",
+    "recovery_failed",
+    "pause_safe_point_failed",
+    "abort_cleanup_failed",
+    "slice_already_verifying",
+    "project_lock_unavailable",
+    "stale_state",
+    "state_persist_failed",
+    "state_corrupt"
+  ],
+  "checks": [
+    { "id": "build", "argv": ["npm", "run", "build"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": ["dist/src/controller/control-plane/index.js", "dist/src/controller/main.js"] },
+    { "id": "typecheck", "argv": ["npm", "run", "typecheck"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "test", "argv": ["npm", "run", "test"], "cwd": ".", "timeout_ms": 300000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "s11_evidence", "argv": ["node", "scripts/verify-s11-evidence.mjs"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "plugin_validation", "argv": ["npm", "run", "validate:plugin"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP", "CODEX_HOME", "PYTHON"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "lint", "argv": ["npm", "run", "lint"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] }
+  ],
+  "expected_artifacts": [
+    { "path": "artifacts/s11/control-matrix.json", "kind": "command_state_matrix" },
+    { "path": "artifacts/s11/command-dto.schema.json", "kind": "control_command_json_schema" },
+    { "path": "artifacts/s11/recovery-catalog.json", "kind": "needs_user_recovery_coverage" },
+    { "path": "artifacts/s11/control-invariant-report.json", "kind": "no_push_no_fallback_and_redaction_report" },
+    { "path": "artifacts/s11/completion-receipt.json", "kind": "completion_receipt" },
+    { "path": "docs/代码链路.md", "kind": "code_path_index" },
+    { "path": "docs/架构.md", "kind": "implementation_architecture" }
+  ],
+  "unlocks": ["S12"]
+}

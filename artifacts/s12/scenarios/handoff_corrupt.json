@@ -1,0 +1,11 @@
+{
+  "id": "handoff_corrupt",
+  "result": "PASS",
+  "assertions": {
+    "failure_code": "handoff_integrity_failed",
+    "failure_reason": "handoff_artifact_digest_mismatch",
+    "final_status": "NEEDS_USER",
+    "diagnostic_handoff_retained": true,
+    "continuation_tasks_created": 0
+  }
+}

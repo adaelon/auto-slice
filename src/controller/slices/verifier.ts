@@ -1,7 +1,12 @@
 import { readFileSync } from "node:fs";
 
 import type { WorkspaceIdentity } from "../../contracts/index.js";
-import { canonicalJson, sha256Bytes, sha256Json } from "../state/index.js";
+import {
+  canonicalJson,
+  sha256Bytes,
+  sha256Json,
+  type Sha256Digest,
+} from "../state/index.js";
 import { GitChangeGuard, WorkspaceGuardError } from "../workspace/index.js";
 import { parseSliceContractV1 } from "./contract-parser.js";
 import { SliceExecutionError } from "./errors.js";
@@ -120,6 +125,7 @@ export class SliceVerifier {
     rawContract: unknown,
     execution: ExecutionReceipt,
     workspace: WorkspaceIdentity,
+    externallyVerifiedOwnership?: { readonly owned_diff_digest: Sha256Digest },
   ): VerificationReceipt {
     const contract = parseSliceContractV1(rawContract);
     if (contract instanceof SliceExecutionError) {
@@ -210,38 +216,46 @@ export class SliceVerifier {
       }
     }
 
-    const changeSet = this.changeGuard.classify(
-      execution.protected_baseline,
-      liveSnapshot,
-      contract.owned_paths,
-    );
-    if (changeSet instanceof WorkspaceGuardError) {
-      return finalize(contract, execution, {
-        checkReceipts: execution.check_receipts,
-        artifactDigests,
-        ownedDiffDigest: null,
-        overlapPaths: [],
-        unownedPaths: [],
-        failureCode: "workspace_inspection_failed",
-      });
-    }
-    const ownedPatch = this.changeGuard.assertCommittable(changeSet);
     let ownershipFailure: SliceFailureCode | undefined;
     let ownedDiffDigest: `sha256:${string}` | null = null;
-    if (ownedPatch instanceof WorkspaceGuardError) {
-      ownershipFailure = changeSet.unowned_paths.length > 0
-        ? "unowned_change_detected"
-        : "protected_change_overlap";
+    let overlapPaths: readonly string[] = [];
+    let unownedPaths: readonly string[] = [];
+    if (externallyVerifiedOwnership !== undefined) {
+      ownedDiffDigest = externallyVerifiedOwnership.owned_diff_digest;
     } else {
-      ownedDiffDigest = ownedPatch.patch_digest;
+      const changeSet = this.changeGuard.classify(
+        execution.protected_baseline,
+        liveSnapshot,
+        contract.owned_paths,
+      );
+      if (changeSet instanceof WorkspaceGuardError) {
+        return finalize(contract, execution, {
+          checkReceipts: execution.check_receipts,
+          artifactDigests,
+          ownedDiffDigest: null,
+          overlapPaths: [],
+          unownedPaths: [],
+          failureCode: "workspace_inspection_failed",
+        });
+      }
+      overlapPaths = changeSet.overlap_paths;
+      unownedPaths = changeSet.unowned_paths;
+      const ownedPatch = this.changeGuard.assertCommittable(changeSet);
+      if (ownedPatch instanceof WorkspaceGuardError) {
+        ownershipFailure = changeSet.unowned_paths.length > 0
+          ? "unowned_change_detected"
+          : "protected_change_overlap";
+      } else {
+        ownedDiffDigest = ownedPatch.patch_digest;
+      }
     }
 
     return finalize(contract, execution, {
       checkReceipts: execution.check_receipts,
       artifactDigests,
       ownedDiffDigest,
-      overlapPaths: changeSet.overlap_paths,
-      unownedPaths: changeSet.unowned_paths,
+      overlapPaths,
+      unownedPaths,
       failureCode: checkFailure(execution.check_receipts) ?? artifactFailure ?? ownershipFailure,
     });
   }

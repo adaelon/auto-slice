@@ -24,6 +24,8 @@ export type RunStatus = (typeof RUN_STATUSES)[number];
 export type CommitMode = "after_slice" | "none";
 export type Sha256Digest = `sha256:${string}`;
 
+export type SliceCommitModeOverrides = Readonly<Record<string, CommitMode>>;
+
 export interface RunCompactionState {
   readonly compaction_id: string;
   readonly observed_started_at: string;
@@ -63,6 +65,8 @@ export interface RunState {
   readonly compaction?: RunCompactionState;
   readonly handoff?: RunHandoffState;
   readonly last_error?: RunFailureState;
+  readonly paused_from_status?: RunStatus;
+  readonly slice_commit_mode_overrides?: SliceCommitModeOverrides;
 }
 
 export interface InitialRunStateInput {
@@ -77,12 +81,15 @@ export interface InitialRunStateInput {
 export interface RunStateUpdates {
   readonly commit_mode?: CommitMode;
   readonly current_slice_id?: string | null;
+  readonly protected_baseline_digest?: Sha256Digest;
   readonly project_lock_owner?: string | null;
   readonly write_epoch?: number;
   readonly source_thread_id?: string | null;
   readonly compaction?: RunCompactionState | null;
   readonly handoff?: RunHandoffState | null;
   readonly last_error?: RunFailureState | null;
+  readonly paused_from_status?: RunStatus | null;
+  readonly slice_commit_mode_overrides?: SliceCommitModeOverrides | null;
 }
 
 export interface RunTransition {

@@ -1,0 +1,299 @@
+{
+  "schema_version": 1,
+  "slice_id": "S11",
+  "contract_digest": "sha256:07044eeb55b34142e3ecbd5cb9d09ecdd58b227061b41e9b145f34c9b61bf94f",
+  "input_digests": [
+    {
+      "path": "contracts/slices/S02.json",
+      "digest": "sha256:44ddff75f353160659331c24d2ae9e780ab7c380bec5b05eb6edf01b47e5a1e0"
+    },
+    {
+      "path": "artifacts/s02/completion-receipt.json",
+      "digest": "sha256:21897c4a55c145e285109ea2c0f065356f94249616497b2d8dd2225762032d98"
+    },
+    {
+      "path": "contracts/slices/S05.json",
+      "digest": "sha256:d785aefe0a2215e4c58c74bcccf4e8a2ab97a5f6288c815b84fdfb7e8f5bcd5a"
+    },
+    {
+      "path": "artifacts/s05/completion-receipt.json",
+      "digest": "sha256:d89d90ac8e26712b8b1d52243fcb983d1346a83a8c55331d6b6416cc6ebf9454"
+    },
+    {
+      "path": "contracts/slices/S06.json",
+      "digest": "sha256:22ca58a7eb60fbda3cf9218d6a6e16fc54be61d2b867130946a66b762e194861"
+    },
+    {
+      "path": "artifacts/s06/completion-receipt.json",
+      "digest": "sha256:aae657083738032e51a1e3c980ae64c9e53f789d7cc970e96d64a2c46e790735"
+    },
+    {
+      "path": "contracts/slices/S10.json",
+      "digest": "sha256:2bbb3b73223e71c65cc08f92373aa31c2851422a8563bfc69acd8b94353be269"
+    },
+    {
+      "path": "artifacts/s10/completion-receipt.json",
+      "digest": "sha256:fd72be19f5f36168dea8b3f70ec4d14a24814ab3bbf09d7fa87dbf7804c493b1"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec"
+    },
+    {
+      "path": "docs/adr/0002-deterministic-model-routing.md",
+      "digest": "sha256:d0752d65132aa27689cf7c6f20a56cfeefaa144a537722c56a7a7a237950dc1a"
+    },
+    {
+      "path": "docs/adr/0003-commit-and-checkpoint-order.md",
+      "digest": "sha256:f687019a8868b1442fe96426063c7c267084b915c0991ae9aa2f570206c5fe55"
+    },
+    {
+      "path": "docs/adr/0006-project-write-lease-log.md",
+      "digest": "sha256:73a015f9bb6ea8c5fc7bfa17027fcbc1ad1e1f8ae0de0447c8c9011d21448661"
+    }
+  ],
+  "output_digests": [
+    {
+      "path": ".codex-plugin/plugin.json",
+      "digest": "sha256:2ba1eba72cc21a0341000bdd528ae5fcfb66d18c3679edd72e86f9f6f726d121"
+    },
+    {
+      "path": "artifacts/s11/command-dto.schema.json",
+      "digest": "sha256:d8ecd8f152f4696b5de750771fb7e3b452ae8cdb68da73da990b6f904f4fe5ec"
+    },
+    {
+      "path": "artifacts/s11/control-invariant-report.json",
+      "digest": "sha256:9a68d933056b7c5806cc165fc328963b1713c70b5d8c025108fbbfa66ec8e1e4"
+    },
+    {
+      "path": "artifacts/s11/control-matrix.json",
+      "digest": "sha256:bc710834216b5ea0733c9a370e37b65a37d2e0a78b69a48d99f4d614c921be3e"
+    },
+    {
+      "path": "artifacts/s11/recovery-catalog.json",
+      "digest": "sha256:d3e5d887a2f1d67a8c2c8a28754dc0efed82fb740fdd9d1936da920b00a6ed26"
+    },
+    {
+      "path": "contracts/slices/S11.json",
+      "digest": "sha256:07044eeb55b34142e3ecbd5cb9d09ecdd58b227061b41e9b145f34c9b61bf94f"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:a9d931c0d0f359b54fa90c44de4b2de36cdfaec15ceaf08cd1b56dc986dcc27b"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:ee56543f8fe9fcf40339f1759407c2c91105bb643c40e2b1535fb3a59b2d6d40"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:9dca31c8c0282a7542cd790c6ffbec8f4c352dc5ecab509d1376eefde26e288b"
+    },
+    {
+      "path": "scripts/verify-s11-evidence.mjs",
+      "digest": "sha256:12147b15f2ddfc14e3af15426b6b563c2f052802c4306258548de34b953e0ab7"
+    },
+    {
+      "path": "scripts/verify-s11.mjs",
+      "digest": "sha256:82892acc1b5c74be9363f1e10d4a899ce6fff1afedbe3a45be8ebf4d9b1f23e3"
+    },
+    {
+      "path": "skills/auto-slice-control/SKILL.md",
+      "digest": "sha256:075a20684a252124da0f0d79eb4aa173bdb77d25e5aed7bdc4a763c0fda94662"
+    },
+    {
+      "path": "src/controller/control-plane/control-matrix.ts",
+      "digest": "sha256:ae98cc21327d3ab816a29aea2d79803b9a5e15e4ad7bf5bbd4e4c2bc423b9a28"
+    },
+    {
+      "path": "src/controller/control-plane/control-plane.ts",
+      "digest": "sha256:ccf6254a5017ae5b3dfd7258073b20340b9db4250ce8d36fbb89bcf7157273ff"
+    },
+    {
+      "path": "src/controller/control-plane/dto-schema.ts",
+      "digest": "sha256:7ada9c4354a6c5fd663b6fb577657cbded95d5560b7f6ef9c5249f26589252b7"
+    },
+    {
+      "path": "src/controller/control-plane/errors.ts",
+      "digest": "sha256:3d90ab83b328e6ebf4e1c6c0a39cd99b11ded7f4a67f8c82a576408b40908f12"
+    },
+    {
+      "path": "src/controller/control-plane/file-command-journal.ts",
+      "digest": "sha256:46afa45d37a838163cd75bcd4060bccd22d6de09d903c1f73b7a99ba5b42e3f5"
+    },
+    {
+      "path": "src/controller/control-plane/index.ts",
+      "digest": "sha256:c5fa22fc0dfeb5a519cbb8c3184cd68ef3ad132069340d5bb0a995e8dffb9a43"
+    },
+    {
+      "path": "src/controller/control-plane/recovery-catalog.ts",
+      "digest": "sha256:b53e5061b84032abdd28d91191a3a1136e6f6bde01fa45728f58a7403b579d06"
+    },
+    {
+      "path": "src/controller/control-plane/runtime.ts",
+      "digest": "sha256:f754fada42100a727f6bb18b27da63c308e852cbe533816adddaf6970cb8a8ef"
+    },
+    {
+      "path": "src/controller/control-plane/status-projector.ts",
+      "digest": "sha256:45d2e513d598422fdea6c46c8a84def67fccfbefc0912275bd614ce5faa64fc2"
+    },
+    {
+      "path": "src/controller/control-plane/types.ts",
+      "digest": "sha256:184f9e154e2d95dda1d9de4f884a08889e7e499f6abbb2721d8399e0f8233e72"
+    },
+    {
+      "path": "src/controller/main.ts",
+      "digest": "sha256:7e7aedc9d46bdf1bdcc2e153aa2bd4a90da441892030c32a7d5560dd172ad264"
+    },
+    {
+      "path": "src/controller/state/file-run-store.ts",
+      "digest": "sha256:950b138a37bef3b2a6ebacc6482a1abfae78dee2219ab7ef332a338cbce2e3a0"
+    },
+    {
+      "path": "src/controller/state/index.ts",
+      "digest": "sha256:8ccdb005d202f487ba2471897402e02946485b338f16e663709142ada8bf36ae"
+    },
+    {
+      "path": "src/controller/state/transitions.ts",
+      "digest": "sha256:7a5c015820caaf5a0549ebf545895e55a136545a405cdcaabc052ff913cc126d"
+    },
+    {
+      "path": "src/controller/state/types.ts",
+      "digest": "sha256:033965f8d2f8da886e0bd5b5aaff60314dee7550bcf4c353e334029c3277d94b"
+    },
+    {
+      "path": "src/controller/state/validation.ts",
+      "digest": "sha256:c1e2dbf0bfe99dc4c788b112ea6ac8ad434eea9d6378a1b2bec5d14e1013afb7"
+    },
+    {
+      "path": "test/control-plane.test.ts",
+      "digest": "sha256:a507fdfc3021631fc87c37bf6e57efc2f40b53ee06daf7870c1fce8eef90ee1b"
+    },
+    {
+      "path": "test/controller.test.ts",
+      "digest": "sha256:fb00429bfe16503c6b52744e2816dc818d776f8ebba7a975527db983436b0ddf"
+    }
+  ],
+  "touched_paths": [
+    ".codex-plugin/plugin.json",
+    "artifacts/s11/command-dto.schema.json",
+    "artifacts/s11/completion-receipt.json",
+    "artifacts/s11/control-invariant-report.json",
+    "artifacts/s11/control-matrix.json",
+    "artifacts/s11/recovery-catalog.json",
+    "contracts/slices/S11.json",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "package.json",
+    "scripts/verify-s11-evidence.mjs",
+    "scripts/verify-s11.mjs",
+    "skills/auto-slice-control/SKILL.md",
+    "src/controller/control-plane/control-matrix.ts",
+    "src/controller/control-plane/control-plane.ts",
+    "src/controller/control-plane/dto-schema.ts",
+    "src/controller/control-plane/errors.ts",
+    "src/controller/control-plane/file-command-journal.ts",
+    "src/controller/control-plane/index.ts",
+    "src/controller/control-plane/recovery-catalog.ts",
+    "src/controller/control-plane/runtime.ts",
+    "src/controller/control-plane/status-projector.ts",
+    "src/controller/control-plane/types.ts",
+    "src/controller/main.ts",
+    "src/controller/state/file-run-store.ts",
+    "src/controller/state/index.ts",
+    "src/controller/state/transitions.ts",
+    "src/controller/state/types.ts",
+    "src/controller/state/validation.ts",
+    "test/control-plane.test.ts",
+    "test/controller.test.ts"
+  ],
+  "check_receipts": [
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ca622aa6b87a4fbd135ae14f841cd92016f6ce189674c007da77682d9bc3fe7a",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 5064
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b4d5eeaf054ffadd6ba18423f31f81288f54bd16be7a5390eafbb745eeba53dc",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 4276
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:2172c6722f9130f0e2988a7af4262f1322bd4f65e5a616f19291a5d3189234dc",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 130974
+    },
+    {
+      "check_id": "s11_evidence",
+      "argv": [
+        "node",
+        "scripts/verify-s11-evidence.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:5d770da691fee5cbcf1ab32eb6095a53cb7b4f24acd3f7114b85b0c2e19f8bc0",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 431
+    },
+    {
+      "check_id": "plugin_validation",
+      "argv": [
+        "npm",
+        "run",
+        "validate:plugin"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:8d2e71d28f84282b4ff2b50b55581cefb572fb55a11155cce10787d1f93dfea5",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 1810
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:50bf418d3f46fa3975eade28b9f81047ee52461d61415cc22546263c0cca2afe",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 21125
+    }
+  ],
+  "start_head": "9b95aed63572560e000314a7ca71fe10b1de95ee",
+  "end_head": null,
+  "owned_diff_digest": "sha256:11f7dda3ab7cf5b87b8807e991d0e8d998bddf6ac198df8a2a6ce07f43906ddf",
+  "completed_at": "2026-08-09T10:16:21.061Z"
+}

@@ -1,0 +1,156 @@
+{
+  "schema_version": 1,
+  "slice_id": "S12",
+  "fixture_digest": "sha256:f144f250e2266aff2e60ad4abffd46b628d13fa314858c1fd9075dd883913cff",
+  "normalized": true,
+  "scenarios": [
+    {
+      "id": "after_slice_happy_path",
+      "result": "PASS",
+      "assertions": {
+        "real_git_cli": true,
+        "real_process_check": true,
+        "commit_mode": "after_slice",
+        "commit_count_delta": 1,
+        "owned_commit_exact": true,
+        "checkpoint_contains_final_head": true,
+        "protected_changes_preserved": null,
+        "remote_count": 0,
+        "push_count": 0
+      }
+    },
+    {
+      "id": "none_happy_path",
+      "result": "PASS",
+      "assertions": {
+        "real_git_cli": true,
+        "real_process_check": true,
+        "commit_mode": "none",
+        "commit_count_delta": 0,
+        "owned_commit_exact": true,
+        "checkpoint_contains_final_head": true,
+        "protected_changes_preserved": null,
+        "remote_count": 0,
+        "push_count": 0
+      }
+    },
+    {
+      "id": "protected_change",
+      "result": "PASS",
+      "assertions": {
+        "real_git_cli": true,
+        "real_process_check": true,
+        "commit_mode": "after_slice",
+        "commit_count_delta": 1,
+        "owned_commit_exact": true,
+        "checkpoint_contains_final_head": true,
+        "protected_changes_preserved": true,
+        "remote_count": 0,
+        "push_count": 0
+      }
+    },
+    {
+      "id": "compaction_completed_29999",
+      "result": "PASS",
+      "assertions": {
+        "virtual_clock_ms": 29999,
+        "final_status": "SLICE_RUNNING",
+        "source_interrupted": false,
+        "new_tasks_created": 0
+      }
+    },
+    {
+      "id": "compaction_timeout_30000",
+      "result": "PASS",
+      "assertions": {
+        "virtual_clock_ms": 30000,
+        "source_interrupted": true,
+        "compression_task_created": true,
+        "continuation_task_created": true,
+        "uuid_distinct": true,
+        "persistent_task_records": 3,
+        "final_status": "SLICE_RUNNING",
+        "final_source_is_continuation": true,
+        "write_epoch_rotated": true
+      }
+    },
+    {
+      "id": "source_interrupt_failed",
+      "result": "PASS",
+      "assertions": {
+        "failure_code": "source_interrupt_failed",
+        "failure_reason": "interrupt_call_failed",
+        "final_status": "NEEDS_USER",
+        "writes_frozen": true,
+        "compression_tasks_created": 0
+      }
+    },
+    {
+      "id": "handoff_corrupt",
+      "result": "PASS",
+      "assertions": {
+        "failure_code": "handoff_integrity_failed",
+        "failure_reason": "handoff_artifact_digest_mismatch",
+        "final_status": "NEEDS_USER",
+        "diagnostic_handoff_retained": true,
+        "continuation_tasks_created": 0
+      }
+    },
+    {
+      "id": "continuation_start_failed",
+      "result": "PASS",
+      "assertions": {
+        "failure_code": "continuation_start_failed",
+        "failure_reason": "task_start_failed",
+        "final_status": "NEEDS_USER",
+        "handoff_retained": true,
+        "source_identity_retained": true,
+        "source_write_restored": false
+      }
+    },
+    {
+      "id": "controller_crash_recovery",
+      "result": "PASS",
+      "assertions": {
+        "recovered_interruption_outcome": "INTERRUPTED",
+        "interrupt_invocations": 2,
+        "interrupt_side_effects": 1,
+        "lease_event_actions": [
+          "ACQUIRED",
+          "FROZEN",
+          "EPOCH_ROTATED"
+        ],
+        "commit_count_delta_after_retry": 1,
+        "duplicate_tasks": 0,
+        "duplicate_commits": 0,
+        "double_writes": 0
+      }
+    },
+    {
+      "id": "dual_run_competition",
+      "result": "PASS",
+      "assertions": {
+        "real_processes": 2,
+        "acquired_runs": 1,
+        "rejected_runs": 1,
+        "rejection_code": "project_lock_unavailable",
+        "simultaneous_writers": 1
+      }
+    }
+  ],
+  "infrastructure": {
+    "isolated_local_git": true,
+    "real_git_cli": true,
+    "real_process_tree": true,
+    "real_file_lock": true,
+    "persistent_task_records": true,
+    "virtual_clock": true,
+    "skill_helper_smoke": {
+      "helper": "export-codex-handoff verify-evidence",
+      "input": "artifacts/s09/verified-test-handoff.evidence.json",
+      "result": "PASS"
+    },
+    "remote_git_connected": false
+  },
+  "result": "PASS"
+}

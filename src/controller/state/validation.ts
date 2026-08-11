@@ -186,6 +186,20 @@ function decodeFailure(value: unknown, code: StateStoreFailureCode): RunFailureS
   return record as unknown as RunFailureState;
 }
 
+function decodeSliceCommitModeOverrides(
+  value: unknown,
+  code: StateStoreFailureCode,
+): Readonly<Record<string, "after_slice" | "none">> {
+  const record = asRecord(value, "RunState.slice_commit_mode_overrides", code);
+  for (const [sliceId, mode] of Object.entries(record)) {
+    requireString(sliceId, "RunState.slice_commit_mode_overrides key", code);
+    if (mode !== "after_slice" && mode !== "none") {
+      fail(code, `RunState.slice_commit_mode_overrides.${sliceId} has an invalid mode.`);
+    }
+  }
+  return record as Readonly<Record<string, "after_slice" | "none">>;
+}
+
 export function decodeRunState(
   value: unknown,
   code: StateStoreFailureCode = "state_corrupt",
@@ -207,7 +221,13 @@ export function decodeRunState(
       "write_epoch",
       "source_thread_id",
     ],
-    ["compaction", "handoff", "last_error"],
+    [
+      "compaction",
+      "handoff",
+      "last_error",
+      "paused_from_status",
+      "slice_commit_mode_overrides",
+    ],
     "RunState",
     code,
   );
@@ -246,6 +266,20 @@ export function decodeRunState(
   }
   if (record.last_error !== undefined) {
     decodeFailure(record.last_error, code);
+  }
+  if (
+    record.paused_from_status !== undefined &&
+    (typeof record.paused_from_status !== "string" ||
+      !RUN_STATUS_SET.has(record.paused_from_status) ||
+      record.paused_from_status === "PAUSED" ||
+      record.paused_from_status === "NEEDS_USER" ||
+      record.paused_from_status === "DONE" ||
+      record.paused_from_status === "ABORTED")
+  ) {
+    fail(code, "RunState.paused_from_status is not a resumable Run status.");
+  }
+  if (record.slice_commit_mode_overrides !== undefined) {
+    decodeSliceCommitModeOverrides(record.slice_commit_mode_overrides, code);
   }
   return record as unknown as RunState;
 }

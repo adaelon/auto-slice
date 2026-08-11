@@ -15,6 +15,42 @@ import type {
 } from "../workspace/index.js";
 
 export const DEFAULT_SOURCE_INTERRUPT_TIMEOUT_MS = 30_000 as const;
+export const OPAQUE_STABLE_REVISION_BYTES = 64 as const;
+export const THREAD_REVISION_UNAVAILABLE = "UNAVAILABLE" as const;
+
+declare const OPAQUE_STABLE_REVISION_BRAND: unique symbol;
+
+export type OpaqueStableRevision = string & {
+  readonly [OPAQUE_STABLE_REVISION_BRAND]: true;
+};
+
+export type ThreadRevisionReadResult =
+  | OpaqueStableRevision
+  | typeof THREAD_REVISION_UNAVAILABLE;
+
+export function isOpaqueStableRevision(value: unknown): value is OpaqueStableRevision {
+  return (
+    typeof value === "string" &&
+    Buffer.byteLength(value, "utf8") === OPAQUE_STABLE_REVISION_BYTES &&
+    /^[A-Za-z0-9_-]+$/u.test(value)
+  );
+}
+
+export interface ThreadRevisionProvider {
+  read(threadId: string): Promise<ThreadRevisionReadResult>;
+}
+
+export interface ThreadSummary {
+  readonly thread_id: string;
+  readonly readable: true;
+  readonly archived: false;
+  readonly deleted: false;
+  readonly observed_at: string;
+}
+
+export interface ThreadMetadataPort {
+  inspect(threadId: string, includeTurns?: false): Promise<unknown>;
+}
 
 export interface InterruptReceipt {
   readonly thread_id: string;
@@ -33,9 +69,8 @@ export interface ThreadInspection {
   readonly observed_at: string;
 }
 
-export interface ThreadControlPort {
+export interface ThreadControlPort extends ThreadMetadataPort {
   interrupt(threadId: string, idempotencyKey: Sha256Digest): Promise<unknown>;
-  inspect(threadId: string): Promise<unknown>;
 }
 
 export interface SourceInterruptionRunStorePort {
@@ -102,6 +137,8 @@ export type SourceInterruptionFailureReason =
   | "interrupt_receipt_identity_mismatch"
   | "thread_inspection_failed"
   | "thread_not_persisted"
+  | "thread_revision_unavailable"
+  | "thread_revision_invalid"
   | "thread_revision_mismatch"
   | "receipt_replay_mismatch"
   | "write_epoch_rotation_failed";

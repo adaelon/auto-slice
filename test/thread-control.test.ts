@@ -31,6 +31,8 @@ const OBSERVED_AT = "2026-08-08T00:00:31.000Z";
 const INSPECTED_AT = "2026-08-08T00:00:31.001Z";
 const SOURCE_THREAD_ID = "thread-source-s08";
 const COMPACTION_ID = "compaction-s08";
+const STABLE_REVISION = "r".repeat(64);
+const SECOND_STABLE_REVISION = "s".repeat(64);
 
 interface Deferred {
   readonly promise: Promise<void>;
@@ -55,6 +57,8 @@ interface MemoryThreadControlOptions {
   readonly hang_interrupt?: boolean;
   readonly reject_interrupt?: boolean;
   readonly reject_inspection?: boolean;
+  readonly interrupt_error?: Error;
+  readonly inspection_error?: Error;
   readonly on_interrupt?: () => void;
   readonly receipt_transform?: (
     receipt: Readonly<Record<string, unknown>>,
@@ -68,11 +72,12 @@ interface MemoryThreadControlOptions {
 class MemoryThreadControl implements ThreadControlPort {
   public interrupt_invocations = 0;
   public interrupt_side_effects = 0;
+  public inspection_invocations = 0;
   public execution_stopped = false;
   public readable = true;
   public archived = false;
   public deleted = false;
-  public persisted_revision = "revision-s08-0001";
+  public persisted_revision = STABLE_REVISION;
   private readonly receipts = new Map<Sha256Digest, Readonly<Record<string, unknown>>>();
 
   public constructor(private readonly options: MemoryThreadControlOptions = {}) {}
@@ -88,6 +93,9 @@ class MemoryThreadControl implements ThreadControlPort {
     }
     if (this.options.reject_interrupt === true) {
       throw new Error("injected interrupt failure");
+    }
+    if (this.options.interrupt_error !== undefined) {
+      throw this.options.interrupt_error;
     }
     await this.options.gate;
     let receipt = this.receipts.get(idempotencyKey);
@@ -107,8 +115,12 @@ class MemoryThreadControl implements ThreadControlPort {
   }
 
   public inspect(threadId: string): Promise<unknown> {
+    this.inspection_invocations += 1;
     if (this.options.reject_inspection === true) {
       return Promise.reject(new Error("injected inspection failure"));
+    }
+    if (this.options.inspection_error !== undefined) {
+      return Promise.reject(this.options.inspection_error);
     }
     const inspection = {
       thread_id: threadId,
@@ -365,6 +377,38 @@ void test("the lease is frozen before interrupt and rejects writes both during a
 
 const FAILURE_SCENARIOS = [
   {
+    id: "revision_unavailable",
+    reason: "thread_revision_unavailable" as const,
+    expected_inspection_invocations: 0,
+    options: {
+      interrupt_error: new SourceInterruptionError(
+        "source_interrupt_failed",
+        "injected unavailable revision capability",
+        { reason: "thread_revision_unavailable" },
+      ),
+    },
+  },
+  {
+    id: "receipt_revision_invalid",
+    reason: "thread_revision_invalid" as const,
+    options: {
+      receipt_transform: (receipt: Readonly<Record<string, unknown>>) => ({
+        ...receipt,
+        persisted_revision: "short-token",
+      }),
+    },
+  },
+  {
+    id: "inspection_revision_invalid",
+    reason: "thread_revision_invalid" as const,
+    options: {
+      inspection_transform: (inspection: Readonly<Record<string, unknown>>) => ({
+        ...inspection,
+        persisted_revision: "short-token",
+      }),
+    },
+  },
+  {
     id: "receipt_identity_mismatch",
     reason: "interrupt_receipt_identity_mismatch" as const,
     options: {
@@ -410,7 +454,7 @@ const FAILURE_SCENARIOS = [
     options: {
       inspection_transform: (inspection: Readonly<Record<string, unknown>>) => ({
         ...inspection,
-        persisted_revision: "revision-impostor",
+        persisted_revision: "m".repeat(64),
       }),
     },
   },
@@ -433,9 +477,10 @@ const FAILURE_SCENARIOS = [
 for (const scenario of FAILURE_SCENARIOS) {
   void test(`fails closed with a frozen lease for ${scenario.id}`, async (context) => {
     const fixture = sourceInterruptingFixture(context, scenario.id);
+    const control = new MemoryThreadControl(scenario.options);
     const result = await coordinator(
       fixture,
-      new MemoryThreadControl(scenario.options),
+      control,
     ).interruptSource(
       fixture.run_id,
       fixture.lease.lease_id,
@@ -458,6 +503,9 @@ for (const scenario of FAILURE_SCENARIOS) {
       fixture.guard.assertWritable(fixture.lease.lease_id, fixture.lease.epoch),
       "lease_lost",
     );
+    if ("expected_inspection_invocations" in scenario) {
+      assert.equal(control.inspection_invocations, scenario.expected_inspection_invocations);
+    }
   });
 }
 
@@ -601,11 +649,11 @@ void test("a different terminal receipt on replay is rejected", async (context) 
     receipt_transform: (receipt, invocation) => {
       replaying = invocation > 1;
       return replaying
-        ? { ...receipt, persisted_revision: "revision-s08-0002" }
+        ? { ...receipt, persisted_revision: SECOND_STABLE_REVISION }
         : receipt;
     },
     inspection_transform: (inspection) => replaying
-      ? { ...inspection, persisted_revision: "revision-s08-0002" }
+      ? { ...inspection, persisted_revision: SECOND_STABLE_REVISION }
       : inspection,
   });
   const subject = coordinator(fixture, control);

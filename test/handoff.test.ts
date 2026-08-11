@@ -191,6 +191,10 @@ class MemoryCompressionLauncher implements CompressionTaskLauncher {
 
   public start(request: CompressionRequest): Promise<unknown> {
     this.start_invocations += 1;
+    assert.equal(
+      request.prompt,
+      `$export-codex-handoff ${SOURCE_THREAD_ID}`,
+    );
     const existing = this.starts.get(request.idempotency_key);
     if (existing !== undefined) {
       return existing;

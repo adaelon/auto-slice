@@ -1,0 +1,357 @@
+{
+  "schema_version": 1,
+  "result": "PASS",
+  "start_precondition": "no_active_run_for_workspace",
+  "entries": [
+    {
+      "command": "status",
+      "status": "IDLE",
+      "allowed": true
+    },
+    {
+      "command": "status",
+      "status": "PREPARING",
+      "allowed": true
+    },
+    {
+      "command": "status",
+      "status": "SLICE_RUNNING",
+      "allowed": true
+    },
+    {
+      "command": "status",
+      "status": "VERIFYING",
+      "allowed": true
+    },
+    {
+      "command": "status",
+      "status": "COMMITTING",
+      "allowed": true
+    },
+    {
+      "command": "status",
+      "status": "CHECKPOINTING",
+      "allowed": true
+    },
+    {
+      "command": "status",
+      "status": "COMPACTION_WAIT",
+      "allowed": true
+    },
+    {
+      "command": "status",
+      "status": "SOURCE_INTERRUPTING",
+      "allowed": true
+    },
+    {
+      "command": "status",
+      "status": "HANDOFF_EXPORTING",
+      "allowed": true
+    },
+    {
+      "command": "status",
+      "status": "CONTINUATION_STARTING",
+      "allowed": true
+    },
+    {
+      "command": "status",
+      "status": "PAUSED",
+      "allowed": true
+    },
+    {
+      "command": "status",
+      "status": "NEEDS_USER",
+      "allowed": true
+    },
+    {
+      "command": "status",
+      "status": "DONE",
+      "allowed": true
+    },
+    {
+      "command": "status",
+      "status": "ABORTED",
+      "allowed": true
+    },
+    {
+      "command": "pause",
+      "status": "IDLE",
+      "allowed": true
+    },
+    {
+      "command": "pause",
+      "status": "PREPARING",
+      "allowed": true
+    },
+    {
+      "command": "pause",
+      "status": "SLICE_RUNNING",
+      "allowed": true
+    },
+    {
+      "command": "pause",
+      "status": "VERIFYING",
+      "allowed": true
+    },
+    {
+      "command": "pause",
+      "status": "COMMITTING",
+      "allowed": true
+    },
+    {
+      "command": "pause",
+      "status": "CHECKPOINTING",
+      "allowed": true
+    },
+    {
+      "command": "pause",
+      "status": "COMPACTION_WAIT",
+      "allowed": true
+    },
+    {
+      "command": "pause",
+      "status": "SOURCE_INTERRUPTING",
+      "allowed": true
+    },
+    {
+      "command": "pause",
+      "status": "HANDOFF_EXPORTING",
+      "allowed": true
+    },
+    {
+      "command": "pause",
+      "status": "CONTINUATION_STARTING",
+      "allowed": true
+    },
+    {
+      "command": "pause",
+      "status": "PAUSED",
+      "allowed": false
+    },
+    {
+      "command": "pause",
+      "status": "NEEDS_USER",
+      "allowed": false
+    },
+    {
+      "command": "pause",
+      "status": "DONE",
+      "allowed": false
+    },
+    {
+      "command": "pause",
+      "status": "ABORTED",
+      "allowed": false
+    },
+    {
+      "command": "resume",
+      "status": "IDLE",
+      "allowed": false
+    },
+    {
+      "command": "resume",
+      "status": "PREPARING",
+      "allowed": false
+    },
+    {
+      "command": "resume",
+      "status": "SLICE_RUNNING",
+      "allowed": false
+    },
+    {
+      "command": "resume",
+      "status": "VERIFYING",
+      "allowed": false
+    },
+    {
+      "command": "resume",
+      "status": "COMMITTING",
+      "allowed": false
+    },
+    {
+      "command": "resume",
+      "status": "CHECKPOINTING",
+      "allowed": false
+    },
+    {
+      "command": "resume",
+      "status": "COMPACTION_WAIT",
+      "allowed": false
+    },
+    {
+      "command": "resume",
+      "status": "SOURCE_INTERRUPTING",
+      "allowed": false
+    },
+    {
+      "command": "resume",
+      "status": "HANDOFF_EXPORTING",
+      "allowed": false
+    },
+    {
+      "command": "resume",
+      "status": "CONTINUATION_STARTING",
+      "allowed": false
+    },
+    {
+      "command": "resume",
+      "status": "PAUSED",
+      "allowed": true
+    },
+    {
+      "command": "resume",
+      "status": "NEEDS_USER",
+      "allowed": true
+    },
+    {
+      "command": "resume",
+      "status": "DONE",
+      "allowed": false
+    },
+    {
+      "command": "resume",
+      "status": "ABORTED",
+      "allowed": false
+    },
+    {
+      "command": "abort",
+      "status": "IDLE",
+      "allowed": true
+    },
+    {
+      "command": "abort",
+      "status": "PREPARING",
+      "allowed": true
+    },
+    {
+      "command": "abort",
+      "status": "SLICE_RUNNING",
+      "allowed": true
+    },
+    {
+      "command": "abort",
+      "status": "VERIFYING",
+      "allowed": true
+    },
+    {
+      "command": "abort",
+      "status": "COMMITTING",
+      "allowed": true
+    },
+    {
+      "command": "abort",
+      "status": "CHECKPOINTING",
+      "allowed": true
+    },
+    {
+      "command": "abort",
+      "status": "COMPACTION_WAIT",
+      "allowed": true
+    },
+    {
+      "command": "abort",
+      "status": "SOURCE_INTERRUPTING",
+      "allowed": true
+    },
+    {
+      "command": "abort",
+      "status": "HANDOFF_EXPORTING",
+      "allowed": true
+    },
+    {
+      "command": "abort",
+      "status": "CONTINUATION_STARTING",
+      "allowed": true
+    },
+    {
+      "command": "abort",
+      "status": "PAUSED",
+      "allowed": true
+    },
+    {
+      "command": "abort",
+      "status": "NEEDS_USER",
+      "allowed": true
+    },
+    {
+      "command": "abort",
+      "status": "DONE",
+      "allowed": false
+    },
+    {
+      "command": "abort",
+      "status": "ABORTED",
+      "allowed": false
+    },
+    {
+      "command": "override",
+      "status": "IDLE",
+      "allowed": true
+    },
+    {
+      "command": "override",
+      "status": "PREPARING",
+      "allowed": true
+    },
+    {
+      "command": "override",
+      "status": "SLICE_RUNNING",
+      "allowed": true
+    },
+    {
+      "command": "override",
+      "status": "VERIFYING",
+      "allowed": true
+    },
+    {
+      "command": "override",
+      "status": "COMMITTING",
+      "allowed": true
+    },
+    {
+      "command": "override",
+      "status": "CHECKPOINTING",
+      "allowed": true
+    },
+    {
+      "command": "override",
+      "status": "COMPACTION_WAIT",
+      "allowed": true
+    },
+    {
+      "command": "override",
+      "status": "SOURCE_INTERRUPTING",
+      "allowed": true
+    },
+    {
+      "command": "override",
+      "status": "HANDOFF_EXPORTING",
+      "allowed": true
+    },
+    {
+      "command": "override",
+      "status": "CONTINUATION_STARTING",
+      "allowed": true
+    },
+    {
+      "command": "override",
+      "status": "PAUSED",
+      "allowed": true
+    },
+    {
+      "command": "override",
+      "status": "NEEDS_USER",
+      "allowed": true
+    },
+    {
+      "command": "override",
+      "status": "DONE",
+      "allowed": false
+    },
+    {
+      "command": "override",
+      "status": "ABORTED",
+      "allowed": false
+    }
+  ]
+}

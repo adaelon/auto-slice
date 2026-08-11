@@ -1,0 +1,65 @@
+{
+  "schema_version": 1,
+  "slice_id": "S13",
+  "items": [
+    {
+      "id": "build",
+      "passed": true
+    },
+    {
+      "id": "typecheck",
+      "passed": true
+    },
+    {
+      "id": "test",
+      "passed": true
+    },
+    {
+      "id": "normalized_production_entry_repeat",
+      "passed": true
+    },
+    {
+      "id": "real_file_plan_to_orchestrator",
+      "passed": true
+    },
+    {
+      "id": "commit_mode_none",
+      "passed": true
+    },
+    {
+      "id": "no_commit_or_head_change",
+      "passed": true
+    },
+    {
+      "id": "no_remote_or_push",
+      "passed": true
+    },
+    {
+      "id": "state_outside_workspace",
+      "passed": true
+    },
+    {
+      "id": "unconfigured_handoff_fails_closed",
+      "passed": true
+    },
+    {
+      "id": "markdown_links",
+      "passed": true
+    },
+    {
+      "id": "plugin_validation",
+      "passed": true
+    },
+    {
+      "id": "lint",
+      "passed": true
+    },
+    {
+      "id": "temporary_pilot_only",
+      "passed": true
+    }
+  ],
+  "next_gate": "personal_plugin_install_and_temporary_pilot",
+  "production_workspace_run_authorized": false,
+  "result": "PASS"
+}

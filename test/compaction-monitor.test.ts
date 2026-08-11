@@ -7,6 +7,7 @@ import test, { type TestContext } from "node:test";
 import {
   CompactionMonitor,
   CompactionMonitorError,
+  nextCompactionProbeElapsedMs,
   type Clock,
   type DeadlineScheduler,
   type HostCompactionObservability,
@@ -19,6 +20,8 @@ import {
   StateStoreError,
   type StoredRun,
 } from "../src/controller/state/index.js";
+
+const MINUTE_MS = 60_000;
 
 const STARTED_AT = "2026-08-08T00:00:00.000Z";
 const SOURCE_THREAD_ID = "thread-source-s07";
@@ -177,6 +180,19 @@ function completed(observedAt: string, sequence = 2, overrides: Readonly<Record<
     ...overrides,
   };
 }
+
+void test("segmented content-probe cadence selects 20/30/35/40/42 minute boundaries", () => {
+  assert.equal(nextCompactionProbeElapsedMs(19 * MINUTE_MS + 59_000), 20 * MINUTE_MS);
+  assert.equal(nextCompactionProbeElapsedMs(20 * MINUTE_MS), 20 * MINUTE_MS);
+  assert.equal(nextCompactionProbeElapsedMs(20 * MINUTE_MS, false), 30 * MINUTE_MS);
+  assert.equal(nextCompactionProbeElapsedMs(29 * MINUTE_MS + 59_000), 30 * MINUTE_MS);
+  assert.equal(nextCompactionProbeElapsedMs(30 * MINUTE_MS), 30 * MINUTE_MS);
+  assert.equal(nextCompactionProbeElapsedMs(30 * MINUTE_MS, false), 35 * MINUTE_MS);
+  assert.equal(nextCompactionProbeElapsedMs(35 * MINUTE_MS), 35 * MINUTE_MS);
+  assert.equal(nextCompactionProbeElapsedMs(40 * MINUTE_MS), 40 * MINUTE_MS);
+  assert.equal(nextCompactionProbeElapsedMs(42 * MINUTE_MS), 42 * MINUTE_MS);
+  assert.equal(nextCompactionProbeElapsedMs(42 * MINUTE_MS, false), 44 * MINUTE_MS);
+});
 
 void test("29.999s and exactly 30s completion recover, while 30.001s takes the timeout path", (context) => {
   const scenarios = [

@@ -1,0 +1,370 @@
+{
+  "schema_version": 1,
+  "slice_id": "S12",
+  "contract_digest": "sha256:d720d72f50196b0b3bc0918dd49d317450189cfacf40a38315acb9e68df639e8",
+  "input_digests": [
+    {
+      "path": "contracts/slices/S01.json",
+      "digest": "sha256:65bf82aaec4e6362b8971323c1a7e169eabf456455dc7603344df8beaedf448d"
+    },
+    {
+      "path": "artifacts/s01/completion-receipt.json",
+      "digest": "sha256:244e7b2d75a27ff77e9e0747a8553c09b21d6b79372133bf22e7474e1cbc4ef9"
+    },
+    {
+      "path": "contracts/slices/S02.json",
+      "digest": "sha256:44ddff75f353160659331c24d2ae9e780ab7c380bec5b05eb6edf01b47e5a1e0"
+    },
+    {
+      "path": "artifacts/s02/completion-receipt.json",
+      "digest": "sha256:21897c4a55c145e285109ea2c0f065356f94249616497b2d8dd2225762032d98"
+    },
+    {
+      "path": "contracts/slices/S03.json",
+      "digest": "sha256:2f3b231fc9652b6a464a8787e7705d9853091b539adc360e08f5ca9ac327b922"
+    },
+    {
+      "path": "artifacts/s03/completion-receipt.json",
+      "digest": "sha256:2272647e961ac4adacb39d74eb53c68145b4206d28be2f3f679eb5a05730d02e"
+    },
+    {
+      "path": "contracts/slices/S04.json",
+      "digest": "sha256:14abc23f94f6d8f75f291c0dfb04b318434f0edaae5d702b1c10485066ca63e4"
+    },
+    {
+      "path": "artifacts/s04/completion-receipt.json",
+      "digest": "sha256:6f4b8e43ed3d82d294c46049b904bb20723583a901a1d930d48cfb4d4b41110a"
+    },
+    {
+      "path": "contracts/slices/S05.json",
+      "digest": "sha256:d785aefe0a2215e4c58c74bcccf4e8a2ab97a5f6288c815b84fdfb7e8f5bcd5a"
+    },
+    {
+      "path": "artifacts/s05/completion-receipt.json",
+      "digest": "sha256:d89d90ac8e26712b8b1d52243fcb983d1346a83a8c55331d6b6416cc6ebf9454"
+    },
+    {
+      "path": "contracts/slices/S06.json",
+      "digest": "sha256:22ca58a7eb60fbda3cf9218d6a6e16fc54be61d2b867130946a66b762e194861"
+    },
+    {
+      "path": "artifacts/s06/completion-receipt.json",
+      "digest": "sha256:aae657083738032e51a1e3c980ae64c9e53f789d7cc970e96d64a2c46e790735"
+    },
+    {
+      "path": "contracts/slices/S07.json",
+      "digest": "sha256:59f4695702105d7807f8984bab2d0cada941db486d831cc9681ef7c0868778b2"
+    },
+    {
+      "path": "artifacts/s07/completion-receipt.json",
+      "digest": "sha256:0d96833541fd3c3b5ac499d3a04563533298c48efe02ae06790cb42b41606508"
+    },
+    {
+      "path": "contracts/slices/S08.json",
+      "digest": "sha256:7dd872284c0b9cf9dcd24e5672cc8a44f93130fd7149a9c02ddce0bc1f807f4e"
+    },
+    {
+      "path": "artifacts/s08/completion-receipt.json",
+      "digest": "sha256:a9a6239e512319c8beb40cd1b08ec983f050dd8881a021d7227c4e344803de7b"
+    },
+    {
+      "path": "contracts/slices/S09.json",
+      "digest": "sha256:74bce51247ca22f0276fe7284d3312608dae7e6b5a8adc1cb37c044dac1c5bc1"
+    },
+    {
+      "path": "artifacts/s09/completion-receipt.json",
+      "digest": "sha256:f749c280d37481343eac9ef04b9a965a43b7c1c54a092b559507c15d81f320ec"
+    },
+    {
+      "path": "contracts/slices/S10.json",
+      "digest": "sha256:2bbb3b73223e71c65cc08f92373aa31c2851422a8563bfc69acd8b94353be269"
+    },
+    {
+      "path": "artifacts/s10/completion-receipt.json",
+      "digest": "sha256:fd72be19f5f36168dea8b3f70ec4d14a24814ab3bbf09d7fa87dbf7804c493b1"
+    },
+    {
+      "path": "contracts/slices/S11.json",
+      "digest": "sha256:07044eeb55b34142e3ecbd5cb9d09ecdd58b227061b41e9b145f34c9b61bf94f"
+    },
+    {
+      "path": "artifacts/s11/completion-receipt.json",
+      "digest": "sha256:ebe0b86f87399baf9f37dfab8fdd96188d0756a0ca3de0cc39b226c9f0a9e169"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:390baf25960d3c19d3f161dd3691aa7cbcdd987993d3e12e5e3deb66817c78ef"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:69af3c513f87a21b998b9429849bd99ca51b56c8787e89326340a7343624c7e8"
+    },
+    {
+      "path": "docs/adr/0001-local-controller-and-task-isolation.md",
+      "digest": "sha256:d5c764a4d6f3c02137b7b43d8f6a883e5b65e0cc37ff0613e4bc5d2b2b679eec"
+    },
+    {
+      "path": "docs/adr/0002-deterministic-model-routing.md",
+      "digest": "sha256:d0752d65132aa27689cf7c6f20a56cfeefaa144a537722c56a7a7a237950dc1a"
+    },
+    {
+      "path": "docs/adr/0003-commit-and-checkpoint-order.md",
+      "digest": "sha256:f687019a8868b1442fe96426063c7c267084b915c0991ae9aa2f570206c5fe55"
+    },
+    {
+      "path": "docs/adr/0004-compaction-timeout-handoff.md",
+      "digest": "sha256:3c76c8af78e292890e5ecd6743a0ad538886916858f2265f119dce9a96e12886"
+    },
+    {
+      "path": "docs/adr/0005-directory-event-store.md",
+      "digest": "sha256:fa5797d3133d8c8168080337ce3e34c4fe7d4415c5860ed8b3497e8b9f2d021b"
+    },
+    {
+      "path": "docs/adr/0006-project-write-lease-log.md",
+      "digest": "sha256:73a015f9bb6ea8c5fc7bfa17027fcbc1ad1e1f8ae0de0447c8c9011d21448661"
+    }
+  ],
+  "output_digests": [
+    {
+      "path": "artifacts/s12/contract-coverage.json",
+      "digest": "sha256:2be3d68978017da8a5c6bd2f03cb0777b8274bb38687fe656e3c0dda5d00c99d"
+    },
+    {
+      "path": "artifacts/s12/e2e-report.json",
+      "digest": "sha256:7686ec26cc4be9a049a55ffadc713b25c845a9e730b0b19b33394ac86c04a8c7"
+    },
+    {
+      "path": "artifacts/s12/release-readiness-checklist.json",
+      "digest": "sha256:d0e770b9c0fd07a1be2d54ad029b1e61f00d6432eb8dd8211217659e6e3d1cbe"
+    },
+    {
+      "path": "artifacts/s12/scenarios/after_slice_happy_path.json",
+      "digest": "sha256:7fc1f042f1fbdb241792380d419378c482e3469ea0a1b6f428ee3419fda4eb73"
+    },
+    {
+      "path": "artifacts/s12/scenarios/compaction_completed_29999.json",
+      "digest": "sha256:c64cb909f584af50c4f20b78870b38a7b188a836e56c53f5ca9b023061d28dbe"
+    },
+    {
+      "path": "artifacts/s12/scenarios/compaction_timeout_30000.json",
+      "digest": "sha256:38429b0a6d06bb5f4e7a743d0231fe5aa38bd869bfad660f5b4d6261a8f93b1b"
+    },
+    {
+      "path": "artifacts/s12/scenarios/continuation_start_failed.json",
+      "digest": "sha256:7e872cdf7c0d2b01c9a2f2d417bad5812f51cb7d89261ba6fc544a57d3ad76e3"
+    },
+    {
+      "path": "artifacts/s12/scenarios/controller_crash_recovery.json",
+      "digest": "sha256:f6acf7bcbd745ad4881b5e10a0ad9199e8f5733f865347ac3c836d68a0f0e2a8"
+    },
+    {
+      "path": "artifacts/s12/scenarios/dual_run_competition.json",
+      "digest": "sha256:320fcb8baa8d3ecdf9b02f3e278425ac36a9aff287ec0b11be8667f82ef70993"
+    },
+    {
+      "path": "artifacts/s12/scenarios/handoff_corrupt.json",
+      "digest": "sha256:d9e40dff0a0a204e2d55c5ba23673d0d20b9fd309eb83a761884713cf5ebba58"
+    },
+    {
+      "path": "artifacts/s12/scenarios/none_happy_path.json",
+      "digest": "sha256:d0ef22cf4b281bca6006c9be9d4a3f68be814d2a5be6d8c743e9c9480ed47be8"
+    },
+    {
+      "path": "artifacts/s12/scenarios/protected_change.json",
+      "digest": "sha256:d6b8bdbd001dc1be627a4764b7ea49cef07bc9d6b8df83e770d512940da5cbb8"
+    },
+    {
+      "path": "artifacts/s12/scenarios/source_interrupt_failed.json",
+      "digest": "sha256:cff141c2e6b5a31e2cff5aeb7988d07e14b0150320f7382b561e46dc2d554d7e"
+    },
+    {
+      "path": "contracts/slices/S12.json",
+      "digest": "sha256:d720d72f50196b0b3bc0918dd49d317450189cfacf40a38315acb9e68df639e8"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:e665e5a35d63b7414face239b3bcd0a8bb1c69f9ba445443762309afb01e73aa"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:c70af101082ee1b2a7a115b39e2cc9a80f056880aed84c450de7020a9a6929f9"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:660b60606fdbbe95c18689884572a3f39d69a6e1e7f8e4023acf965e723bb99c"
+    },
+    {
+      "path": "scripts/check-markdown-links.mjs",
+      "digest": "sha256:9992c390486fd5fb5656aa0bae0c35d6081101132ebb0e524f4c4941bda7418b"
+    },
+    {
+      "path": "scripts/run-s12-e2e.mjs",
+      "digest": "sha256:bc6f58a0b3e9df25da967ae0913eb825091a1a52790eed0cf2feae28452a4516"
+    },
+    {
+      "path": "scripts/verify-s12.mjs",
+      "digest": "sha256:e3112bab6923992a71832d7d125504a6bbbb9281b7c40e0f5009f806facb3e26"
+    },
+    {
+      "path": "test/fixtures/s12/scenarios.json",
+      "digest": "sha256:f144f250e2266aff2e60ad4abffd46b628d13fa314858c1fd9075dd883913cff"
+    }
+  ],
+  "touched_paths": [
+    "artifacts/s12/completion-receipt.json",
+    "artifacts/s12/contract-coverage.json",
+    "artifacts/s12/e2e-report.json",
+    "artifacts/s12/release-readiness-checklist.json",
+    "artifacts/s12/scenarios/after_slice_happy_path.json",
+    "artifacts/s12/scenarios/compaction_completed_29999.json",
+    "artifacts/s12/scenarios/compaction_timeout_30000.json",
+    "artifacts/s12/scenarios/continuation_start_failed.json",
+    "artifacts/s12/scenarios/controller_crash_recovery.json",
+    "artifacts/s12/scenarios/dual_run_competition.json",
+    "artifacts/s12/scenarios/handoff_corrupt.json",
+    "artifacts/s12/scenarios/none_happy_path.json",
+    "artifacts/s12/scenarios/protected_change.json",
+    "artifacts/s12/scenarios/source_interrupt_failed.json",
+    "contracts/slices/S12.json",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "package.json",
+    "scripts/check-markdown-links.mjs",
+    "scripts/run-s12-e2e.mjs",
+    "scripts/verify-s12.mjs",
+    "test/fixtures/s12/scenarios.json"
+  ],
+  "inherited_prerequisite_paths": [
+    ".codex-plugin/plugin.json",
+    "artifacts/s11/command-dto.schema.json",
+    "artifacts/s11/completion-receipt.json",
+    "artifacts/s11/control-invariant-report.json",
+    "artifacts/s11/control-matrix.json",
+    "artifacts/s11/recovery-catalog.json",
+    "contracts/slices/S11.json",
+    "scripts/verify-s11-evidence.mjs",
+    "scripts/verify-s11.mjs",
+    "skills/auto-slice-control/SKILL.md",
+    "src/controller/control-plane/control-matrix.ts",
+    "src/controller/control-plane/control-plane.ts",
+    "src/controller/control-plane/dto-schema.ts",
+    "src/controller/control-plane/errors.ts",
+    "src/controller/control-plane/file-command-journal.ts",
+    "src/controller/control-plane/index.ts",
+    "src/controller/control-plane/recovery-catalog.ts",
+    "src/controller/control-plane/runtime.ts",
+    "src/controller/control-plane/status-projector.ts",
+    "src/controller/control-plane/types.ts",
+    "src/controller/main.ts",
+    "src/controller/state/file-run-store.ts",
+    "src/controller/state/index.ts",
+    "src/controller/state/transitions.ts",
+    "src/controller/state/types.ts",
+    "src/controller/state/validation.ts",
+    "test/control-plane.test.ts",
+    "test/controller.test.ts"
+  ],
+  "check_receipts": [
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ca622aa6b87a4fbd135ae14f841cd92016f6ce189674c007da77682d9bc3fe7a",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 4214
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b4d5eeaf054ffadd6ba18423f31f81288f54bd16be7a5390eafbb745eeba53dc",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 3786
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:0b0dde9010340b7f6c15c6131705a07cfe57b4f90f32cdc220134bcba43cdf91",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 109379
+    },
+    {
+      "check_id": "s12_e2e_first",
+      "argv": [
+        "node",
+        "scripts/run-s12-e2e.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:c1e03399af044fbd67e4f0e02480ab916068b767351b025a464107818489a844",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 74040
+    },
+    {
+      "check_id": "s12_e2e_repeat",
+      "argv": [
+        "node",
+        "scripts/run-s12-e2e.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:c1e03399af044fbd67e4f0e02480ab916068b767351b025a464107818489a844",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 70759
+    },
+    {
+      "check_id": "markdown_links",
+      "argv": [
+        "node",
+        "scripts/check-markdown-links.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:a939986fbba121a7c6055cc1e9d85e4ae5196d3e4d69442a83cdd8544dea3043",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 204
+    },
+    {
+      "check_id": "plugin_validation",
+      "argv": [
+        "npm",
+        "run",
+        "validate:plugin"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:8d2e71d28f84282b4ff2b50b55581cefb572fb55a11155cce10787d1f93dfea5",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 1432
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:50bf418d3f46fa3975eade28b9f81047ee52461d61415cc22546263c0cca2afe",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 11926
+    }
+  ],
+  "start_head": "9b95aed63572560e000314a7ca71fe10b1de95ee",
+  "end_head": null,
+  "owned_diff_digest": "sha256:83c48bc09b8f64ccd4fdacefd85127f8fd296cf9375590b40775e64e97521602",
+  "completed_at": "2026-08-09T10:53:21.799Z"
+}

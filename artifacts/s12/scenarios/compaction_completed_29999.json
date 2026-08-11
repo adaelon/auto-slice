@@ -1,0 +1,10 @@
+{
+  "id": "compaction_completed_29999",
+  "result": "PASS",
+  "assertions": {
+    "virtual_clock_ms": 29999,
+    "final_status": "SLICE_RUNNING",
+    "source_interrupted": false,
+    "new_tasks_created": 0
+  }
+}

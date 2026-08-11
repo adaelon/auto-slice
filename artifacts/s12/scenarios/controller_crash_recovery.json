@@ -1,0 +1,18 @@
+{
+  "id": "controller_crash_recovery",
+  "result": "PASS",
+  "assertions": {
+    "recovered_interruption_outcome": "INTERRUPTED",
+    "interrupt_invocations": 2,
+    "interrupt_side_effects": 1,
+    "lease_event_actions": [
+      "ACQUIRED",
+      "FROZEN",
+      "EPOCH_ROTATED"
+    ],
+    "commit_count_delta_after_retry": 1,
+    "duplicate_tasks": 0,
+    "duplicate_commits": 0,
+    "double_writes": 0
+  }
+}

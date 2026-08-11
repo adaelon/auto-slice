@@ -1,17 +1,17 @@
 # Auto Slice 产品与架构契约
 
-状态：设计冻结，可进入实现切片。术语以 [`CONTEXT.md`](../CONTEXT.md) 为准。
+状态：可信完成与低干扰监控实现已收口，进入发布候选验收。术语以 [`CONTEXT.md`](../CONTEXT.md) 为准。
 
 ## 1. 产品边界
 
-Auto Slice 是本地 Codex 插件及其持久化 Slice Controller。它接收一份已确认的 Slice 计划，在一个 Local checkout 中顺序执行、验证、提交或记录每个 Slice，并在 Codex 自动压缩无法完成时通过 Handoff 接力。
+Auto Slice 是本地 Codex 插件及其持久化 Slice Controller。它接收一份已确认的 Slice 计划，在一个 Local checkout 中顺序投递 Goal Task，并在 Codex 自动压缩无法完成时通过 Handoff 接力。
 
 包含：
 
 - 持久化 Run/Slice 状态机；
 - 单工作区独占写租约；
 - 确定性模型路由；
-- Slice 验收、提交与 checkpoint 编排；
+- 一句话 Goal Task 启动与结构化终态可信完成；
 - 自动压缩 30 秒超时后的三任务接力；
 - 可恢复、可审计的错误闭合。
 
@@ -78,23 +78,34 @@ Controller 必须先持久化意图，再执行外部副作用，最后持久化
 IDLE
   -> PREPARING
   -> SLICE_RUNNING
-  -> VERIFYING
-  -> COMMITTING?          # 仅 after_slice
-  -> CHECKPOINTING
-  -> SLICE_RUNNING | DONE
+  -> PREPARING            # 当前 Slice 结构化 COMPLETED，准备下一 Slice
+  -> SLICE_RUNNING | DONE # 最后一刀 COMPLETED 后直接 DONE
 
 任意可恢复状态 -> PAUSED
 任意失败闭合   -> NEEDS_USER
 用户终止       -> ABORTED
 ```
 
-只有 `SLICE_RUNNING` 的当前任务可以持有 Project Write Lease。Compression Task 永远不取得写租约。
+`VERIFYING`、`COMMITTING`、`CHECKPOINTING` 只为旧 snapshot 解码、`status` 与 `abort` 保留；新 Run 不进入这些状态，也不能从旧态按新语义恢复。只有当前 Development Task 或 Continuation Task 可以持有 Project Write Lease；Compression Task 永远不取得写租约。
 
 ## 5. 自动压缩接力状态机
 
 ### 5.1 入口信号
 
-Host Adapter 必须提供带稳定 `compaction_id` 的 `AUTO_COMPACTION_STARTED` 与 `AUTO_COMPACTION_COMPLETED`。缺少可观测信号时进入 `NEEDS_USER(compaction_observability_unavailable)`，不得用模型自述、日志文案猜测或普通静默时间代替。
+Host Adapter 显式声明 `contextCompaction` 事件能力。能力为 `AVAILABLE` 时只消费带稳定 `compaction_id` 的 `AUTO_COMPACTION_STARTED` 与 `AUTO_COMPACTION_COMPLETED`，Compaction Content Probe 调用数必须为零；只有显式 `UNAVAILABLE` 才启用隔离 probe。
+
+```text
+UNAVAILABLE:
+  20m -> 首次 probe
+  30m / 35m / 40m -> 每 5 分钟 probe
+  42m / 44m / ... -> 每 2 分钟 probe
+
+NO_COMPACTION  -> 挂下一时点
+COMPACTION_SEEN -> 投影 AUTO_COMPACTION_STARTED
+PROBE_FAILED    -> NEEDS_USER(compaction_probe_failed)
+```
+
+Probe 可在隔离端口内部读取 Worker Content，但只返回封闭枚举、规范时间与白名单失败码；原始正文不得进入 Controller、RunStore、日志或错误消息。Turn 终止、结构化事件到达或已发现压缩都会取消后续 probe，且同一时刻最多一个读取 in-flight。
 
 ```text
 SLICE_RUNNING
@@ -124,7 +135,7 @@ SOURCE_INTERRUPTING:
 ```text
 HANDOFF_EXPORTING:
   create fresh task in Source Thread workspace
-  invoke export-codex-handoff(source_thread_id)
+  input exactly: $export-codex-handoff <source_thread_id>
   require Markdown + Evidence Index atomic publication
   require verify-evidence == PASS
 ```
@@ -136,7 +147,8 @@ Compression Task 必须满足 `export-codex-handoff` 的 Isolation Gate：它不
 ```text
 CONTINUATION_STARTING:
   create second fresh task in the same workspace
-  provide verified Handoff path + consumer contract
+  input exactly: one goal sentence with the Handoff Markdown absolute-path link, current_slice_id, optional commit, and checkpoint refresh
+  provide verified Handoff consumer contract out of band
   acquire Project Write Lease(write_epoch)
   continue current_slice_id
   replace source_thread_id with continuation_task_id
@@ -157,30 +169,31 @@ Continuation Task 必须先按 Handoff 的 Resume Policy 产出首份实质草�
 
 策略不可满足时进入 `NEEDS_USER(model_policy_unavailable)`。不得选用近似模型或降低 reasoning effort。
 
+### 6.1 内容盲控制边界
+
+Controller 与 Production Orchestrator 必须是 Content-blind Controller：只接收任务身份、枚举状态、有序事件、时间戳和确定性回执。Worker Content 不得进入模型上下文、控制判断、持久 Run 状态、命令回执或日志。
+
+App Server 传输若把控制事件与正文复用在同一帧流，Host Adapter 必须在 Controller port 之前按白名单投影并丢弃其余字段。禁止以 `thread/read(includeTurns=true)`、最终 agent 回复、reasoning、命令输出、diff 或普通静默作为控制输入。当前 Turn 的 Run/Slice/Thread/Turn 身份、回执摘要与结构化 `COMPLETED` 匹配，即构成 Trusted Completion；`FAILED`、`INTERRUPTED`、模型改道与协议错误仍失败闭合。
+
+只有 Compaction Timeout 后的 Compression Task 可自动读取 Source Thread 正文。Host 无法在不返回完整 turns 的情况下提供稳定 persisted revision 时，以 `NEEDS_USER(source_interrupt_failed)` 失败闭合，不得降级为正文读取。
+
 ## 7. 工作区与提交
 
-Run 启动时记录 Protected Change 基线。Slice 只能声明并提交 Slice-owned changes；若改动与 Protected Change 重叠，进入 `NEEDS_USER(protected_change_overlap)`。
+每个全新 Development Task 的首条输入只有一句 `设定goal`；Production Plan、契约、排除项和检查不会拼进该消息，具体工作以 checkpoint（接力时为 Handoff）为权威。Project Write Lease 继续保护同一 checkout 不被两个开发任务并发写入，但 Production Orchestrator 不检查任务写了哪些文件。
 
 ```text
 after_slice:
-  verify slice
-  commit only slice-owned changes
-  capture new HEAD
-  rewrite SESSION_CHECKPOINT.md with new HEAD and next slice
-  never push
+  -> 设定goal：阅读checkpoint，实现<SliceId>，完成后commit，刷新checkpoint
 
 none:
-  verify slice
-  record normalized slice-owned diff digest
-  rewrite SESSION_CHECKPOINT.md with next slice
-  never commit or push
+  -> 设定goal：阅读checkpoint，实现<SliceId>，完成后刷新checkpoint
 ```
 
-checkpoint 刷新失败不得回滚已经成功的 Slice commit；Controller 记录 `NEEDS_USER(checkpoint_refresh_failed)` 和真实 HEAD。
+`commit_mode` 与 Slice override 只在 `turn/start` 前决定提示文案；当前 Slice 已投递后拒绝 override。Controller 不运行 Git 命令，不读取 diff、HEAD、checkpoint 或 artifact，也不再次 commit、覆盖 checkpoint 或 push。无 commit、多 commit、额外文件、checkpoint 不存在或未变化都不阻断匹配的结构化 `COMPLETED`。
 
-## 8. Slice 验收
+## 8. Slice 字段兼容边界
 
-每个 Slice 必须声明：
+Production Plan V1 继续解析以下 Slice 字段，以兼容既有计划：
 
 ```text
 SliceContract {
@@ -188,13 +201,13 @@ SliceContract {
   objective
   exclusions[]
   owned_paths[]
-  deterministic_checks[]
+  checks[]
   expected_artifacts[]
   commit_mode_override?
 }
 ```
 
-验收只接受测试 runner、编译器、linter、文件/摘要比对、Git 状态和真实工具回执。LLM 评价不得作为唯一通过条件。
+这些字段由 Development Task 的工程纪律使用，Production Orchestrator 对其保持惰性：不执行 `checks`，不读取或 hash `expected_artifacts`，不分类 `owned_paths`，也不建立 Protected Change 基线。历史 `SliceExecutor`、`SliceVerifier`、`GitGoalCompletionGuard` 与 CommitCoordinator 仍作为直接 API 和回归基线保留，不接入新 Production Run。
 
 ## 9. 错误闭合
 
@@ -202,22 +215,25 @@ SliceContract {
 | --- | --- |
 | `model_policy_unavailable` | 不启动或暂停当前工作，等待用户 |
 | `project_lock_unavailable` | 不产生写入，等待或由用户终止 |
-| `compaction_observability_unavailable` | 不启动推测性 30 秒计时 |
+| `slice_execution_failed` | `FAILED`、`INTERRUPTED` 或身份/摘要不匹配时停止当前 Run，不启动下一 Slice |
+| `compaction_probe_failed` | 保存白名单 reason code，不提高读取频率，等待用户 |
 | `source_interrupt_failed` | 不创建新任务，保留 Source Thread |
 | `handoff_export_failed` | 保留源与压缩诊断，不重试 |
 | `handoff_integrity_failed` | 禁止创建 Continuation Task |
 | `continuation_start_failed` | 保留 Handoff，等待用户重试或终止 |
-| `protected_change_overlap` | 禁止提交，等待用户划分所有权 |
-| `verification_failed` | 保持当前 Slice，不提交、不前进 |
+| `protected_change_overlap` / `verification_failed` | 仅历史直接 API 与旧 Run 恢复目录保留；新 Production Run 不触发 |
 
-`NEEDS_USER` 状态必须保存原因、最后成功状态、相关任务 UUID、文件路径和确定性回执；恢复操作必须显式指定处理方式。
+`NEEDS_USER` 状态只保存白名单错误码、最后成功状态、相关任务 UUID、允许暴露的证据路径和确定性回执；不得保存 Worker Content 或原始进程输出。恢复操作必须显式指定处理方式。
 
 ## 10. 决策索引
 
 - [本地控制器与任务隔离](adr/0001-local-controller-and-task-isolation.md)
 - [确定性模型路由](adr/0002-deterministic-model-routing.md)
 - [提交模式与 Checkpoint 顺序](adr/0003-commit-and-checkpoint-order.md)
+- [Goal Task 输入与完成所有权](adr/0008-goal-task-input-and-finish-ownership.md)
 - [自动压缩超时后的三任务接力](adr/0004-compaction-timeout-handoff.md)
+- [内容盲控制面](adr/0009-content-blind-controller.md)
+- [可信工作进程收口](adr/0010-trusted-worker-completion.md)
 
 ## 11. 设计验收条件
 
@@ -227,6 +243,12 @@ SliceContract {
 - Source Thread 未收到停止回执时无法启动导出；
 - Compression Task 无写租约且无法成为 Continuation Task；
 - Handoff 未通过完整性校验时无法启动续接；
-- `after_slice` 的 commit 始终先于 checkpoint；
-- Protected Change 不会进入自动提交；
+- Development、Compression、Continuation 三种新任务的首条输入均符合各自的一句话协议；
+- 两刀结构化 `COMPLETED` 直接 `DONE`，状态链不出现历史验收三态；
+- `FAILED` 与 `INTERRUPTED` 均进入 `NEEDS_USER`，下一 Slice 启动数为零；
+- Controller 的模型上下文、持久状态、回执与日志均不含 Worker Content；
+- Source 持久性核验不读取完整 turns，元数据 revision 不可用时失败闭合；
+- 结构化压缩事件可用时正文 probe 为零；不可用时严格按 20/30/35/40/42... 分段探测；
+- 普通完成与压缩接力均不调用 Git/workspace inspection，不读取 commit、checkpoint 或 artifacts；
+- V1 旧字段与旧验收态可读取，但不参与新 Run 判断或恢复推进；
 - 任一失败均闭合为可解释状态，不静默降级、不 push。

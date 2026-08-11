@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "slice_id": "S15",
+  "opaque_revision_bytes": 64,
+  "scenarios": [
+    {
+      "opaque_revision_valid": true,
+      "outcome": "INTERRUPTED",
+      "reason": null,
+      "revision_provider_reads": 2,
+      "run_status": "HANDOFF_EXPORTING",
+      "scenario": "stable"
+    },
+    {
+      "opaque_revision_valid": null,
+      "outcome": "FAIL_CLOSED",
+      "reason": "thread_revision_unavailable",
+      "revision_provider_reads": 0,
+      "run_status": "NEEDS_USER",
+      "scenario": "unavailable"
+    },
+    {
+      "opaque_revision_valid": null,
+      "outcome": "FAIL_CLOSED",
+      "reason": "thread_revision_invalid",
+      "revision_provider_reads": 1,
+      "run_status": "NEEDS_USER",
+      "scenario": "invalid"
+    },
+    {
+      "opaque_revision_valid": null,
+      "outcome": "FAIL_CLOSED",
+      "reason": "thread_revision_mismatch",
+      "revision_provider_reads": 2,
+      "run_status": "NEEDS_USER",
+      "scenario": "mismatch"
+    },
+    {
+      "opaque_revision_valid": null,
+      "outcome": "FAIL_CLOSED",
+      "reason": "thread_inspection_failed",
+      "revision_provider_reads": 1,
+      "run_status": "NEEDS_USER",
+      "scenario": "malicious_turns"
+    },
+    {
+      "opaque_revision_valid": null,
+      "outcome": "FAIL_CLOSED",
+      "reason": "thread_inspection_failed",
+      "revision_provider_reads": 1,
+      "run_status": "NEEDS_USER",
+      "scenario": "malicious_items"
+    }
+  ],
+  "result": "PASS"
+}

@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "slice_id": "S14",
+  "notification_opt_out_methods": [
+    "turn/diff/updated",
+    "turn/plan/updated",
+    "rawResponseItem/completed",
+    "rawResponse/completed",
+    "item/agentMessage/delta",
+    "item/plan/delta",
+    "command/exec/outputDelta",
+    "process/outputDelta",
+    "item/commandExecution/outputDelta",
+    "item/commandExecution/terminalInteraction",
+    "item/fileChange/outputDelta",
+    "item/fileChange/patchUpdated",
+    "item/mcpToolCall/progress",
+    "item/reasoning/summaryTextDelta",
+    "item/reasoning/summaryPartAdded",
+    "item/reasoning/textDelta"
+  ],
+  "projected_signal_types": [
+    "COMPACTION",
+    "TURN_TERMINAL",
+    "THREAD_LIFECYCLE",
+    "MODEL_REROUTED"
+  ],
+  "signal_field_sets": {
+    "COMPACTION": [
+      "type",
+      "phase",
+      "thread_id",
+      "compaction_id",
+      "host_sequence",
+      "observed_at"
+    ],
+    "TURN_TERMINAL": [
+      "type",
+      "run_id",
+      "slice_id",
+      "thread_id",
+      "turn_id",
+      "outcome",
+      "started_at",
+      "completed_at"
+    ],
+    "THREAD_LIFECYCLE": [
+      "type",
+      "thread_id",
+      "state"
+    ],
+    "MODEL_REROUTED": [
+      "type",
+      "thread_id",
+      "turn_id",
+      "from_model",
+      "to_model",
+      "reason_code"
+    ]
+  },
+  "dropped_content_categories": [
+    "agent_message",
+    "reasoning",
+    "command_output",
+    "diff",
+    "tool_payload",
+    "plan"
+  ],
+  "dropped_notification_count": 6,
+  "maximum_signal_bytes": 237,
+  "result": "PASS"
+}

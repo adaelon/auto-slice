@@ -1,0 +1,243 @@
+{
+  "schema_version": 1,
+  "slice_id": "S15",
+  "contract_digest": "sha256:1152e7b4c6f35cc6c088496ad84d5b47bbe66bdf5ecbfccb5d7d95c15cb091ce",
+  "input_digests": [
+    {
+      "path": "artifacts/s14/completion-receipt.json",
+      "digest": "sha256:09f17d0ab66d78f3c757870a05c5f52ea00d0f6b395b21f88f73e8c81d972e45"
+    },
+    {
+      "path": "artifacts/s08/completion-receipt.json",
+      "digest": "sha256:a9a6239e512319c8beb40cd1b08ec983f050dd8881a021d7227c4e344803de7b"
+    },
+    {
+      "path": "artifacts/s09/completion-receipt.json",
+      "digest": "sha256:f749c280d37481343eac9ef04b9a965a43b7c1c54a092b559507c15d81f320ec"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:34f0bd669d970ea4befa580004229219c0a79f4aa0d355ca667dc5bee575fb9f"
+    },
+    {
+      "path": "docs/adr/0009-content-blind-controller.md",
+      "digest": "sha256:0c9b7285fc06475c5438c983653fe94e34801fa0c6306d07c738f6f5a2f646c4"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:b753253c76fd511d8501fa580c4edb57be64efff22631701d79cdd563b724368"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:4efa4ee4f37152e27edd00775d4ab3979b25072c228a8f60e096aa7994136b6a"
+    }
+  ],
+  "output_digests": [
+    {
+      "path": "artifacts/s15/full-turn-read-trace.json",
+      "digest": "sha256:1124f8d3221778563d8b2b29b9d4444987eb931be74ef75dc598da465b245547"
+    },
+    {
+      "path": "artifacts/s15/revision-capability-matrix.json",
+      "digest": "sha256:a02bed84a69eff4ed17d210885399fa1f20a9698039f8248e8b9790be7bae46c"
+    },
+    {
+      "path": "artifacts/s15/source-interruption-handoff-report.json",
+      "digest": "sha256:7398fba39b03a3a391d9d7a78a3b184fd4620515c5b150d6dad75be50885ed3e"
+    },
+    {
+      "path": "contracts/slices/S15.json",
+      "digest": "sha256:1152e7b4c6f35cc6c088496ad84d5b47bbe66bdf5ecbfccb5d7d95c15cb091ce"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:98c622e4c2dab6bde4d7b8c34a3047b6cd8ae09b65b295c377e3cbbfdb9897ec"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:2a8a8fa1496ca3b3cb9a140216768fc80ef0d47d217ea78c0eaadd3f41480bf4"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:4ffd06cadf0dc70401d0ceb341b1d5761562c2638c9916e4c641744f24dde3af"
+    },
+    {
+      "path": "scripts/run-s15-metadata-revision.mjs",
+      "digest": "sha256:9cc63d0671b3473349fdbbc4a98b01362dd48cd4bbd9caa7ef06d5d656b1f6eb"
+    },
+    {
+      "path": "scripts/verify-s15.mjs",
+      "digest": "sha256:519bbfc21ca71079dfa96e9eed78009114bca1cc62a06d9c103a6b8222bc5ea3"
+    },
+    {
+      "path": "src/controller/production/codex-app-server-development-task.ts",
+      "digest": "sha256:2410794ea72b58e09315779667657ea4b0b79133a1625dd55f2f5a4339343719"
+    },
+    {
+      "path": "src/controller/production/codex-app-server-task-host.ts",
+      "digest": "sha256:f71426e26120769d3bd5cf9f62d029f9ab6dcedb91301b3ebb6cc0b4b1478acf"
+    },
+    {
+      "path": "src/controller/production/index.ts",
+      "digest": "sha256:8b4f52cc8c2539069f7491cebf9e3fe06ca89e755aaf4dfa0164caa292d5eaae"
+    },
+    {
+      "path": "src/controller/thread-control/index.ts",
+      "digest": "sha256:55688d868d7392401dd6706f0573d63f95291a55b1f3f988321b88dcc5feca20"
+    },
+    {
+      "path": "src/controller/thread-control/source-interruption-coordinator.ts",
+      "digest": "sha256:765e9f93c58995201fa6e2f86e1f4926c7dceb53e4d0fbc500c607e4e7b4d716"
+    },
+    {
+      "path": "src/controller/thread-control/types.ts",
+      "digest": "sha256:d1f60b5d6f890286077987fe5cd1264fa4387394d703d8838cc17514e635553e"
+    },
+    {
+      "path": "test/app-server-development-task.test.ts",
+      "digest": "sha256:ed4c6d9e0aaeec8027bb20c153667770c7ca5ae9f3d504b0e51a893900eddef1"
+    },
+    {
+      "path": "test/fixtures/process/fake-codex-app-server.mjs",
+      "digest": "sha256:fa521ea45f3924d6593ffa90721b6a551f0719fd8a79dbd4997222bc4744ec8a"
+    },
+    {
+      "path": "test/thread-control.test.ts",
+      "digest": "sha256:7ae0137a2e7a103a9306d18feb47fb23ebb85910fc2c7054db0fb28293686ca8"
+    }
+  ],
+  "touched_paths": [
+    "artifacts/s15/completion-receipt.json",
+    "artifacts/s15/full-turn-read-trace.json",
+    "artifacts/s15/revision-capability-matrix.json",
+    "artifacts/s15/source-interruption-handoff-report.json",
+    "contracts/slices/S15.json",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "package.json",
+    "scripts/run-s15-metadata-revision.mjs",
+    "scripts/verify-s15.mjs",
+    "src/controller/production/codex-app-server-development-task.ts",
+    "src/controller/production/codex-app-server-task-host.ts",
+    "src/controller/production/index.ts",
+    "src/controller/thread-control/index.ts",
+    "src/controller/thread-control/source-interruption-coordinator.ts",
+    "src/controller/thread-control/types.ts",
+    "test/app-server-development-task.test.ts",
+    "test/fixtures/process/fake-codex-app-server.mjs",
+    "test/thread-control.test.ts"
+  ],
+  "check_receipts": [
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ca622aa6b87a4fbd135ae14f841cd92016f6ce189674c007da77682d9bc3fe7a",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 3411
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b4d5eeaf054ffadd6ba18423f31f81288f54bd16be7a5390eafbb745eeba53dc",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 3327
+    },
+    {
+      "check_id": "target_test",
+      "argv": [
+        "node",
+        "--test",
+        "dist/test/app-server-development-task.test.js",
+        "dist/test/thread-control.test.js",
+        "dist/test/handoff.test.js"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:d38acb36c9249400e846a9d2891d1ab334b458429cf49601aea4b88afe4c407e",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 5040
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:38e93eaa14ffb1cbbb06daf7135185fd3b0d2c96603f6830ff545151b8adb7a5",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 104772
+    },
+    {
+      "check_id": "metadata_revision_evidence_first",
+      "argv": [
+        "node",
+        "scripts/run-s15-metadata-revision.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b46f0f83763c17c778adaea5a3129bfd8d1676297707063e2cf0e417994a3b75",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 5288
+    },
+    {
+      "check_id": "metadata_revision_evidence_repeat",
+      "argv": [
+        "node",
+        "scripts/run-s15-metadata-revision.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b46f0f83763c17c778adaea5a3129bfd8d1676297707063e2cf0e417994a3b75",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 5261
+    },
+    {
+      "check_id": "markdown_links",
+      "argv": [
+        "node",
+        "scripts/check-markdown-links.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:fc71099181b71ca78249eabce71f02114c85f3ddd0ba868a4b6b7c21df6a9c2d",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 242
+    },
+    {
+      "check_id": "plugin_validation",
+      "argv": [
+        "npm",
+        "run",
+        "validate:plugin"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:8d2e71d28f84282b4ff2b50b55581cefb572fb55a11155cce10787d1f93dfea5",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 1627
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:50bf418d3f46fa3975eade28b9f81047ee52461d61415cc22546263c0cca2afe",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 12683
+    }
+  ],
+  "start_head": "9b95aed63572560e000314a7ca71fe10b1de95ee",
+  "end_head": null,
+  "owned_diff_digest": "sha256:c360c531344615649317ac523d3b3cc2bcf56b4b9657ce22a1972dc082aec877",
+  "completed_at": "2026-08-10T10:16:31.801Z"
+}

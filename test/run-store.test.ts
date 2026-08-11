@@ -15,13 +15,17 @@ import { fileURLToPath } from "node:url";
 
 import {
   buildRunTransitionMatrix,
+  canonicalJson,
   createEffectIdempotencyKey,
   createInitialRunState,
   FileRunStore,
   RUN_STATUSES,
   sha256Bytes,
+  sha256Json,
   StateStoreError,
+  type RunEventRecord,
   type RunState,
+  type RunStatus,
   type StateStoreFaultPoint,
   type StoredRun,
 } from "../src/controller/state/index.js";
@@ -98,12 +102,57 @@ function eventsPath(storageRoot: string, runId: string): string {
   return path.join(storageRoot, "runs", encodedRunId(runId), "events");
 }
 
-const OPERATIONAL = [
-  "PREPARING",
-  "SLICE_RUNNING",
+function appendLegacyStateEvent(
+  storageRoot: string,
+  store: FileRunStore,
+  runId: string,
+  status: RunStatus,
+  action: string,
+): RunState {
+  const before = unwrap(store.load(runId)).state;
+  const previous = unwrap(store.inspectRunEvents(runId)).at(-1);
+  assert.ok(previous);
+  const after = {
+    ...before,
+    state_version: before.state_version + 1,
+    status,
+  } satisfies RunState;
+  const material: Omit<RunEventRecord, "event_digest"> = {
+    schema_version: previous.schema_version,
+    run_id: runId,
+    event_index: after.state_version,
+    event_kind: "STATE_TRANSITION",
+    action,
+    occurred_at: new Date(
+      Date.parse(FIXED_TIME) + after.state_version * 1_000,
+    ).toISOString(),
+    previous_event_digest: previous.event_digest,
+    before_state: before,
+    before_state_digest: sha256Json(before),
+    after_state: after,
+    after_state_digest: sha256Json(after),
+  };
+  const event: RunEventRecord = {
+    ...material,
+    event_digest: sha256Json(material),
+  };
+  writeFileSync(
+    path.join(eventsPath(storageRoot, runId), `${String(after.state_version).padStart(20, "0")}.json`),
+    `${canonicalJson(event)}\n`,
+    "utf8",
+  );
+  return after;
+}
+
+const LEGACY_ACCEPTANCE_STATUSES = [
   "VERIFYING",
   "COMMITTING",
   "CHECKPOINTING",
+] as const satisfies readonly RunStatus[];
+
+const OPERATIONAL = [
+  "PREPARING",
+  "SLICE_RUNNING",
   "COMPACTION_WAIT",
   "SOURCE_INTERRUPTING",
   "HANDOFF_EXPORTING",
@@ -113,13 +162,9 @@ const OPERATIONAL = [
 const FORWARD = new Set([
   "IDLE->PREPARING",
   "PREPARING->SLICE_RUNNING",
-  "SLICE_RUNNING->VERIFYING",
+  "SLICE_RUNNING->PREPARING",
+  "SLICE_RUNNING->DONE",
   "SLICE_RUNNING->COMPACTION_WAIT",
-  "VERIFYING->COMMITTING",
-  "VERIFYING->CHECKPOINTING",
-  "COMMITTING->CHECKPOINTING",
-  "CHECKPOINTING->SLICE_RUNNING",
-  "CHECKPOINTING->DONE",
   "COMPACTION_WAIT->SLICE_RUNNING",
   "COMPACTION_WAIT->SOURCE_INTERRUPTING",
   "SOURCE_INTERRUPTING->HANDOFF_EXPORTING",
@@ -132,6 +177,9 @@ const FORWARD = new Set([
 function expectedTransition(from: (typeof RUN_STATUSES)[number], to: (typeof RUN_STATUSES)[number]): boolean {
   if (from === to || from === "DONE" || from === "ABORTED") {
     return false;
+  }
+  if (LEGACY_ACCEPTANCE_STATUSES.includes(from as (typeof LEGACY_ACCEPTANCE_STATUSES)[number])) {
+    return to === "ABORTED";
   }
   if (FORWARD.has(`${from}->${to}`)) {
     return true;
@@ -208,6 +256,142 @@ void test("rejects an illegal transition without appending an event", (context) 
   );
   const after = unwrap(store.inspectRunEvents("run-s02"));
   assert.deepEqual(after, before);
+});
+
+void test("new Run completion advances directly without entering legacy acceptance states", (context) => {
+  const storageRoot = temporaryDirectory(context);
+  const store = openStore(storageRoot, { now: deterministicClock() });
+  unwrap(store.create(initialState("trusted-completion")));
+  unwrap(store.compareAndSwap("trusted-completion", 0, {
+    action: "prepare_run",
+    to: "PREPARING",
+  }));
+  unwrap(store.compareAndSwap("trusted-completion", 1, {
+    action: "start_first_slice",
+    to: "SLICE_RUNNING",
+  }));
+
+  for (const legacyStatus of LEGACY_ACCEPTANCE_STATUSES) {
+    expectError(store.compareAndSwap("trusted-completion", 2, {
+      action: `must_not_enter_${legacyStatus.toLowerCase()}`,
+      to: legacyStatus,
+    }), "invalid_transition");
+  }
+
+  unwrap(store.compareAndSwap("trusted-completion", 2, {
+    action: "complete_first_slice",
+    to: "PREPARING",
+  }));
+  unwrap(store.compareAndSwap("trusted-completion", 3, {
+    action: "start_final_slice",
+    to: "SLICE_RUNNING",
+    updates: {
+      current_slice_id: "S03",
+      protected_baseline_digest: sha256Bytes("trusted-next-baseline"),
+    },
+  }));
+  const done = unwrap(store.compareAndSwap("trusted-completion", 4, {
+    action: "complete_final_slice",
+    to: "DONE",
+  }));
+  assert.equal(done.state.status, "DONE");
+  assert.deepEqual(
+    unwrap(store.inspectRunEvents("trusted-completion")).map((event) => event.after_state.status),
+    ["IDLE", "PREPARING", "SLICE_RUNNING", "PREPARING", "SLICE_RUNNING", "DONE"],
+  );
+});
+
+void test("legacy acceptance event chains replay read-only and can only abort", (context) => {
+  const storageRoot = temporaryDirectory(context);
+  const legacyChains = [
+    ["VERIFYING"],
+    ["VERIFYING", "COMMITTING"],
+    ["VERIFYING", "CHECKPOINTING"],
+  ] as const satisfies readonly (readonly RunStatus[])[];
+  const forbiddenTargets = ["CHECKPOINTING", "CHECKPOINTING", "DONE"] as const;
+
+  for (const [index, chain] of legacyChains.entries()) {
+    const runId = `legacy-acceptance-${String(index)}`;
+    const store = openStore(storageRoot, { now: deterministicClock() });
+    unwrap(store.create(initialState(runId)));
+    unwrap(store.compareAndSwap(runId, 0, { action: "prepare_legacy", to: "PREPARING" }));
+    unwrap(store.compareAndSwap(runId, 1, { action: "start_legacy", to: "SLICE_RUNNING" }));
+    for (const status of chain) {
+      appendLegacyStateEvent(
+        storageRoot,
+        store,
+        runId,
+        status,
+        `legacy_${status.toLowerCase()}`,
+      );
+    }
+    const loaded = unwrap(store.load(runId));
+    assert.equal(loaded.state.status, chain.at(-1));
+    expectError(store.compareAndSwap(runId, loaded.state.state_version, {
+      action: "legacy_must_not_advance",
+      to: forbiddenTargets[index] ?? "DONE",
+    }), "invalid_transition");
+    const aborted = unwrap(store.compareAndSwap(runId, loaded.state.state_version, {
+      action: "abort_legacy",
+      to: "ABORTED",
+    }));
+    assert.equal(aborted.state.status, "ABORTED");
+  }
+});
+
+void test("rotates the protected baseline only when starting the next Slice", (context) => {
+  const storageRoot = temporaryDirectory(context);
+  const store = openStore(storageRoot, { now: deterministicClock() });
+  unwrap(store.create(initialState("baseline-rotation")));
+  unwrap(store.compareAndSwap("baseline-rotation", 0, {
+    action: "prepare_run",
+    to: "PREPARING",
+  }));
+  const firstBaseline = sha256Bytes("first-baseline");
+  expectError(store.compareAndSwap("baseline-rotation", 1, {
+    action: "start_first_slice_without_identity",
+    to: "SLICE_RUNNING",
+    updates: {
+      protected_baseline_digest: firstBaseline,
+    },
+  }), "invalid_transition");
+  const first = unwrap(store.compareAndSwap("baseline-rotation", 1, {
+    action: "start_first_slice",
+    to: "SLICE_RUNNING",
+    updates: {
+      current_slice_id: "S13",
+      protected_baseline_digest: firstBaseline,
+      source_thread_id: "thread-source-1",
+    },
+  }));
+  assert.equal(first.state.current_slice_id, "S13");
+  assert.equal(first.state.protected_baseline_digest, firstBaseline);
+  const illegalBaseline = sha256Bytes("illegal-baseline");
+  expectError(store.compareAndSwap("baseline-rotation", 2, {
+    action: "change_baseline_while_running",
+    to: "PREPARING",
+    updates: {
+      protected_baseline_digest: illegalBaseline,
+    },
+  }), "invalid_transition");
+  unwrap(store.compareAndSwap("baseline-rotation", 2, {
+    action: "complete_first_slice",
+    to: "PREPARING",
+  }));
+  const nextBaseline = sha256Bytes("next-baseline");
+  const next = unwrap(store.compareAndSwap("baseline-rotation", 3, {
+    action: "start_next_slice",
+    to: "SLICE_RUNNING",
+    updates: {
+      current_slice_id: "S03",
+      protected_baseline_digest: nextBaseline,
+      source_thread_id: "thread-source-2",
+    },
+  }));
+  assert.equal(next.state.current_slice_id, "S03");
+  assert.equal(next.state.protected_baseline_digest, nextBaseline);
+  assert.equal(next.state.source_thread_id, "thread-source-2");
+  assert.deepEqual(unwrap(store.replayRunEvents("baseline-rotation")).state, next.state);
 });
 
 void test("allows only the digest-bound S09 attempt claim as a same-state transition", (context) => {

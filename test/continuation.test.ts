@@ -328,6 +328,10 @@ class MemoryContinuationLauncher implements ContinuationLauncher {
 
   public start(envelope: ResumeEnvelope, modelDecision: ModelDecision): Promise<unknown> {
     this.start_invocations += 1;
+    assert.equal(
+      envelope.goal_prompt,
+      `设定goal：阅读[Handoff Markdown](${envelope.handoff_markdown_path.replaceAll("\\", "/")})，继续实现${CURRENT_SLICE_ID}，完成后commit，刷新checkpoint`,
+    );
     const key = sha256Json({ envelope, model_decision: modelDecision });
     const existing = this.starts.get(key);
     if (existing !== undefined) {
@@ -462,7 +466,6 @@ function input(
     handoff_receipt: value.handoff_receipt,
     slice_contract: SLICE_CONTRACT,
     model_decision: CONTINUATION_DECISION,
-    expected_owned_diff_digest: EXPECTED_OWNED_DIFF_DIGEST,
     expected_state_version: value.state_version,
     ...overrides,
   };
@@ -504,6 +507,7 @@ void test("starts one fresh Continuation, grants the rotated epoch, records prog
   assert.equal(first.continuation_task_id, CONTINUATION_TASK_ID);
   assert.equal(first.current_slice_id, CURRENT_SLICE_ID);
   assert.equal(first.write_epoch, value.lease.epoch + 1);
+  assert.equal("expected_owned_diff_digest" in first.envelope, false);
   assert.equal(launcher.write_observed_before_ready, false);
   assert.equal(launcher.start_side_effects, 1);
   assert.equal(launcher.ready_side_effects, 1);
@@ -627,8 +631,8 @@ void test("freezes the rotated epoch when write grant fails ambiguously", async 
   assert.equal(oldEpoch.code, "stale_write_epoch");
 });
 
-void test("requires changed durable progress and freezes an already granted epoch on failure", async (context) => {
-  const value = fixture(context, "no-progress");
+void test("accepts a legacy owned diff digest without using it as a progress gate", async (context) => {
+  const value = fixture(context, "legacy-owned-diff");
   const launcher = new MemoryContinuationLauncher(value, {
     progress_transform: (receipt) => ({
       ...receipt,
@@ -636,17 +640,25 @@ void test("requires changed durable progress and freezes an already granted epoc
     }),
   });
 
-  const result = await coordinator(value, launcher).continueFromHandoff(input(value));
+  const subject = coordinator(value, launcher);
+  const legacyInput = input(value, {
+    expected_owned_diff_digest: EXPECTED_OWNED_DIFF_DIGEST,
+  });
+  const result = unwrapDecision(await subject.continueFromHandoff(legacyInput));
+  const replayed = unwrapDecision(await subject.continueFromHandoff(legacyInput));
 
-  expectContinuationError(result, "progress_not_durable");
+  assert.equal(result.outcome, "CONTINUED");
+  assert.equal(replayed.outcome, "ALREADY_CONTINUED");
+  assert.equal(result.progress_receipt.durable_artifact_digest, EXPECTED_OWNED_DIFF_DIGEST);
+  assert.equal(result.envelope.expected_owned_diff_digest, EXPECTED_OWNED_DIFF_DIGEST);
   assert.equal(launcher.grant_side_effects, 1);
   const final = unwrapStored(value.store.load(value.run_id)).state;
-  assert.equal(final.status, "NEEDS_USER");
-  assert.equal(final.source_thread_id, SOURCE_THREAD_ID);
-  assert.ok(value.guard.assertWritable(
+  assert.equal(final.status, "SLICE_RUNNING");
+  assert.equal(final.source_thread_id, CONTINUATION_TASK_ID);
+  assert.ok(!(value.guard.assertWritable(
     value.rotated_lease.lease_id,
     value.rotated_lease.epoch,
-  ) instanceof WorkspaceGuardError);
+  ) instanceof WorkspaceGuardError));
 });
 
 void test("accepts a verification receipt as the first durable progress anchor", async (context) => {

@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "fixed_time": "2026-08-09T12:00:00.000Z",
+  "source_thread_id": "00000000-0000-7000-8000-000000001201",
+  "compression_task_id": "00000000-0000-7000-8000-000000001202",
+  "continuation_task_id": "00000000-0000-7000-8000-000000001203",
+  "compaction_id": "compaction-s12",
+  "current_slice_id": "fixture-slice-s12",
+  "host_events": {
+    "started": {
+      "type": "AUTO_COMPACTION_STARTED",
+      "host_sequence": 1,
+      "observed_at": "2026-08-09T12:00:00.000Z"
+    },
+    "completed_29999": {
+      "type": "AUTO_COMPACTION_COMPLETED",
+      "host_sequence": 2,
+      "observed_at": "2026-08-09T12:00:29.999Z"
+    },
+    "deadline": "2026-08-09T12:00:30.000Z"
+  },
+  "scenario_ids": [
+    "after_slice_happy_path",
+    "none_happy_path",
+    "protected_change",
+    "compaction_completed_29999",
+    "compaction_timeout_30000",
+    "source_interrupt_failed",
+    "handoff_corrupt",
+    "continuation_start_failed",
+    "controller_crash_recovery",
+    "dual_run_competition"
+  ]
+}

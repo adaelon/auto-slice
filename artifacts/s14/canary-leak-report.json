@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "slice_id": "S14",
+  "canary_count": 6,
+  "scanned_surfaces": [
+    "ControllerSignal",
+    "DevelopmentTaskReceipt",
+    "DevelopmentTaskEvent",
+    "Controller Run event store",
+    "check_stdout",
+    "check_stderr"
+  ],
+  "scanned_process_surface_count": 18,
+  "matches": 0,
+  "result": "PASS"
+}

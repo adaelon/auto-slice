@@ -1,0 +1,16 @@
+{
+  "schema_version": 1,
+  "slice_id": "S14",
+  "normalized_short_digest": "sha256:ddc33568b82008f624e8078b0827515564dcfac1d90d16c79a90833c842b2d8c",
+  "normalized_large_digest": "sha256:ddc33568b82008f624e8078b0827515564dcfac1d90d16c79a90833c842b2d8c",
+  "normalized_controller_bytes": 751,
+  "development_receipt_digest": "sha256:8a0b56f6865512fec35b2d93ed7dd6acbe79ac1c53d4d89ccafe571da2ff3770",
+  "normalized_short_run_events_digest": "sha256:f4ca0597b61fb09051d0e3cc4660f9f6030983c520857f3813965bd0d2b084f0",
+  "normalized_large_run_events_digest": "sha256:f4ca0597b61fb09051d0e3cc4660f9f6030983c520857f3813965bd0d2b084f0",
+  "normalized_short_production_receipt_digest": "sha256:934034ec79c3b5c9bb3882161135035cff9fc96db2eb7647d861e7d36491161a",
+  "normalized_large_production_receipt_digest": "sha256:934034ec79c3b5c9bb3882161135035cff9fc96db2eb7647d861e7d36491161a",
+  "run_event_count": 9,
+  "controller_state_file_count": 15,
+  "equal": true,
+  "result": "PASS"
+}

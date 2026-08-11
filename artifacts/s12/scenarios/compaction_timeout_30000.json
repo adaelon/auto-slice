@@ -1,0 +1,15 @@
+{
+  "id": "compaction_timeout_30000",
+  "result": "PASS",
+  "assertions": {
+    "virtual_clock_ms": 30000,
+    "source_interrupted": true,
+    "compression_task_created": true,
+    "continuation_task_created": true,
+    "uuid_distinct": true,
+    "persistent_task_records": 3,
+    "final_status": "SLICE_RUNNING",
+    "final_source_is_continuation": true,
+    "write_epoch_rotated": true
+  }
+}

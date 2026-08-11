@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "result": "PASS",
+  "executable_paths": [
+    "src/controller/control-plane/control-plane.ts",
+    "src/controller/control-plane/runtime.ts",
+    "src/controller/main.ts"
+  ],
+  "no_push_path": true,
+  "no_model_fallback_path": true,
+  "status_omits_raw_error_message": true,
+  "status_includes_task_ids": true,
+  "status_includes_evidence_path": true,
+  "deterministic_test_anchors": [
+    "test/control-plane.test.ts",
+    "test/controller.test.ts",
+    "test/run-store.test.ts"
+  ]
+}

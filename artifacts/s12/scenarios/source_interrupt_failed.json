@@ -1,0 +1,11 @@
+{
+  "id": "source_interrupt_failed",
+  "result": "PASS",
+  "assertions": {
+    "failure_code": "source_interrupt_failed",
+    "failure_reason": "interrupt_call_failed",
+    "final_status": "NEEDS_USER",
+    "writes_frozen": true,
+    "compression_tasks_created": 0
+  }
+}

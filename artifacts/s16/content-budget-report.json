@@ -1,0 +1,700 @@
+{
+  "schema_version": 1,
+  "slice_id": "S16",
+  "signal_budget": {
+    "dropped_content_categories": [
+      "agent_message",
+      "reasoning",
+      "command_output",
+      "diff",
+      "tool_payload",
+      "plan"
+    ],
+    "limit_bytes": 8192,
+    "maximum_bytes": 283,
+    "signals": [
+      {
+        "bytes": 184,
+        "fields": [
+          "compaction_id",
+          "host_sequence",
+          "observed_at",
+          "phase",
+          "thread_id",
+          "type"
+        ],
+        "type": "COMPACTION"
+      },
+      {
+        "bytes": 283,
+        "fields": [
+          "completed_at",
+          "outcome",
+          "run_id",
+          "slice_id",
+          "started_at",
+          "thread_id",
+          "turn_id",
+          "type"
+        ],
+        "type": "TURN_TERMINAL"
+      },
+      {
+        "bytes": 85,
+        "fields": [
+          "state",
+          "thread_id",
+          "type"
+        ],
+        "type": "THREAD_LIFECYCLE"
+      },
+      {
+        "bytes": 176,
+        "fields": [
+          "from_model",
+          "reason_code",
+          "thread_id",
+          "to_model",
+          "turn_id",
+          "type"
+        ],
+        "type": "MODEL_REROUTED"
+      }
+    ]
+  },
+  "acceptance_matrix": {
+    "compaction_observability": {
+      "event_path_probe_calls": 0,
+      "fallback_probe_calls": 1,
+      "fallback_probe_elapsed_ms": [
+        1200000
+      ],
+      "timeout_continuation_tasks_distinct": true
+    },
+    "compatibility": {
+      "legacy_acceptance_snapshot_tests_required": true,
+      "legacy_slice_fields_present_and_inert": true,
+      "production_plan_version": 1
+    },
+    "controller_observation": {
+      "full_turn_reads": 0,
+      "git_process_calls": 0,
+      "worker_content_matches": 0
+    },
+    "failure_closure": {
+      "failed": {
+        "error_code": "slice_execution_failed",
+        "run_status": "NEEDS_USER"
+      },
+      "interrupted": {
+        "error_code": "slice_execution_failed",
+        "run_status": "NEEDS_USER"
+      },
+      "next_slice_starts": 0
+    },
+    "trusted_completion": {
+      "arbitrary_extra_files": 2,
+      "checkpoint_exists": false,
+      "commit_mode": "after_slice",
+      "head_commit_delta": 0,
+      "legacy_acceptance_states_seen": false,
+      "missing_expected_artifact_ignored": true,
+      "slice_count": 2
+    }
+  },
+  "normal_content_equivalence": {
+    "compared_surfaces": [
+      "Run snapshot",
+      "effect ledger",
+      "terminal receipt",
+      "Run event bytes"
+    ],
+    "effect_ledger_digest": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "equal": true,
+    "run_event_count": 6,
+    "run_event_digest": "sha256:deb9ef2f0e958f9573c81388a163049354fc2e55ffd4bbede71dc85670eab19d",
+    "snapshot_digest": "sha256:346af724764f67f62905363cf42253c30d969f2208995be9a082fe73ac20f45a",
+    "state_file_count": 12,
+    "state_total_bytes": 16356,
+    "terminal_receipt_digest": "sha256:738beeeb1a119c0e53aecb5df869c1ded73ba3872a2a6c1960037354225b2726"
+  },
+  "scenarios": [
+    {
+      "canary_matches": 0,
+      "checkpoint_exists": false,
+      "cli_status": "PRODUCTION_RUN_COMPLETED",
+      "commit_mode": "after_slice",
+      "completed_slice_count": 2,
+      "completed_slice_ids": [
+        "S16-trusted-a",
+        "S16-trusted-b"
+      ],
+      "compression_task_id": null,
+      "continuation_task_id": null,
+      "controller_git_invocation_count": 0,
+      "current_slice_id": "S16-trusted-b",
+      "decision_source_thread_id": null,
+      "development_start_count": 2,
+      "effects": {
+        "bytes": 2,
+        "count": 0,
+        "digest": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "error_code": null,
+      "extra_file_count": 2,
+      "full_turn_read_count": 0,
+      "head_commit_delta": 0,
+      "host_clock_offsets_used": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "host_compaction_capability": "AVAILABLE",
+      "id": "normal-short",
+      "launcher_counts": {
+        "compression_starts": 0,
+        "continuation_starts": 0,
+        "progress_receipts": 0,
+        "write_grants": 0
+      },
+      "legacy_contract_fields_present": true,
+      "legacy_expected_artifact_exists": false,
+      "outcome": "DONE",
+      "probe_call_count": 0,
+      "probe_compaction_id_shape_valid": true,
+      "probe_elapsed_ms": [],
+      "run_events": {
+        "bytes": 2413,
+        "count": 6,
+        "digest": "sha256:deb9ef2f0e958f9573c81388a163049354fc2e55ffd4bbede71dc85670eab19d"
+      },
+      "run_status": "DONE",
+      "run_status_chain": [
+        "IDLE",
+        "PREPARING",
+        "SLICE_RUNNING",
+        "PREPARING",
+        "SLICE_RUNNING",
+        "DONE"
+      ],
+      "scanned_bytes": 21081,
+      "snapshot": {
+        "bytes": 312,
+        "digest": "sha256:346af724764f67f62905363cf42253c30d969f2208995be9a082fe73ac20f45a"
+      },
+      "source_thread_id": "019feb16-0000-7000-8000-000000000011",
+      "state_file_count": 12,
+      "state_total_bytes": 16356,
+      "summary_only_thread_read_count": 0,
+      "terminal_receipt": {
+        "bytes": 445,
+        "digest": "sha256:738beeeb1a119c0e53aecb5df869c1ded73ba3872a2a6c1960037354225b2726"
+      },
+      "worker_content_profile": "short"
+    },
+    {
+      "canary_matches": 0,
+      "checkpoint_exists": false,
+      "cli_status": "PRODUCTION_RUN_COMPLETED",
+      "commit_mode": "after_slice",
+      "completed_slice_count": 2,
+      "completed_slice_ids": [
+        "S16-trusted-a",
+        "S16-trusted-b"
+      ],
+      "compression_task_id": null,
+      "continuation_task_id": null,
+      "controller_git_invocation_count": 0,
+      "current_slice_id": "S16-trusted-b",
+      "decision_source_thread_id": null,
+      "development_start_count": 2,
+      "effects": {
+        "bytes": 2,
+        "count": 0,
+        "digest": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "error_code": null,
+      "extra_file_count": 2,
+      "full_turn_read_count": 0,
+      "head_commit_delta": 0,
+      "host_clock_offsets_used": [
+        0,
+        0,
+        0,
+        0
+      ],
+      "host_compaction_capability": "AVAILABLE",
+      "id": "normal-large",
+      "launcher_counts": {
+        "compression_starts": 0,
+        "continuation_starts": 0,
+        "progress_receipts": 0,
+        "write_grants": 0
+      },
+      "legacy_contract_fields_present": true,
+      "legacy_expected_artifact_exists": false,
+      "outcome": "DONE",
+      "probe_call_count": 0,
+      "probe_compaction_id_shape_valid": true,
+      "probe_elapsed_ms": [],
+      "run_events": {
+        "bytes": 2413,
+        "count": 6,
+        "digest": "sha256:deb9ef2f0e958f9573c81388a163049354fc2e55ffd4bbede71dc85670eab19d"
+      },
+      "run_status": "DONE",
+      "run_status_chain": [
+        "IDLE",
+        "PREPARING",
+        "SLICE_RUNNING",
+        "PREPARING",
+        "SLICE_RUNNING",
+        "DONE"
+      ],
+      "scanned_bytes": 21081,
+      "snapshot": {
+        "bytes": 312,
+        "digest": "sha256:346af724764f67f62905363cf42253c30d969f2208995be9a082fe73ac20f45a"
+      },
+      "source_thread_id": "019feb16-0000-7000-8000-000000000011",
+      "state_file_count": 12,
+      "state_total_bytes": 16356,
+      "summary_only_thread_read_count": 0,
+      "terminal_receipt": {
+        "bytes": 445,
+        "digest": "sha256:738beeeb1a119c0e53aecb5df869c1ded73ba3872a2a6c1960037354225b2726"
+      },
+      "worker_content_profile": "large_96_kib_per_value"
+    },
+    {
+      "canary_matches": 0,
+      "checkpoint_exists": false,
+      "cli_status": "PRODUCTION_RUN_COMPLETED",
+      "commit_mode": "none",
+      "completed_slice_count": 1,
+      "completed_slice_ids": [
+        "S16-content-budget-fixture"
+      ],
+      "compression_task_id": null,
+      "continuation_task_id": null,
+      "controller_git_invocation_count": 0,
+      "current_slice_id": "S16-content-budget-fixture",
+      "decision_source_thread_id": null,
+      "development_start_count": 1,
+      "effects": {
+        "bytes": 2,
+        "count": 0,
+        "digest": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "error_code": null,
+      "extra_file_count": 1,
+      "full_turn_read_count": 0,
+      "head_commit_delta": 0,
+      "host_clock_offsets_used": [
+        0,
+        0,
+        29999,
+        29999
+      ],
+      "host_compaction_capability": "AVAILABLE",
+      "id": "compaction-29999",
+      "launcher_counts": {
+        "compression_starts": 0,
+        "continuation_starts": 0,
+        "progress_receipts": 0,
+        "write_grants": 0
+      },
+      "legacy_contract_fields_present": true,
+      "legacy_expected_artifact_exists": false,
+      "outcome": "DONE",
+      "probe_call_count": 0,
+      "probe_compaction_id_shape_valid": true,
+      "probe_elapsed_ms": [],
+      "run_events": {
+        "bytes": 2546,
+        "count": 6,
+        "digest": "sha256:4b3cf1ebf82e6d21c216f09c01513190bd75b6e91d629b772afc651fc3400474"
+      },
+      "run_status": "DONE",
+      "run_status_chain": [
+        "IDLE",
+        "PREPARING",
+        "SLICE_RUNNING",
+        "COMPACTION_WAIT",
+        "SLICE_RUNNING",
+        "DONE"
+      ],
+      "scanned_bytes": 21424,
+      "snapshot": {
+        "bytes": 318,
+        "digest": "sha256:3a4df2ea4a7de71e821d4ae3a198000c9de28015808cd74e873129776bb4df59"
+      },
+      "source_thread_id": "019feb16-0000-7000-8000-000000000001",
+      "state_file_count": 12,
+      "state_total_bytes": 16877,
+      "summary_only_thread_read_count": 0,
+      "terminal_receipt": {
+        "bytes": 353,
+        "digest": "sha256:3e390ddcc63efe848c0730fb8e05c3c3b7120dad97d9a354637892d680819b88"
+      },
+      "worker_content_profile": "large_96_kib_per_value"
+    },
+    {
+      "canary_matches": 0,
+      "checkpoint_exists": false,
+      "cli_status": "PRODUCTION_CONTINUATION_STARTED",
+      "commit_mode": "none",
+      "completed_slice_count": 0,
+      "completed_slice_ids": [],
+      "compression_task_id": "019feb16-0000-7000-8000-000000000003",
+      "continuation_task_id": "019feb16-0000-7000-8000-000000000004",
+      "controller_git_invocation_count": 0,
+      "current_slice_id": "S16-content-budget-fixture",
+      "decision_source_thread_id": "019feb16-0000-7000-8000-000000000001",
+      "development_start_count": 1,
+      "effects": {
+        "bytes": 379,
+        "count": 5,
+        "digest": "sha256:4a7c0e4a4bdecb0fee2cc4a0f07c9bc75bfd02e1d5fcf4be5fe430bd144edfe4"
+      },
+      "error_code": null,
+      "extra_file_count": 0,
+      "full_turn_read_count": 0,
+      "head_commit_delta": 0,
+      "host_clock_offsets_used": [
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      "host_compaction_capability": "AVAILABLE",
+      "id": "timeout-revision-available",
+      "launcher_counts": {
+        "compression_starts": 1,
+        "continuation_starts": 1,
+        "progress_receipts": 1,
+        "write_grants": 1
+      },
+      "legacy_contract_fields_present": true,
+      "legacy_expected_artifact_exists": false,
+      "outcome": "CONTINUATION_STARTED",
+      "probe_call_count": 0,
+      "probe_compaction_id_shape_valid": true,
+      "probe_elapsed_ms": [],
+      "run_events": {
+        "bytes": 4349,
+        "count": 9,
+        "digest": "sha256:ab8c1a6ff91cbd9e5be9ec356d926d8090c6d89b428e458eded2d2f67392a3a7"
+      },
+      "run_status": "SLICE_RUNNING",
+      "run_status_chain": [
+        "IDLE",
+        "PREPARING",
+        "SLICE_RUNNING",
+        "COMPACTION_WAIT",
+        "SOURCE_INTERRUPTING",
+        "HANDOFF_EXPORTING",
+        "HANDOFF_EXPORTING",
+        "CONTINUATION_STARTING",
+        "SLICE_RUNNING"
+      ],
+      "scanned_bytes": 41413,
+      "snapshot": {
+        "bytes": 446,
+        "digest": "sha256:d0642f8a97dc6a08975b442738f8c6790561a06746a57e1c373017efc5db2854"
+      },
+      "source_thread_id": "019feb16-0000-7000-8000-000000000004",
+      "state_file_count": 27,
+      "state_total_bytes": 34474,
+      "summary_only_thread_read_count": 1,
+      "terminal_receipt": {
+        "bytes": 385,
+        "digest": "sha256:5f2a4cb5a013ec36247f19eaf583303307bf022473647a97466ac673cf8c6bdb"
+      },
+      "worker_content_profile": "large_96_kib_per_value"
+    },
+    {
+      "canary_matches": 0,
+      "checkpoint_exists": false,
+      "cli_status": "PRODUCTION_RUN_FAILED",
+      "commit_mode": "none",
+      "completed_slice_count": 0,
+      "completed_slice_ids": [],
+      "compression_task_id": null,
+      "continuation_task_id": null,
+      "controller_git_invocation_count": 0,
+      "current_slice_id": "S16-content-budget-fixture",
+      "decision_source_thread_id": null,
+      "development_start_count": 1,
+      "effects": {
+        "bytes": 76,
+        "count": 1,
+        "digest": "sha256:5ac7698c2335ffb4183327f3733494928975c48f3356cd0fd4321fbab60da754"
+      },
+      "error_code": "source_interrupt_failed",
+      "extra_file_count": 0,
+      "full_turn_read_count": 0,
+      "head_commit_delta": 0,
+      "host_clock_offsets_used": [
+        0,
+        0,
+        0
+      ],
+      "host_compaction_capability": "AVAILABLE",
+      "id": "timeout-revision-unavailable",
+      "launcher_counts": {
+        "compression_starts": 0,
+        "continuation_starts": 0,
+        "progress_receipts": 0,
+        "write_grants": 0
+      },
+      "legacy_contract_fields_present": true,
+      "legacy_expected_artifact_exists": false,
+      "outcome": "FAIL_CLOSED",
+      "probe_call_count": 0,
+      "probe_compaction_id_shape_valid": true,
+      "probe_elapsed_ms": [],
+      "run_events": {
+        "bytes": 2776,
+        "count": 6,
+        "digest": "sha256:e358fcd6769fa0067fc08afe781aa2d64d3448ac6f47ad1807567a9c96f2205b"
+      },
+      "run_status": "NEEDS_USER",
+      "run_status_chain": [
+        "IDLE",
+        "PREPARING",
+        "SLICE_RUNNING",
+        "COMPACTION_WAIT",
+        "SOURCE_INTERRUPTING",
+        "NEEDS_USER"
+      ],
+      "scanned_bytes": 24343,
+      "snapshot": {
+        "bytes": 471,
+        "digest": "sha256:400c468001aa5860244d5a79280995363dbfd483c7379a2ca48482d9c0fd9203"
+      },
+      "source_thread_id": "019feb16-0000-7000-8000-000000000001",
+      "state_file_count": 14,
+      "state_total_bytes": 20358,
+      "summary_only_thread_read_count": 0,
+      "terminal_receipt": {
+        "bytes": 97,
+        "digest": "sha256:7eb48642b8fc691ce30f06c17653c6c8f7014e1eb6d3e85e331647560e5c8b73"
+      },
+      "worker_content_profile": "large_96_kib_per_value"
+    },
+    {
+      "canary_matches": 0,
+      "checkpoint_exists": false,
+      "cli_status": "PRODUCTION_RUN_COMPLETED",
+      "commit_mode": "none",
+      "completed_slice_count": 1,
+      "completed_slice_ids": [
+        "S16-probe-fallback"
+      ],
+      "compression_task_id": null,
+      "continuation_task_id": null,
+      "controller_git_invocation_count": 0,
+      "current_slice_id": "S16-probe-fallback",
+      "decision_source_thread_id": null,
+      "development_start_count": 1,
+      "effects": {
+        "bytes": 2,
+        "count": 0,
+        "digest": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "error_code": null,
+      "extra_file_count": 1,
+      "full_turn_read_count": 0,
+      "head_commit_delta": 0,
+      "host_clock_offsets_used": [
+        0,
+        0,
+        0,
+        1200000,
+        1200000
+      ],
+      "host_compaction_capability": "UNAVAILABLE",
+      "id": "probe-fallback",
+      "launcher_counts": {
+        "compression_starts": 0,
+        "continuation_starts": 0,
+        "progress_receipts": 0,
+        "write_grants": 0
+      },
+      "legacy_contract_fields_present": true,
+      "legacy_expected_artifact_exists": false,
+      "outcome": "DONE",
+      "probe_call_count": 1,
+      "probe_compaction_id_shape_valid": true,
+      "probe_elapsed_ms": [
+        1200000
+      ],
+      "run_events": {
+        "bytes": 2476,
+        "count": 6,
+        "digest": "sha256:17e07297eb899bf5629d163221664b516a2b476b6fd36cbf858d83ab5650ac45"
+      },
+      "run_status": "DONE",
+      "run_status_chain": [
+        "IDLE",
+        "PREPARING",
+        "SLICE_RUNNING",
+        "COMPACTION_WAIT",
+        "SLICE_RUNNING",
+        "DONE"
+      ],
+      "scanned_bytes": 21279,
+      "snapshot": {
+        "bytes": 310,
+        "digest": "sha256:3f6cb2d198cbe350113b1d465db92ea402abc6e5170531284e2fb2af31cba944"
+      },
+      "source_thread_id": "019feb16-0000-7000-8000-000000000001",
+      "state_file_count": 12,
+      "state_total_bytes": 16817,
+      "summary_only_thread_read_count": 0,
+      "terminal_receipt": {
+        "bytes": 345,
+        "digest": "sha256:723d765fafacb9b404b8661b5f9cb85605bb1d26fd62bd27f27ca99bd734cd71"
+      },
+      "worker_content_profile": "large_96_kib_per_value"
+    },
+    {
+      "canary_matches": 0,
+      "checkpoint_exists": false,
+      "cli_status": "PRODUCTION_RUN_FAILED",
+      "commit_mode": "none",
+      "completed_slice_count": 0,
+      "completed_slice_ids": [],
+      "compression_task_id": null,
+      "continuation_task_id": null,
+      "controller_git_invocation_count": 0,
+      "current_slice_id": "S16-failure-a",
+      "decision_source_thread_id": null,
+      "development_start_count": 1,
+      "effects": {
+        "bytes": 2,
+        "count": 0,
+        "digest": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "error_code": "slice_execution_failed",
+      "extra_file_count": 0,
+      "full_turn_read_count": 0,
+      "head_commit_delta": 0,
+      "host_clock_offsets_used": [
+        0,
+        0
+      ],
+      "host_compaction_capability": "AVAILABLE",
+      "id": "worker-failed",
+      "launcher_counts": {
+        "compression_starts": 0,
+        "continuation_starts": 0,
+        "progress_receipts": 0,
+        "write_grants": 0
+      },
+      "legacy_contract_fields_present": true,
+      "legacy_expected_artifact_exists": false,
+      "outcome": "FAIL_CLOSED",
+      "probe_call_count": 0,
+      "probe_compaction_id_shape_valid": true,
+      "probe_elapsed_ms": [],
+      "run_events": {
+        "bytes": 1614,
+        "count": 4,
+        "digest": "sha256:2acb1e23200d967c02596660c06c010fac40407442c8eefe3645aa79fd37c796"
+      },
+      "run_status": "NEEDS_USER",
+      "run_status_chain": [
+        "IDLE",
+        "PREPARING",
+        "SLICE_RUNNING",
+        "NEEDS_USER"
+      ],
+      "scanned_bytes": 14797,
+      "snapshot": {
+        "bytes": 380,
+        "digest": "sha256:ed244b148f80872b27036649bc91577a14c2f9af23835ed967982be5da9b4d92"
+      },
+      "source_thread_id": "019feb16-0000-7000-8000-000000000001",
+      "state_file_count": 10,
+      "state_total_bytes": 12177,
+      "summary_only_thread_read_count": 0,
+      "terminal_receipt": {
+        "bytes": 96,
+        "digest": "sha256:4eaa9173b2d5ce6592276cb3258cbb588d1c93b5dd18129b416f33b561a8e3dc"
+      },
+      "worker_content_profile": "large_96_kib_per_value"
+    },
+    {
+      "canary_matches": 0,
+      "checkpoint_exists": false,
+      "cli_status": "PRODUCTION_RUN_FAILED",
+      "commit_mode": "none",
+      "completed_slice_count": 0,
+      "completed_slice_ids": [],
+      "compression_task_id": null,
+      "continuation_task_id": null,
+      "controller_git_invocation_count": 0,
+      "current_slice_id": "S16-failure-a",
+      "decision_source_thread_id": null,
+      "development_start_count": 1,
+      "effects": {
+        "bytes": 2,
+        "count": 0,
+        "digest": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+      },
+      "error_code": "slice_execution_failed",
+      "extra_file_count": 0,
+      "full_turn_read_count": 0,
+      "head_commit_delta": 0,
+      "host_clock_offsets_used": [
+        0,
+        0
+      ],
+      "host_compaction_capability": "AVAILABLE",
+      "id": "worker-interrupted",
+      "launcher_counts": {
+        "compression_starts": 0,
+        "continuation_starts": 0,
+        "progress_receipts": 0,
+        "write_grants": 0
+      },
+      "legacy_contract_fields_present": true,
+      "legacy_expected_artifact_exists": false,
+      "outcome": "FAIL_CLOSED",
+      "probe_call_count": 0,
+      "probe_compaction_id_shape_valid": true,
+      "probe_elapsed_ms": [],
+      "run_events": {
+        "bytes": 1614,
+        "count": 4,
+        "digest": "sha256:2acb1e23200d967c02596660c06c010fac40407442c8eefe3645aa79fd37c796"
+      },
+      "run_status": "NEEDS_USER",
+      "run_status_chain": [
+        "IDLE",
+        "PREPARING",
+        "SLICE_RUNNING",
+        "NEEDS_USER"
+      ],
+      "scanned_bytes": 14852,
+      "snapshot": {
+        "bytes": 380,
+        "digest": "sha256:ed244b148f80872b27036649bc91577a14c2f9af23835ed967982be5da9b4d92"
+      },
+      "source_thread_id": "019feb16-0000-7000-8000-000000000001",
+      "state_file_count": 10,
+      "state_total_bytes": 12227,
+      "summary_only_thread_read_count": 0,
+      "terminal_receipt": {
+        "bytes": 96,
+        "digest": "sha256:4eaa9173b2d5ce6592276cb3258cbb588d1c93b5dd18129b416f33b561a8e3dc"
+      },
+      "worker_content_profile": "large_96_kib_per_value"
+    }
+  ],
+  "result": "PASS"
+}

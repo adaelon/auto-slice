@@ -1,0 +1,15 @@
+{
+  "id": "protected_change",
+  "result": "PASS",
+  "assertions": {
+    "real_git_cli": true,
+    "real_process_check": true,
+    "commit_mode": "after_slice",
+    "commit_count_delta": 1,
+    "owned_commit_exact": true,
+    "checkpoint_contains_final_head": true,
+    "protected_changes_preserved": true,
+    "remote_count": 0,
+    "push_count": 0
+  }
+}

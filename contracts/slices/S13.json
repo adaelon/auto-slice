@@ -1,0 +1,62 @@
+{
+  "id": "S13",
+  "contract_version": 1,
+  "requires": ["S12"],
+  "objective": "把 Production Plan 经真实文件端口和 App Server Development Task 接到 Production Orchestrator，并以可重复的隔离 Git harness 证明 commit_mode=none、外部状态目录、无 remote 与失败闭合。",
+  "exclusions": [
+    "不在当前生产工作区启动真实 Auto Slice Run",
+    "不连接、提交或 push 任何 Git 远端",
+    "不把未实现的 Compression/Continuation launcher 伪装为可用",
+    "不以人工观察或 LLM 自评替代机器断言",
+    "不安装或重装 Codex 插件"
+  ],
+  "inputs": [
+    { "path": "contracts/slices/S12.json", "digest": "sha256:d720d72f50196b0b3bc0918dd49d317450189cfacf40a38315acb9e68df639e8", "producer_slice": "S12" },
+    { "path": "artifacts/s12/completion-receipt.json", "digest": "sha256:a684a4578212037b07dde6bd58a2142e5b2ba3cacd9bcbcf3830f878449bea72", "producer_slice": "S12" },
+    { "path": "docs/auto-slice-design.md", "digest": "sha256:c10bce7d9a6a83c9bd5e771a6e99caf181c25ed03bf68f13e01baab31955451a", "producer_slice": "frozen-design" }
+  ],
+  "owned_paths": [
+    "contracts/slices/S13.json",
+    "src/controller/main.ts",
+    "src/controller/production/**",
+    "src/controller/state/file-run-store.ts",
+    "src/controller/state/index.ts",
+    "src/controller/state/transitions.ts",
+    "src/controller/state/types.ts",
+    "src/controller/state/validation.ts",
+    "test/controller.test.ts",
+    "test/run-store.test.ts",
+    "test/production-plan.test.ts",
+    "test/app-server-development-task.test.ts",
+    "test/production-orchestrator.test.ts",
+    "test/file-production-runtime.test.ts",
+    "test/fixtures/process/fake-codex-app-server.mjs",
+    "test/fixtures/process/run-production-cli-with-fake-host.mjs",
+    "scripts/run-s13-production-entry.mjs",
+    "scripts/verify-s13.mjs",
+    "package.json",
+    "CONTEXT.md",
+    "docs/adr/0007-codex-app-server-production-adapter.md",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "artifacts/s13/**"
+  ],
+  "checks": [
+    { "id": "build", "argv": ["npm", "run", "build"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": ["dist/src/controller/main.js", "dist/src/controller/production/production-cli.js"] },
+    { "id": "typecheck", "argv": ["npm", "run", "typecheck"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "test", "argv": ["npm", "run", "test"], "cwd": ".", "timeout_ms": 300000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "production_entry_first", "argv": ["node", "scripts/run-s13-production-entry.mjs"], "cwd": ".", "timeout_ms": 180000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "production_entry_repeat", "argv": ["node", "scripts/run-s13-production-entry.mjs"], "cwd": ".", "timeout_ms": 180000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "markdown_links", "argv": ["node", "scripts/check-markdown-links.mjs"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "plugin_validation", "argv": ["npm", "run", "validate:plugin"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP", "CODEX_HOME", "PYTHON"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "lint", "argv": ["npm", "run", "lint"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] }
+  ],
+  "expected_artifacts": [
+    { "path": "artifacts/s13/production-entry-report.json", "kind": "normalized_production_entry_report" },
+    { "path": "artifacts/s13/release-readiness-checklist.json", "kind": "production_entry_release_gate" },
+    { "path": "artifacts/s13/completion-receipt.json", "kind": "completion_receipt" },
+    { "path": "docs/代码链路.md", "kind": "code_path_index" },
+    { "path": "docs/架构.md", "kind": "implementation_architecture" }
+  ],
+  "unlocks": ["personal_plugin_install_and_temporary_pilot"]
+}

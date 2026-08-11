@@ -1,0 +1,62 @@
+{
+  "id": "S16",
+  "contract_version": 1,
+  "requires": ["S14", "S15"],
+  "objective": "在完整 Production Run、失败闭合、probe 降级与 Compaction Timeout 路径上，机器证明 Trusted Completion、旧数据兼容和 Content-blind Controller 的最终发布契约。",
+  "exclusions": [
+    "不在生产项目启动真实 Auto Slice Run",
+    "不连接、修改或推送 Git 远端",
+    "不改变模型策略、Handoff v2、30 秒 Compaction Timeout 或 Controller 状态语义",
+    "不允许 Controller 读取、hash、摘要或持久化 Worker Content",
+    "不倒改 S13、S14 或 S15 CompletionReceipt",
+    "不执行 Git commit 或 push"
+  ],
+  "inputs": [
+    { "path": "artifacts/s15/completion-receipt.json", "digest": "sha256:c841f1599586342b8ab6e82805dedf0345f4c91b548a10a9b641952475029738", "producer_slice": "S15" },
+    { "path": "artifacts/s14/completion-receipt.json", "digest": "sha256:09f17d0ab66d78f3c757870a05c5f52ea00d0f6b395b21f88f73e8c81d972e45", "producer_slice": "S14" },
+    { "path": "artifacts/s13/completion-receipt.json", "digest": "sha256:d8ea9df68eb8e46078bc60f5fffa60eb6c91a936c65b0d0c4221f9d3ab3b2bbf", "producer_slice": "S13" },
+    { "path": "CONTEXT.md", "digest": "sha256:7fb5a486fefddcf63d14329f1735b81db2d85b18ca2f8359079dee4e99328742", "producer_slice": "trusted-completion-boundary" },
+    { "path": "docs/adr/0009-content-blind-controller.md", "digest": "sha256:ddac3896e44cd630a3e5e9e047f65c32306be2a8b866c933a6c22ba7ac5667b6", "producer_slice": "content-blind-boundary" },
+    { "path": "docs/adr/0010-trusted-worker-completion.md", "digest": "sha256:d27617e8c5760e5da3bdb3255602824b0165bf0b85d975a832ad14e9878f90ca", "producer_slice": "trusted-completion-boundary" },
+    { "path": "skills/auto-slice-control/SKILL.md", "digest": "sha256:1144722bbc0087adb1bc92874d0503369c16ea58cfbe56901011688d93874fe0", "producer_slice": "S-CONTROL-1" },
+    { "path": "docs/切片方案-可信完成与低干扰监控.md", "digest": "sha256:58b5ae9e10595f7705216aa46f74d4ed72e666bf9c2ba13e0e24a09ffec12575", "producer_slice": "S-ACC-1" },
+    { "path": "docs/auto-slice-design.md", "digest": "sha256:0302e6099e47984793249b81ddb007b5c0dc7c6365e513d99176f754a6f87564", "producer_slice": "release-candidate-design" },
+    { "path": "docs/implementation-slices.md", "digest": "sha256:4efa4ee4f37152e27edd00775d4ab3979b25072c228a8f60e096aa7994136b6a", "producer_slice": "frozen-design" }
+  ],
+  "owned_paths": [
+    "contracts/slices/S16.json",
+    "scripts/run-s16-content-budget.mjs",
+    "scripts/verify-s16.mjs",
+    "test/fixtures/process/fake-s16-app-server.mjs",
+    "test/fixtures/process/run-s16-production-with-fake-host.mjs",
+    "package.json",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "artifacts/s16/**"
+  ],
+  "budgets": {
+    "maximum_controller_signal_bytes": 8192,
+    "worker_content_canary_types": 8,
+    "full_turn_read_count": 0
+  },
+  "checks": [
+    { "id": "build", "argv": ["npm", "run", "build"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": ["dist/src/controller/production/app-server-client.js", "dist/src/controller/production/production-orchestrator.js"] },
+    { "id": "typecheck", "argv": ["npm", "run", "typecheck"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "target_test", "argv": ["node", "--test", "dist/test/app-server-client.test.js", "dist/test/app-server-development-task.test.js", "dist/test/thread-control.test.js", "dist/test/production-orchestrator.test.js", "dist/test/file-production-runtime.test.js", "dist/test/run-store.test.js", "dist/test/control-plane.test.js", "dist/test/auto-slice-control-skill.test.js"], "cwd": ".", "timeout_ms": 180000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "test", "argv": ["npm", "run", "test"], "cwd": ".", "timeout_ms": 300000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "content_budget_evidence_first", "argv": ["node", "scripts/run-s16-content-budget.mjs"], "cwd": ".", "timeout_ms": 180000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "content_budget_evidence_repeat", "argv": ["node", "scripts/run-s16-content-budget.mjs"], "cwd": ".", "timeout_ms": 180000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "markdown_links", "argv": ["node", "scripts/check-markdown-links.mjs"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "plugin_validation", "argv": ["npm", "run", "validate:plugin"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP", "CODEX_HOME", "PYTHON"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "lint", "argv": ["npm", "run", "lint"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] }
+  ],
+  "expected_artifacts": [
+    { "path": "artifacts/s16/content-budget-report.json", "kind": "controller_content_budget_report" },
+    { "path": "artifacts/s16/canary-scan-report.json", "kind": "all_surface_worker_content_canary_report" },
+    { "path": "artifacts/s16/revision-failure-trace.json", "kind": "summary_only_revision_failure_closure_trace" },
+    { "path": "artifacts/s16/completion-receipt.json", "kind": "completion_receipt" },
+    { "path": "docs/代码链路.md", "kind": "code_path_index" },
+    { "path": "docs/架构.md", "kind": "implementation_architecture" }
+  ],
+  "unlocks": ["trusted-completion-release-candidate"]
+}

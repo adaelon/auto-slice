@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "result": "PASS",
+  "entries": [
+    {
+      "error_code": "model_policy_unavailable",
+      "resolutions": [
+        "supply_model_policy",
+        "abort_run"
+      ],
+      "classification": "RECOVERABLE"
+    },
+    {
+      "error_code": "project_lock_unavailable",
+      "resolutions": [
+        "release_stale_project_lock",
+        "abort_run"
+      ],
+      "classification": "RECOVERABLE"
+    },
+    {
+      "error_code": "compaction_observability_unavailable",
+      "resolutions": [
+        "abort_run"
+      ],
+      "classification": "ABORT_ONLY"
+    },
+    {
+      "error_code": "source_interrupt_failed",
+      "resolutions": [
+        "abort_run"
+      ],
+      "classification": "ABORT_ONLY"
+    },
+    {
+      "error_code": "handoff_export_failed",
+      "resolutions": [
+        "abort_run"
+      ],
+      "classification": "ABORT_ONLY"
+    },
+    {
+      "error_code": "handoff_integrity_failed",
+      "resolutions": [
+        "abort_run"
+      ],
+      "classification": "ABORT_ONLY"
+    },
+    {
+      "error_code": "continuation_start_failed",
+      "resolutions": [
+        "retry_continuation_start",
+        "abort_run"
+      ],
+      "classification": "RECOVERABLE"
+    },
+    {
+      "error_code": "protected_change_overlap",
+      "resolutions": [
+        "resolve_protected_changes",
+        "abort_run"
+      ],
+      "classification": "RECOVERABLE"
+    },
+    {
+      "error_code": "verification_failed",
+      "resolutions": [
+        "abort_run"
+      ],
+      "classification": "ABORT_ONLY"
+    },
+    {
+      "error_code": "checkpoint_refresh_failed",
+      "resolutions": [
+        "abort_run"
+      ],
+      "classification": "ABORT_ONLY"
+    },
+    {
+      "error_code": "state_persist_failed",
+      "resolutions": [
+        "abort_run"
+      ],
+      "classification": "ABORT_ONLY"
+    },
+    {
+      "error_code": "state_corrupt",
+      "resolutions": [
+        "abort_run"
+      ],
+      "classification": "ABORT_ONLY"
+    },
+    {
+      "error_code": "unsupported_state_schema",
+      "resolutions": [
+        "abort_run"
+      ],
+      "classification": "ABORT_ONLY"
+    }
+  ],
+  "unknown_error_policy": [
+    "abort_run"
+  ]
+}

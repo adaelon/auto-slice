@@ -1,0 +1,61 @@
+{
+  "schema_version": 1,
+  "slice_id": "S12",
+  "items": [
+    {
+      "id": "all_s01_s12_contracts",
+      "passed": true
+    },
+    {
+      "id": "ten_e2e_scenarios",
+      "passed": true
+    },
+    {
+      "id": "normalized_repeat",
+      "passed": true
+    },
+    {
+      "id": "real_git_process_lock_helper",
+      "passed": true
+    },
+    {
+      "id": "build",
+      "passed": true
+    },
+    {
+      "id": "typecheck",
+      "passed": true
+    },
+    {
+      "id": "test",
+      "passed": true
+    },
+    {
+      "id": "lint",
+      "passed": true
+    },
+    {
+      "id": "plugin_validation",
+      "passed": true
+    },
+    {
+      "id": "markdown_relative_links",
+      "passed": true
+    },
+    {
+      "id": "no_remote_or_push",
+      "passed": true
+    },
+    {
+      "id": "production_run_not_started",
+      "passed": true
+    },
+    {
+      "id": "manual_pilot_only",
+      "passed": true
+    }
+  ],
+  "next_gate": "manual_first_project_pilot",
+  "automatic_production_run": false,
+  "result": "PASS"
+}

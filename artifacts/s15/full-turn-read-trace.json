@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "slice_id": "S15",
+  "all_requests_summary_only": true,
+  "include_turns_true_count": 0,
+  "scenarios": [
+    {
+      "scenario": "stable",
+      "thread_reads": [
+        {
+          "includeTurns": false,
+          "method": "thread/read"
+        }
+      ]
+    },
+    {
+      "scenario": "unavailable",
+      "thread_reads": []
+    },
+    {
+      "scenario": "invalid",
+      "thread_reads": []
+    },
+    {
+      "scenario": "mismatch",
+      "thread_reads": [
+        {
+          "includeTurns": false,
+          "method": "thread/read"
+        }
+      ]
+    },
+    {
+      "scenario": "malicious_turns",
+      "thread_reads": [
+        {
+          "includeTurns": false,
+          "method": "thread/read"
+        }
+      ]
+    },
+    {
+      "scenario": "malicious_items",
+      "thread_reads": [
+        {
+          "includeTurns": false,
+          "method": "thread/read"
+        }
+      ]
+    }
+  ],
+  "thread_read_count": 4,
+  "result": "PASS"
+}

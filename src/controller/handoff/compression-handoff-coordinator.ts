@@ -14,6 +14,7 @@ import {
   type StoredRun,
 } from "../state/index.js";
 import type { InterruptReceipt } from "../thread-control/index.js";
+import { buildCompressionPrompt } from "../production/prompt-builder.js";
 
 import { CompressionHandoffError } from "./errors.js";
 import {
@@ -328,6 +329,13 @@ export class CompressionHandoffCoordinator {
 
     const state = claimed.state;
     const request = this.createRequest(state, interruptReceipt);
+    if (request instanceof CompressionHandoffError) {
+      return this.closeFailure(
+        state,
+        request.reason ?? "invalid_request",
+        request.message,
+      );
+    }
     const effectKey = createEffectIdempotencyKey(
       runId,
       state.state_version,
@@ -845,13 +853,17 @@ export class CompressionHandoffCoordinator {
       "export_handoff",
       state.compaction.compaction_id,
     );
-    const request = {
-      ...this.createRequest(state, interruptReceipt),
+    const requestBase = this.createRequest(state, interruptReceipt);
+    if (requestBase instanceof CompressionHandoffError) {
+      return requestBase;
+    }
+    const boundRequest = {
+      ...requestBase,
       idempotency_key: effectKey.digest,
     } satisfies CompressionRequest;
     const effect = this.options.run_store.appendEffectIntent(
       effectKey,
-      sha256Json(request),
+      sha256Json(boundRequest),
     );
     if (effect instanceof StateStoreError) {
       return this.fromStateError(effect);
@@ -884,7 +896,7 @@ export class CompressionHandoffCoordinator {
       const receipt = await this.decodeAndVerifyHandoffReceipt(
         raw,
         syntheticLaunch,
-        request,
+        boundRequest,
       );
       if (
         sha256Json(receipt) !== effect.receipt_digest ||
@@ -991,9 +1003,18 @@ export class CompressionHandoffCoordinator {
   private createRequest(
     state: RunState,
     receipt: InterruptReceipt,
-  ): Omit<CompressionRequest, "idempotency_key"> {
+  ): Omit<CompressionRequest, "idempotency_key"> | CompressionHandoffError {
+    const prompt = buildCompressionPrompt(state.source_thread_id as string);
+    if (typeof prompt !== "string") {
+      return new CompressionHandoffError(
+        "handoff_export_failed",
+        prompt.message,
+        { reason: "invalid_request", cause: prompt },
+      );
+    }
     return {
       source_thread_id: state.source_thread_id as string,
+      prompt,
       source_persisted_revision: receipt.persisted_revision,
       workspace_identity: state.workspace_identity,
       compaction_id: state.compaction?.compaction_id as string,

@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "slice_id": "S16",
+  "contract_digest": "sha256:32161b4309e104dad059bdc53ca028a3d4c45661732ae0d5b690d2af0ac1d956",
+  "input_digests": [
+    {
+      "path": "artifacts/s15/completion-receipt.json",
+      "digest": "sha256:c841f1599586342b8ab6e82805dedf0345f4c91b548a10a9b641952475029738"
+    },
+    {
+      "path": "artifacts/s14/completion-receipt.json",
+      "digest": "sha256:09f17d0ab66d78f3c757870a05c5f52ea00d0f6b395b21f88f73e8c81d972e45"
+    },
+    {
+      "path": "artifacts/s13/completion-receipt.json",
+      "digest": "sha256:d8ea9df68eb8e46078bc60f5fffa60eb6c91a936c65b0d0c4221f9d3ab3b2bbf"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:7fb5a486fefddcf63d14329f1735b81db2d85b18ca2f8359079dee4e99328742"
+    },
+    {
+      "path": "docs/adr/0009-content-blind-controller.md",
+      "digest": "sha256:ddac3896e44cd630a3e5e9e047f65c32306be2a8b866c933a6c22ba7ac5667b6"
+    },
+    {
+      "path": "docs/adr/0010-trusted-worker-completion.md",
+      "digest": "sha256:d27617e8c5760e5da3bdb3255602824b0165bf0b85d975a832ad14e9878f90ca"
+    },
+    {
+      "path": "skills/auto-slice-control/SKILL.md",
+      "digest": "sha256:1144722bbc0087adb1bc92874d0503369c16ea58cfbe56901011688d93874fe0"
+    },
+    {
+      "path": "docs/切片方案-可信完成与低干扰监控.md",
+      "digest": "sha256:58b5ae9e10595f7705216aa46f74d4ed72e666bf9c2ba13e0e24a09ffec12575"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:0302e6099e47984793249b81ddb007b5c0dc7c6365e513d99176f754a6f87564"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:4efa4ee4f37152e27edd00775d4ab3979b25072c228a8f60e096aa7994136b6a"
+    }
+  ],
+  "output_digests": [
+    {
+      "path": "artifacts/s16/canary-scan-report.json",
+      "digest": "sha256:5c6b6112fcf91a1ab2620bbf8bc32de22a1d845b11c61e8efa05fcaf7fab52ad"
+    },
+    {
+      "path": "artifacts/s16/content-budget-report.json",
+      "digest": "sha256:5f2f26fe7f5c7afe1f1ca94030f6a09a34bbfc2444047495bea840a77d9acbc1"
+    },
+    {
+      "path": "artifacts/s16/revision-failure-trace.json",
+      "digest": "sha256:bd057a4a8a0b35aa7c054f59af4622ec540149d6a6ff9db394efe39af6beb2b0"
+    },
+    {
+      "path": "contracts/slices/S16.json",
+      "digest": "sha256:32161b4309e104dad059bdc53ca028a3d4c45661732ae0d5b690d2af0ac1d956"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:d465aaa99842cdc3a4e99a924a5ae04178f5ad864d0f0098d7c67833c6f84c09"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:0055c8b3fc241578ac2ac19e5b779aec4fb733e2dbc01d686306c8c1e7c06bf1"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:739ebd8e3fa1032af70c6df4adc58ff296405bf81a1590cc18e67a8db2affcfa"
+    },
+    {
+      "path": "scripts/run-s16-content-budget.mjs",
+      "digest": "sha256:141314a01a4da2892ffe046d576e0c4afab65d30e24382ee58b6265c40418992"
+    },
+    {
+      "path": "scripts/verify-s16.mjs",
+      "digest": "sha256:03b4edb5b4a1cca58d6e1f06079aa7fb2205ad1ce357797a88a8055946bee8d8"
+    },
+    {
+      "path": "test/fixtures/process/fake-s16-app-server.mjs",
+      "digest": "sha256:7e30d1a4dcd153642c6a88b2d3263a78e330f76946894c7c3ce2246dd6e5a104"
+    },
+    {
+      "path": "test/fixtures/process/run-s16-production-with-fake-host.mjs",
+      "digest": "sha256:9e4dd84b98da470058455455caadb766b9699abf599ab750bee2dfda6c42da3f"
+    }
+  ],
+  "touched_paths": [
+    "artifacts/s16/canary-scan-report.json",
+    "artifacts/s16/completion-receipt.json",
+    "artifacts/s16/content-budget-report.json",
+    "artifacts/s16/revision-failure-trace.json",
+    "contracts/slices/S16.json",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "package.json",
+    "scripts/run-s16-content-budget.mjs",
+    "scripts/verify-s16.mjs",
+    "test/fixtures/process/fake-s16-app-server.mjs",
+    "test/fixtures/process/run-s16-production-with-fake-host.mjs"
+  ],
+  "check_receipts": [
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ca622aa6b87a4fbd135ae14f841cd92016f6ce189674c007da77682d9bc3fe7a",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 5248
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b4d5eeaf054ffadd6ba18423f31f81288f54bd16be7a5390eafbb745eeba53dc",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 3677
+    },
+    {
+      "check_id": "target_test",
+      "argv": [
+        "node",
+        "--test",
+        "dist/test/app-server-client.test.js",
+        "dist/test/app-server-development-task.test.js",
+        "dist/test/thread-control.test.js",
+        "dist/test/production-orchestrator.test.js",
+        "dist/test/file-production-runtime.test.js",
+        "dist/test/run-store.test.js",
+        "dist/test/control-plane.test.js",
+        "dist/test/auto-slice-control-skill.test.js"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:3044511aba6d2ddd1f8ec59499350dbf0cb6ec90d6f3cd97c3bc2228f04f0701",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 8142
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:4f403cb2c26152c8ff37bf9545409350ecaaf2927cdb52f76fff64d19a6ebaa6",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 117964
+    },
+    {
+      "check_id": "content_budget_evidence_first",
+      "argv": [
+        "node",
+        "scripts/run-s16-content-budget.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b0dd70b351e5f63c8b914d0ef3671a94da3b01eaeaf65ed17865f430bcd5fdf0",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 38484
+    },
+    {
+      "check_id": "content_budget_evidence_repeat",
+      "argv": [
+        "node",
+        "scripts/run-s16-content-budget.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b0dd70b351e5f63c8b914d0ef3671a94da3b01eaeaf65ed17865f430bcd5fdf0",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 34907
+    },
+    {
+      "check_id": "markdown_links",
+      "argv": [
+        "node",
+        "scripts/check-markdown-links.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:828bc005b31de084ac1d459398f89a84af7aadd4d3f27cb6e3da136ca2c77845",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 237
+    },
+    {
+      "check_id": "plugin_validation",
+      "argv": [
+        "npm",
+        "run",
+        "validate:plugin"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:8d2e71d28f84282b4ff2b50b55581cefb572fb55a11155cce10787d1f93dfea5",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 1618
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:50bf418d3f46fa3975eade28b9f81047ee52461d61415cc22546263c0cca2afe",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 15325
+    }
+  ],
+  "start_head": "9b95aed63572560e000314a7ca71fe10b1de95ee",
+  "end_head": null,
+  "owned_diff_digest": "sha256:2c045f5eb2c1af114060b19296e8e1b338bc760cb5cf645349cdd8dfe9aaec6f",
+  "completed_at": "2026-08-10T15:44:14.681Z"
+}

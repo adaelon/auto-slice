@@ -27,11 +27,13 @@ export type ContinuationTaskId = string;
 export interface ResumeEnvelope {
   readonly run_id: string;
   readonly current_slice_id: string;
+  readonly goal_prompt: string;
   readonly handoff_markdown_path: string;
   readonly evidence_index_path: string;
   readonly consumer_contract: SynthesizeFirstConsumerContract;
   readonly expected_workspace_identity: WorkspaceIdentity;
-  readonly expected_owned_diff_digest: Sha256Digest;
+  /** Legacy envelope decode compatibility only; new envelopes omit this field. */
+  readonly expected_owned_diff_digest?: Sha256Digest;
 }
 
 export interface ReadyReceipt {
@@ -136,7 +138,8 @@ export interface ContinueFromHandoffInput {
   readonly handoff_receipt: HandoffReceipt;
   readonly slice_contract: SliceContractV1;
   readonly model_decision: ModelDecision;
-  readonly expected_owned_diff_digest: Sha256Digest;
+  /** Accepted only for legacy callers and ignored by runtime decisions. */
+  readonly expected_owned_diff_digest?: Sha256Digest;
   readonly expected_state_version: number;
 }
 

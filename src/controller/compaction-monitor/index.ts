@@ -1,6 +1,7 @@
 export { CompactionMonitor } from "./compaction-monitor.js";
 export { CompactionMonitorError } from "./errors.js";
 export { SystemClock, TimeoutDeadlineScheduler } from "./timeout-scheduler.js";
+export { nextCompactionProbeElapsedMs } from "./probe-schedule.js";
 export {
   COMPACTION_TIMEOUT_MS,
   type AutoCompactionCompletedEvent,

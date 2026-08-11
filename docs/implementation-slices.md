@@ -108,6 +108,7 @@ CompletionReceipt {
 8. Protected Change 无法证明归属时按用户改动处理，禁止自动提交。
 9. 所有失败均进入枚举状态；日志文本和模型自述不是状态证据。
 10. 测试 runner、Git、文件摘要和工具回执负责判定对错，LLM 不得自验收。
+11. Controller 必须是 Content-blind Controller；Worker Content 不得进入模型上下文、控制判断、持久状态、回执或日志。
 
 ## 2. 依赖图与交付顺序
 
@@ -133,9 +134,13 @@ flowchart LR
   S06 --> S12["S12 端到端验收"]
   S10 --> S12
   S11 --> S12
+  S12 --> S13["S13 生产入口"]
+  S13 --> S14["S14 事件防火墙"]
+  S14 --> S15["S15 元数据 revision"]
+  S15 --> S16["S16 内容预算门禁"]
 ```
 
-允许并行准备但不允许并行写入生产路径：S02 与 S04 在 S01 后可分别实现；S03 与 S07 在 S02 后可分别实现。合流切片开始前必须消费所有前置 `CompletionReceipt`。
+允许并行准备但不允许并行写入生产路径：S02 与 S04 在 S01 后可分别实现；S03 与 S07 在 S02 后可分别实现。合流切片开始前必须消费所有前置 `CompletionReceipt`。S13 是后续已冻结的生产入口扩展，以 [`contracts/slices/S13.json`](../contracts/slices/S13.json) 和 S13 `CompletionReceipt` 为权威输入。
 
 ## 3. S01 插件骨架与契约装载
 
@@ -702,7 +707,126 @@ RecoveryResolution =
 
 **Unlocks**：仅解锁人工批准的首个真实项目试运行；不自动启动生产 Run。
 
-## 15. 计划级验收矩阵
+ADR-0009 与下列计划是 S13 完成后的边界变更。S13 `CompletionReceipt` 只作为历史前置证明，不得因共享文档的新决策而重写；S14 `SliceSpec` 必须另行冻结当前 `CONTEXT.md`、ADR-0009、产品契约与本计划的新 digest。
+
+## 15. S14 App Server 事件防火墙
+
+**Requires**：S13、ADR-0009。
+
+**Objective**：在 App Server 传输与 Controller ports 之间建立白名单投影，使 Controller 只接收有界的结构化事件和终态回执。
+
+**Exclusions**：不改 Source 持久 revision 的获取方式（归 S15）；不改 30 秒 Compaction Timeout；不限制 Compression Task 读取 Source Thread。
+
+**Inputs**：S13 `CompletionReceipt`、当前 `CONTEXT.md`、ADR-0009、`auto-slice-design.md`、本计划、S13 App Server adapter 与 App Server `turn/*` / `item/*` / `thread/*` 通知契约。
+
+**Owned outputs**：`contracts/slices/S14.json`、`controller/production` 事件投影边界、fake App Server 内容洪泛夹具、S14 单元/集成测试与 `CompletionReceipt`。
+
+**Port contract**：
+
+```text
+ControllerSignal =
+  | { type: COMPACTION, phase, thread_id, compaction_id, host_sequence, observed_at }
+  | { type: TURN_TERMINAL, run_id, slice_id, thread_id, turn_id, outcome, started_at, completed_at }
+  | { type: THREAD_LIFECYCLE, thread_id, state }
+  | { type: MODEL_REROUTED, thread_id, turn_id, from_model, to_model, reason_code }
+
+HostEventFirewall.project(notification) -> ControllerSignal | DROP
+```
+
+`project` 只构造新的白名单 DTO，不透传、摘要、hash、记录或引用原始 notification。`agentMessage`、reasoning、command output、diff、tool payload、plan 和完整 turn items 一律 `DROP`；`DevelopmentTaskReceipt` 移除 `final_response_digest`。
+
+**Failure closure**：白名单控制事件缺失必需字段时返回 `app_server_protocol_error`；非控制内容帧被丢弃而不改变 Run 状态。
+
+**Deterministic checks**：
+
+- `initialize.capabilities.optOutNotificationMethods` 精确屏蔽所有不需要的 message/reasoning/command/diff/plan delta；
+- 同一控制序列搭配短与大份 Worker Content 时，ControllerSignal、Run 事件和终态回执规范化后字节相同；
+- 在消息、reasoning、命令输出、diff 和工具 payload 植入不同 canary，状态、stdout/stderr、回执与日志中均搜索不到；
+- `contextCompaction` start/completed、model reroute 和 turn terminal 的现有状态转换仍全绿。
+
+**Completion evidence**：事件白名单报告、canary 不泄漏报告、大小内容等价回执、S14 `CompletionReceipt`。
+
+**Unlocks**：S15。
+
+## 16. S15 元数据 Source revision
+
+**Requires**：S14、S08、S09、ADR-0009。
+
+**Objective**：用 Host 边界的稳定不透明 revision 和 summary-only thread 核验替代 `thread/read(includeTurns=true)`。
+
+**Exclusions**：不用 `updatedAt` 单字段伪装 revision；不在 Controller 内读取或 hash 完整 turns；不改 Handoff 产物格式或 Compression Task 的源读取权限。
+
+**Inputs**：S14 ControllerSignal、S08 `InterruptReceipt/ThreadInspection`、S09 `source_persisted_revision`、Host revision 能力快照。
+
+**Owned outputs**：`contracts/slices/S15.json`、`ThreadRevisionProvider`、summary-only `ThreadMetadataPort`、Source interruption 集成测试、S15 `CompletionReceipt`。
+
+**Port contract**：
+
+```text
+ThreadRevisionProvider.read(thread_id) -> OpaqueStableRevision | UNAVAILABLE
+ThreadMetadataPort.inspect(thread_id, include_turns=false) -> ThreadSummary
+
+ThreadInspection {
+  thread_id
+  persisted_revision: OpaqueStableRevision
+  readable: true
+  archived: false
+  deleted: false
+  observed_at
+}
+```
+
+Revision provider 属于 Host Adapter 边界，只能返回定长不透明 token 或 `UNAVAILABLE`；Controller 独立获取中断回执与 inspection revision 并要求一致。当前 Host 没有稳定能力时必须显式注入 fail-closed provider。
+
+**Failure closure**：Revision 能力不可用、token 非法或两次观测漂移时进入 `NEEDS_USER(source_interrupt_failed)`，分别记录 `thread_revision_unavailable|invalid|mismatch` 原因；不创建 Compression Task。
+
+**Deterministic checks**：
+
+- fake App Server 拒绝任何 `includeTurns: true` 请求，并证明生产适配器只读 summary；
+- summary 响应中即使恶意夹带 `turns/items` 也在 Host Adapter 边界被拒绝；
+- Revision provider `UNAVAILABLE` 时确定性闭合，且 Compression launcher 调用数为零；
+- 中断后 revision 漂移仍被 S08/S09 门禁拒绝，正常 token 可完成 Source -> Compression 身份绑定。
+
+**Completion evidence**：无 full-turn read 协议轨迹、revision 能力矩阵、Source interruption/Handoff 门禁报告、S15 `CompletionReceipt`。
+
+**Unlocks**：S16。
+
+## 17. S16 内容预算端到端门禁
+
+**Requires**：S14、S15；同时复核 S13 生产入口回执。
+
+**Objective**：在完整 Production Run 和 Compaction Timeout 路径上机器证明 Controller 的输入、持久与输出成本与 Worker Content 字节数无关。
+
+**Exclusions**：不在生产项目启动真实 Run；不连接 Git 远端；不改模型策略、Handoff v2 或 30 秒阈值。
+
+**Inputs**：S14/S15 `CompletionReceipt`、S13 生产入口 harness、短/大 Worker Content 夹具、可注入 revision provider。
+
+**Owned outputs**：`contracts/slices/S16.json`、内容预算 E2E harness、canary 扫描器、协议大小报告、架构/代码链路更新、S16 `CompletionReceipt`。
+
+**Scenario contract**：
+
+| 场景 | 必须证明 |
+| --- | --- |
+| 普通完成 + 短/大内容 | 规范化 Controller 回执与持久事件字节相同 |
+| 29.999 秒压缩完成 | 只消费 compaction 元数据，不读 Source 正文 |
+| 30 秒超时 + revision 可用 | 中断、Compression、Continuation 身份与原语义一致 |
+| 30 秒超时 + revision 不可用 | `NEEDS_USER(source_interrupt_failed)` 且零 full-turn read |
+| 全类型 canary 注入 | Controller 状态目录、stdout/stderr、回执、日志与错误投影零命中 |
+
+**Deterministic checks**：
+
+- 每个 ControllerSignal 的 canonical JSON 不超过 8 KiB，事件数只由控制生命周期决定；
+- 短/大内容运行的 Run snapshot、effect ledger 和终态回执规范化后字节等价；
+- 对 workspace 外 Controller 状态目录及 harness 捕获的 stdout/stderr 执行原始字节 canary 扫描；
+- build、typecheck、全量 tests、lint、Markdown links、切片契约与重复 harness 规范化一致性全部通过。
+
+**Failure closure**：任一 canary 泄漏、full-turn read、信号超限或大小内容不等价都阻断发布；保留隔离夹具和首个违反点。
+
+**Completion evidence**：内容预算报告、canary 扫描报告、revision 失败闭合轨迹、S14–S16 `CompletionReceipt`、更新后的架构与代码链路。
+
+**Unlocks**：人工批准的长时间 Auto Slice 试运行；不自动启动。
+
+## 18. 计划级验收矩阵
 
 实现开始前和每个切片完成后，使用下表检查计划没有被悄悄削弱：
 
@@ -720,5 +844,8 @@ RecoveryResolution =
 | Continuation 是第二个新任务 | S10 | S12 |
 | `NEEDS_USER` 可解释、显式恢复 | S11 | S12 |
 | 无 push、无 Protected Change 泄漏 | S06 | S12 |
+| Controller 零 Worker Content | S14 | S16 |
+| Source 持久性核验零 full-turn read | S15 | S16 |
+| 控制信号和持久成本与 Worker Content 大小无关 | S14 | S16 |
 
 任何一行缺少对应测试、回执或产物 digest，相关切片不得标记 `COMPLETE`。

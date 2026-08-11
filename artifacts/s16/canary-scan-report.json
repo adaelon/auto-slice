@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "slice_id": "S16",
+  "bytes_scanned": 180270,
+  "canary_types": [
+    "agent_message",
+    "reasoning",
+    "command_output",
+    "diff",
+    "tool_payload",
+    "plan",
+    "thread_summary",
+    "error_projection"
+  ],
+  "matches": 0,
+  "scanned_surfaces": [
+    "ControllerSignal",
+    "Run snapshot",
+    "effect ledger",
+    "terminal receipt",
+    "Run event ledger",
+    "Controller state directory",
+    "harness stdout",
+    "harness stderr",
+    "error projection",
+    "isolated probe projection"
+  ],
+  "scenario_count": 8,
+  "state_files_scanned": 109,
+  "result": "PASS"
+}

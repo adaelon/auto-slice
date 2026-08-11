@@ -1,0 +1,15 @@
+{
+  "id": "none_happy_path",
+  "result": "PASS",
+  "assertions": {
+    "real_git_cli": true,
+    "real_process_check": true,
+    "commit_mode": "none",
+    "commit_count_delta": 0,
+    "owned_commit_exact": true,
+    "checkpoint_contains_final_head": true,
+    "protected_changes_preserved": null,
+    "remote_count": 0,
+    "push_count": 0
+  }
+}

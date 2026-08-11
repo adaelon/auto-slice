@@ -1,0 +1,79 @@
+{
+  "id": "S15",
+  "contract_version": 1,
+  "requires": ["S14", "S08", "S09"],
+  "objective": "用 Host 边界的定长不透明 revision 与 summary-only ThreadMetadataPort 替代 Controller 的 thread/read(includeTurns=true)，并把 revision 能力失败确定性闭合到 Source interruption 门禁。",
+  "exclusions": [
+    "不用 updatedAt、单字段时间戳或完整 Thread/turns hash 伪装稳定 revision",
+    "不允许 Controller 或 Host Adapter 请求 includeTurns=true、保留正文或接受 summary 中夹带的 turns/items",
+    "不改变 Handoff v2 产物格式或 Compression Task 读取 Source Thread 正文的权限",
+    "不实现 S16 内容预算端到端门禁",
+    "不倒改 S08、S09 或 S14 CompletionReceipt",
+    "不执行 Git commit 或 push"
+  ],
+  "inputs": [
+    { "path": "artifacts/s14/completion-receipt.json", "digest": "sha256:09f17d0ab66d78f3c757870a05c5f52ea00d0f6b395b21f88f73e8c81d972e45", "producer_slice": "S14" },
+    { "path": "artifacts/s08/completion-receipt.json", "digest": "sha256:a9a6239e512319c8beb40cd1b08ec983f050dd8881a021d7227c4e344803de7b", "producer_slice": "S08" },
+    { "path": "artifacts/s09/completion-receipt.json", "digest": "sha256:f749c280d37481343eac9ef04b9a965a43b7c1c54a092b559507c15d81f320ec", "producer_slice": "S09" },
+    { "path": "CONTEXT.md", "digest": "sha256:34f0bd669d970ea4befa580004229219c0a79f4aa0d355ca667dc5bee575fb9f", "producer_slice": "content-blind-boundary" },
+    { "path": "docs/adr/0009-content-blind-controller.md", "digest": "sha256:0c9b7285fc06475c5438c983653fe94e34801fa0c6306d07c738f6f5a2f646c4", "producer_slice": "content-blind-boundary" },
+    { "path": "docs/auto-slice-design.md", "digest": "sha256:b753253c76fd511d8501fa580c4edb57be64efff22631701d79cdd563b724368", "producer_slice": "frozen-design" },
+    { "path": "docs/implementation-slices.md", "digest": "sha256:4efa4ee4f37152e27edd00775d4ab3979b25072c228a8f60e096aa7994136b6a", "producer_slice": "frozen-design" }
+  ],
+  "owned_paths": [
+    "contracts/slices/S15.json",
+    "src/controller/production/codex-app-server-development-task.ts",
+    "src/controller/production/codex-app-server-task-host.ts",
+    "src/controller/production/index.ts",
+    "src/controller/thread-control/index.ts",
+    "src/controller/thread-control/source-interruption-coordinator.ts",
+    "src/controller/thread-control/types.ts",
+    "test/app-server-development-task.test.ts",
+    "test/thread-control.test.ts",
+    "test/fixtures/process/fake-codex-app-server.mjs",
+    "scripts/run-s15-metadata-revision.mjs",
+    "scripts/verify-s15.mjs",
+    "package.json",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "artifacts/s15/**"
+  ],
+  "ports": [
+    {
+      "name": "read_source_revision",
+      "signature": "ThreadRevisionProvider.read(thread_id) -> OpaqueStableRevision | UNAVAILABLE"
+    },
+    {
+      "name": "inspect_source_metadata",
+      "signature": "ThreadMetadataPort.inspect(thread_id, include_turns=false) -> ThreadSummary | source_interrupt_failed"
+    }
+  ],
+  "failure_codes": [
+    "source_interrupt_failed"
+  ],
+  "failure_reasons": [
+    "thread_revision_unavailable",
+    "thread_revision_invalid",
+    "thread_revision_mismatch"
+  ],
+  "checks": [
+    { "id": "build", "argv": ["npm", "run", "build"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": ["dist/src/controller/production/codex-app-server-development-task.js", "dist/src/controller/thread-control/source-interruption-coordinator.js"] },
+    { "id": "typecheck", "argv": ["npm", "run", "typecheck"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "target_test", "argv": ["node", "--test", "dist/test/app-server-development-task.test.js", "dist/test/thread-control.test.js", "dist/test/handoff.test.js"], "cwd": ".", "timeout_ms": 180000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "test", "argv": ["npm", "run", "test"], "cwd": ".", "timeout_ms": 300000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "metadata_revision_evidence_first", "argv": ["node", "scripts/run-s15-metadata-revision.mjs"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "metadata_revision_evidence_repeat", "argv": ["node", "scripts/run-s15-metadata-revision.mjs"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "markdown_links", "argv": ["node", "scripts/check-markdown-links.mjs"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "plugin_validation", "argv": ["npm", "run", "validate:plugin"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP", "CODEX_HOME", "PYTHON"], "expected_exit_code": 0, "expected_artifacts": [] },
+    { "id": "lint", "argv": ["npm", "run", "lint"], "cwd": ".", "timeout_ms": 120000, "env_allowlist": ["PATH", "SystemRoot", "ComSpec", "PATHEXT", "USERPROFILE", "HOME", "APPDATA", "LOCALAPPDATA", "TEMP", "TMP"], "expected_exit_code": 0, "expected_artifacts": [] }
+  ],
+  "expected_artifacts": [
+    { "path": "artifacts/s15/revision-capability-matrix.json", "kind": "host_revision_capability_matrix" },
+    { "path": "artifacts/s15/full-turn-read-trace.json", "kind": "summary_only_protocol_trace" },
+    { "path": "artifacts/s15/source-interruption-handoff-report.json", "kind": "source_interruption_handoff_gate_report" },
+    { "path": "artifacts/s15/completion-receipt.json", "kind": "completion_receipt" },
+    { "path": "docs/代码链路.md", "kind": "code_path_index" },
+    { "path": "docs/架构.md", "kind": "implementation_architecture" }
+  ],
+  "unlocks": ["S16"]
+}

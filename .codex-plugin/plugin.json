@@ -5,15 +5,18 @@
   "author": {
     "name": "Auto Slice contributors"
   },
+  "skills": "./skills/",
   "interface": {
     "displayName": "Auto Slice",
     "shortDescription": "Execute local development plans one verified slice at a time.",
     "longDescription": "Auto Slice provides a local controller for sequential, deterministic development slices with auditable handoffs.",
     "developerName": "Auto Slice contributors",
     "category": "Productivity",
-    "capabilities": [],
+    "capabilities": ["Interactive", "Write"],
     "defaultPrompt": [
-      "Load this workspace's frozen Auto Slice contracts."
+      "Load this workspace's frozen Auto Slice contracts.",
+      "Show the status of an Auto Slice Run.",
+      "Resume an Auto Slice Run with an explicit recovery resolution."
     ]
   }
 }

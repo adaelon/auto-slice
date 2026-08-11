@@ -16,6 +16,7 @@ export const DEFAULT_HANDOFF_EXPORT_TIMEOUT_MS = 600_000 as const;
 
 export interface CompressionRequest {
   readonly source_thread_id: string;
+  readonly prompt: string;
   readonly source_persisted_revision: string;
   readonly workspace_identity: WorkspaceIdentity;
   readonly compaction_id: string;

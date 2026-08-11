@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "slice_id": "S13",
+  "result": "PASS",
+  "assertions": {
+    "compiled_bin_advertises_run_plan": true,
+    "production_plan_reached_orchestrator": true,
+    "default_development_adapter_protocol_exercised": true,
+    "commit_mode": "none",
+    "commit_count_delta": 0,
+    "head_unchanged": true,
+    "remote_count": 0,
+    "push_count": 0,
+    "state_storage_outside_workspace": true,
+    "workspace_state_directory_absent": true,
+    "deterministic_checks_passed": true,
+    "task_host_disposed": true
+  },
+  "workspace_status": [
+    "?? SESSION_CHECKPOINT.md",
+    "?? owned.txt",
+    "?? result.json"
+  ]
+}

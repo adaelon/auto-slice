@@ -24,6 +24,7 @@ import {
   type StoredRun,
 } from "../state/index.js";
 import { WorkspaceGuardError } from "../workspace/index.js";
+import { buildContinuationPrompt } from "../production/prompt-builder.js";
 
 import { ContinuationError } from "./errors.js";
 import {
@@ -357,9 +358,13 @@ export class ContinuationCoordinator {
 
     const envelope = this.createEnvelope(
       state,
+      sliceContract,
       handoff,
       input.expected_owned_diff_digest,
     );
+    if (envelope instanceof ContinuationError) {
+      return this.closeFailure(state, input, envelope);
+    }
     const position: WorkflowPosition = { grant_may_have_occurred: false };
     let workflow: WorkflowReceipts;
     try {
@@ -473,9 +478,13 @@ export class ContinuationCoordinator {
     }
     const envelope = this.createEnvelope(
       loaded.state,
+      sliceContract,
       handoff,
       input.expected_owned_diff_digest,
     );
+    if (envelope instanceof ContinuationError) {
+      return envelope;
+    }
     const position: WorkflowPosition = { grant_may_have_occurred: false };
     try {
       const workflow = await this.performWorkflow(
@@ -600,7 +609,9 @@ export class ContinuationCoordinator {
       taskId,
     );
     const progressPayloadDigest = sha256Json({
-      expected_owned_diff_digest: input.expected_owned_diff_digest,
+      ...(input.expected_owned_diff_digest === undefined
+        ? {}
+        : { expected_owned_diff_digest: input.expected_owned_diff_digest }),
       slice_contract_digest: sha256Json(sliceContract),
       task_id: taskId,
     });
@@ -616,7 +627,6 @@ export class ContinuationCoordinator {
       taskId,
       state,
       effectStateVersion,
-      input.expected_owned_diff_digest,
     );
     this.completeEffect(
       progressKey,
@@ -637,7 +647,8 @@ export class ContinuationCoordinator {
       !validIdentifier(runtime.lease_id) ||
       !Number.isSafeInteger(runtime.expected_state_version) ||
       (runtime.expected_state_version as number) < 0 ||
-      !sha256Digest(runtime.expected_owned_diff_digest) ||
+      (runtime.expected_owned_diff_digest !== undefined &&
+        !sha256Digest(runtime.expected_owned_diff_digest)) ||
       !isRecord(runtime.handoff_receipt) ||
       !isRecord(runtime.slice_contract) ||
       !isRecord(runtime.model_decision) ||
@@ -928,17 +939,35 @@ export class ContinuationCoordinator {
 
   private createEnvelope(
     state: RunState,
+    sliceContract: SliceContractV1,
     handoff: HandoffReceipt,
-    expectedOwnedDiffDigest: Sha256Digest,
-  ): ResumeEnvelope {
+    legacyExpectedOwnedDiffDigest?: Sha256Digest,
+  ): ResumeEnvelope | ContinuationError {
+    const runtimeOverride = state.slice_commit_mode_overrides?.[sliceContract.slice_id];
+    const commitMode = sliceContract.commit_mode_override ?? runtimeOverride ?? state.commit_mode;
+    const goalPrompt = buildContinuationPrompt(
+      sliceContract.slice_id,
+      handoff.markdown_path,
+      commitMode,
+    );
+    if (typeof goalPrompt !== "string") {
+      return new ContinuationError(
+        "continuation_start_failed",
+        goalPrompt.message,
+        { reason: "invalid_request", cause: goalPrompt },
+      );
+    }
     return {
       run_id: state.run_id,
       current_slice_id: state.current_slice_id as string,
+      goal_prompt: goalPrompt,
       handoff_markdown_path: handoff.markdown_path,
       evidence_index_path: handoff.evidence_index_path,
       consumer_contract: handoff.consumer_contract,
       expected_workspace_identity: state.workspace_identity,
-      expected_owned_diff_digest: expectedOwnedDiffDigest,
+      ...(legacyExpectedOwnedDiffDigest === undefined
+        ? {}
+        : { expected_owned_diff_digest: legacyExpectedOwnedDiffDigest }),
     };
   }
 
@@ -1081,7 +1110,6 @@ export class ContinuationCoordinator {
     taskId: string,
     state: RunState,
     observedStateVersion: number,
-    previousOwnedDiffDigest: Sha256Digest,
   ): ProgressReceipt {
     const durableKeys = [...PROGRESS_RECEIPT_BASE_KEYS, "durable_artifact_digest"];
     const verificationKeys = [
@@ -1112,13 +1140,12 @@ export class ContinuationCoordinator {
     const durable = value.durable_artifact_digest;
     const verification = value.verification_receipt_digest;
     if (
-      (durable !== undefined &&
-        (!sha256Digest(durable) || durable === previousOwnedDiffDigest)) ||
+      (durable !== undefined && !sha256Digest(durable)) ||
       (verification !== undefined && !sha256Digest(verification))
     ) {
       throw new ContinuationError(
         "continuation_start_failed",
-        "ProgressReceipt does not prove a changed durable artifact or verification receipt.",
+        "ProgressReceipt does not contain a canonical durable or verification digest.",
         { reason: "progress_not_durable" },
       );
     }

@@ -3,7 +3,12 @@ export { StateStoreError } from "./errors.js";
 export { createInitialRunState } from "./factory.js";
 export { createEffectIdempotencyKey, FileRunStore } from "./file-run-store.js";
 export { STATE_STORE_MIGRATIONS } from "./schema.js";
-export { buildRunTransitionMatrix, isRunTransitionAllowed } from "./transitions.js";
+export {
+  buildRunTransitionMatrix,
+  isLegacyAcceptanceStatus,
+  isRunTransitionAllowed,
+  isRunTransitionReplayCompatible,
+} from "./transitions.js";
 export {
   RUN_STATE_SCHEMA_VERSION,
   RUN_STATUSES,
@@ -24,6 +29,7 @@ export {
   type RunTransition,
   type RunTransitionMatrixEntry,
   type Sha256Digest,
+  type SliceCommitModeOverrides,
   type StateStoreFailureCode,
   type StateStoreFaultContext,
   type StateStoreFaultPoint,

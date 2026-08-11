@@ -24,6 +24,13 @@
     "verify:s08": "node scripts/verify-s08.mjs",
     "verify:s09": "node scripts/verify-s09.mjs",
     "verify:s10": "node scripts/verify-s10.mjs",
+    "verify:s11": "node scripts/verify-s11.mjs",
+    "verify:s12": "node scripts/verify-s12.mjs",
+    "verify:s13": "node scripts/verify-s13.mjs",
+    "verify:s14": "node scripts/verify-s14.mjs",
+    "verify:s15": "node scripts/verify-s15.mjs",
+    "verify:s16": "node scripts/verify-s16.mjs",
+    "verify:markdown-links": "node scripts/check-markdown-links.mjs",
     "state:replay": "node scripts/replay-run-events.mjs"
   },
   "engines": {

@@ -1,0 +1,246 @@
+{
+  "schema_version": 1,
+  "slice_id": "S14",
+  "contract_digest": "sha256:6c5ad5398a9296661c50f68d0c3d57bcdefea2fb489e1e039516db260ebf494e",
+  "input_digests": [
+    {
+      "path": "artifacts/s13/completion-receipt.json",
+      "digest": "sha256:d8ea9df68eb8e46078bc60f5fffa60eb6c91a936c65b0d0c4221f9d3ab3b2bbf"
+    },
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:34f0bd669d970ea4befa580004229219c0a79f4aa0d355ca667dc5bee575fb9f"
+    },
+    {
+      "path": "docs/adr/0009-content-blind-controller.md",
+      "digest": "sha256:0c9b7285fc06475c5438c983653fe94e34801fa0c6306d07c738f6f5a2f646c4"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:b753253c76fd511d8501fa580c4edb57be64efff22631701d79cdd563b724368"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:4efa4ee4f37152e27edd00775d4ab3979b25072c228a8f60e096aa7994136b6a"
+    }
+  ],
+  "output_digests": [
+    {
+      "path": "artifacts/s14/canary-leak-report.json",
+      "digest": "sha256:4a5a5170186ec670a5fd889f9f5d47a490741121966f7c2b1198bc98e7d21d0f"
+    },
+    {
+      "path": "artifacts/s14/content-equivalence-receipt.json",
+      "digest": "sha256:e19f66efc1e95aa99242827bc7ec8ab786dd8ca8b31272bdacd836ba6c6f22d8"
+    },
+    {
+      "path": "artifacts/s14/event-whitelist-report.json",
+      "digest": "sha256:104c7a53cdb4aafacc580c35a6f560286874b43a75de39afa0dd8ed773d96b52"
+    },
+    {
+      "path": "contracts/slices/S14.json",
+      "digest": "sha256:6c5ad5398a9296661c50f68d0c3d57bcdefea2fb489e1e039516db260ebf494e"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:0b2ab2cd75d6c47a6baec1132d19e980307b3ea34a9252f511fde1de4bfe833c"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:30b25948c64fd22b3d74ee0b33ef850ead7cc7ba1ad3173aa5402eae24752e31"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:f7c66192523e0f29cdd34217d72424279c9f79a4faa56b5a4c91a3823b72b08d"
+    },
+    {
+      "path": "scripts/run-s14-firewall.mjs",
+      "digest": "sha256:7c620c9700ea3e1ed59f1532da9b066772660d58d4e10afdc7bd70a2198483a8"
+    },
+    {
+      "path": "scripts/verify-s14.mjs",
+      "digest": "sha256:0cfbc55cbdfeec9220b8d93b6241d9145edc6e55df68c1f992816416665927b7"
+    },
+    {
+      "path": "src/controller/production/app-server-client.ts",
+      "digest": "sha256:00577ae6356e9274a7ab9ebc6a8d1f73fa3d16a3fde11df273144b8178f0c1d8"
+    },
+    {
+      "path": "src/controller/production/codex-app-server-development-task.ts",
+      "digest": "sha256:c550a80f585a1e697b178f416e7ac662013b860df86533d9a5a92d54de7db4e3"
+    },
+    {
+      "path": "src/controller/production/index.ts",
+      "digest": "sha256:719631a4708b7f91531ead47b37ac0fc64b04d174f7763bd8efbca4c2debcecf"
+    },
+    {
+      "path": "src/controller/production/production-orchestrator.ts",
+      "digest": "sha256:c7910d6842b7fceb62d82a1c611ac278553129c324d8d23405b885141fea62fe"
+    },
+    {
+      "path": "src/controller/production/types.ts",
+      "digest": "sha256:40f6eb464df1a2560036b7a99754f932beb5ed4fdb4e30e85baeb9ad21887579"
+    },
+    {
+      "path": "test/app-server-client.test.ts",
+      "digest": "sha256:cd63ef4cdac12461c3601095e1823f9a1b97b3f99a46de253f5d8221cdc8d8d2"
+    },
+    {
+      "path": "test/app-server-development-task.test.ts",
+      "digest": "sha256:067b787fef87725c8e16b1cd549f6d0a4c3d72e7dfcfe8ed68ae1e1da543d77e"
+    },
+    {
+      "path": "test/file-production-runtime.test.ts",
+      "digest": "sha256:06838e2abe0d29ac106a32bab49104f6b03176905149924d919b2296ccc7203b"
+    },
+    {
+      "path": "test/fixtures/process/fake-codex-app-server.mjs",
+      "digest": "sha256:c0680a39c8ed819be87f68e029444060947566eed9042967925c17a3c73e90d9"
+    },
+    {
+      "path": "test/fixtures/process/run-s14-production-with-fake-host.mjs",
+      "digest": "sha256:b5cabdc1c1abad343e4e7ca96fe76bdb95f6ff3db95ff625c37753bc29156719"
+    },
+    {
+      "path": "test/production-orchestrator.test.ts",
+      "digest": "sha256:a8050b5c64c1b1d6d33bb3a1f44edbabb81089246d2530b92845bf36c99c1703"
+    }
+  ],
+  "touched_paths": [
+    "artifacts/s14/canary-leak-report.json",
+    "artifacts/s14/completion-receipt.json",
+    "artifacts/s14/content-equivalence-receipt.json",
+    "artifacts/s14/event-whitelist-report.json",
+    "contracts/slices/S14.json",
+    "docs/代码链路.md",
+    "docs/架构.md",
+    "package.json",
+    "scripts/run-s14-firewall.mjs",
+    "scripts/verify-s14.mjs",
+    "src/controller/production/app-server-client.ts",
+    "src/controller/production/codex-app-server-development-task.ts",
+    "src/controller/production/index.ts",
+    "src/controller/production/production-orchestrator.ts",
+    "src/controller/production/types.ts",
+    "test/app-server-client.test.ts",
+    "test/app-server-development-task.test.ts",
+    "test/file-production-runtime.test.ts",
+    "test/fixtures/process/fake-codex-app-server.mjs",
+    "test/fixtures/process/run-s14-production-with-fake-host.mjs",
+    "test/production-orchestrator.test.ts"
+  ],
+  "check_receipts": [
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:ca622aa6b87a4fbd135ae14f841cd92016f6ce189674c007da77682d9bc3fe7a",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 3252
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:b4d5eeaf054ffadd6ba18423f31f81288f54bd16be7a5390eafbb745eeba53dc",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 3285
+    },
+    {
+      "check_id": "target_test",
+      "argv": [
+        "node",
+        "--test",
+        "dist/test/app-server-client.test.js",
+        "dist/test/app-server-development-task.test.js",
+        "dist/test/file-production-runtime.test.js",
+        "dist/test/production-orchestrator.test.js"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:fb259e2b624fce4f41c323bb9ad227eaa0ce928a18ee2c675ce3e567b79d270a",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 19954
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:dca17c412604de2436631ee7edb0c212bcd1c27c8c0391074aeaa5c4e867d1ee",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 91523
+    },
+    {
+      "check_id": "firewall_evidence_first",
+      "argv": [
+        "node",
+        "scripts/run-s14-firewall.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:fd219c0f531c33efcd2269ebb2595edce06ea195ae334347343f43b54148d960",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 17075
+    },
+    {
+      "check_id": "firewall_evidence_repeat",
+      "argv": [
+        "node",
+        "scripts/run-s14-firewall.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:fd219c0f531c33efcd2269ebb2595edce06ea195ae334347343f43b54148d960",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 17118
+    },
+    {
+      "check_id": "markdown_links",
+      "argv": [
+        "node",
+        "scripts/check-markdown-links.mjs"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:a2fa2f4c8b255091bc0ecc8dd48fd95c6bd2caddf5228a84cf233055b10d5cbe",
+      "stderr_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "duration_ms": 233
+    },
+    {
+      "check_id": "plugin_validation",
+      "argv": [
+        "npm",
+        "run",
+        "validate:plugin"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:8d2e71d28f84282b4ff2b50b55581cefb572fb55a11155cce10787d1f93dfea5",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 1432
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0,
+      "stdout_digest": "sha256:50bf418d3f46fa3975eade28b9f81047ee52461d61415cc22546263c0cca2afe",
+      "stderr_digest": "sha256:491da059fb305efb8edae1c149992173f739ece96831840160fefecbf4775435",
+      "duration_ms": 12586
+    }
+  ],
+  "start_head": "9b95aed63572560e000314a7ca71fe10b1de95ee",
+  "end_head": null,
+  "owned_diff_digest": "sha256:1ba3cb30d6dfa4e2663f75cc6e28ce2525177daf493e8377f49b34a2f2528619",
+  "completed_at": "2026-08-10T09:46:43.216Z"
+}

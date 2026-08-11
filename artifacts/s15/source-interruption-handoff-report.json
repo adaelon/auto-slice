@@ -1,0 +1,69 @@
+{
+  "schema_version": 1,
+  "slice_id": "S15",
+  "failure_closures": [
+    {
+      "compression_launcher_calls": 0,
+      "lease_events": [
+        "ACQUIRED",
+        "FROZEN"
+      ],
+      "scenario": "unavailable",
+      "source_revision_bound": null,
+      "source_thread_bound": null
+    },
+    {
+      "compression_launcher_calls": 0,
+      "lease_events": [
+        "ACQUIRED",
+        "FROZEN"
+      ],
+      "scenario": "invalid",
+      "source_revision_bound": null,
+      "source_thread_bound": null
+    },
+    {
+      "compression_launcher_calls": 0,
+      "lease_events": [
+        "ACQUIRED",
+        "FROZEN"
+      ],
+      "scenario": "mismatch",
+      "source_revision_bound": null,
+      "source_thread_bound": null
+    },
+    {
+      "compression_launcher_calls": 0,
+      "lease_events": [
+        "ACQUIRED",
+        "FROZEN"
+      ],
+      "scenario": "malicious_turns",
+      "source_revision_bound": null,
+      "source_thread_bound": null
+    },
+    {
+      "compression_launcher_calls": 0,
+      "lease_events": [
+        "ACQUIRED",
+        "FROZEN"
+      ],
+      "scenario": "malicious_items",
+      "source_revision_bound": null,
+      "source_thread_bound": null
+    }
+  ],
+  "s09_revision_guard_regression": "dist/test/handoff.test.js",
+  "stable_identity_binding": {
+    "compression_launcher_calls": 1,
+    "lease_events": [
+      "ACQUIRED",
+      "FROZEN",
+      "EPOCH_ROTATED"
+    ],
+    "scenario": "stable",
+    "source_revision_bound": true,
+    "source_thread_bound": true
+  },
+  "result": "PASS"
+}
