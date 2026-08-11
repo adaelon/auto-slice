@@ -17,7 +17,10 @@ import {
   AppServerCompressionLauncherError,
   type CompressionTaskLauncher,
 } from "../src/controller/handoff/index.js";
-import type { ContinuationLauncher } from "../src/controller/continuation/index.js";
+import {
+  AppServerContinuationLauncherError,
+  type ContinuationLauncher,
+} from "../src/controller/continuation/index.js";
 import {
   CodexAppServerTaskHost,
   ProductionPlanError,
@@ -391,7 +394,7 @@ void test("run-plan CLI composes a file Production Plan into the orchestrator", 
   assert.equal(git(workspaceRoot, ["rev-parse", "HEAD"]), beforeHead);
 });
 
-void test("default App Server Task Host wires Compression and keeps Continuation fail closed", async () => {
+void test("default App Server Task Host wires real Compression and Continuation launchers", async () => {
   const host = new CodexAppServerTaskHost();
 
   await assert.rejects(
@@ -401,8 +404,8 @@ void test("default App Server Task Host wires Compression and keeps Continuation
   );
   await assert.rejects(
     host.continuation_launcher.start({} as never, {} as never),
-    (error: unknown) => error instanceof ProductionRuntimeError &&
-      error.code === "continuation_start_failed",
+    (error: unknown) => error instanceof AppServerContinuationLauncherError &&
+      error.code === "INVALID_CONTINUATION_REQUEST",
   );
   await host.dispose();
 });

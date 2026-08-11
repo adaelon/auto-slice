@@ -1,0 +1,76 @@
+{
+  "id": "S21",
+  "contract_version": 1,
+  "requires": ["S20"],
+  "objective": "让默认 CodexAppServerTaskHost 以真实 fresh Continuation Task 消费 HandoffReceiptV2：首个 readOnly Turn 注入已验证 Handoff 正文并由私有事件顺序生成 ReadyReceipt，终态后再以新 write epoch 启动 workspaceWrite Turn 并由其终态生成 ProgressReceipt。",
+  "exclusions": [
+    "不复用 Source Thread、Compression Task 或历史 Turn",
+    "不使用 thread/resume、thread/fork 或 turn/steer",
+    "不从模型自报 JSON、ready 文案或 final reply 构造任何 receipt 字段",
+    "不让 Controller、RunStore、日志或错误文本读取 Handoff/Worker 正文",
+    "不在第一 Turn terminal 且 ReadyReceipt 验证前启动 workspaceWrite Turn",
+    "不实现 S22 hermetic/live 三任务端到端验收"
+  ],
+  "inputs": [
+    {
+      "path": "artifacts/s20/completion-receipt.json",
+      "digest": "sha256:6bd0367648ee4226122c0b137a154b92de1b15aee7c4f77fa49cdf4d02764f1d",
+      "producer_slice": "S20"
+    }
+  ],
+  "owned_paths": [
+    "contracts/slices/S21.json",
+    "src/controller/continuation/app-server-continuation-launcher.ts",
+    "src/controller/continuation/continuation-coordinator.ts",
+    "src/controller/continuation/index.ts",
+    "src/controller/continuation/types.ts",
+    "src/controller/production/codex-app-server-task-host.ts",
+    "test/continuation.test.ts",
+    "test/file-production-runtime.test.ts",
+    "test/fixtures/process/fake-s21-app-server.mjs",
+    "scripts/verify-s21.mjs",
+    "package.json",
+    "docs/切片方案-App-Server三任务接力解锁.md",
+    "docs/implementation-slices.md",
+    "docs/架构.md",
+    "docs/代码链路.md",
+    "artifacts/s21/**"
+  ],
+  "budgets": {
+    "continuation_thread_roots": 1,
+    "continuation_turns": 2,
+    "first_turn_input_items": 2,
+    "maximum_handoff_markdown_bytes": 1048576,
+    "first_turn_tool_or_write_items": 0,
+    "workspace_write_turns_before_ready": 0,
+    "model_reported_receipt_fields": 0
+  },
+  "checks": [
+    { "id": "surface", "argv": ["node", "scripts/verify-s21.mjs", "--surface-only"], "expected_exit_code": 0 },
+    { "id": "build", "argv": ["npm", "run", "build"], "expected_exit_code": 0 },
+    { "id": "typecheck", "argv": ["npm", "run", "typecheck"], "expected_exit_code": 0 },
+    {
+      "id": "target_test",
+      "argv": [
+        "node",
+        "--test",
+        "dist/test/continuation.test.js",
+        "dist/test/file-production-runtime.test.js",
+        "dist/test/production-orchestrator.test.js"
+      ],
+      "expected_exit_code": 0
+    },
+    { "id": "test", "argv": ["npm", "run", "test"], "expected_exit_code": 0 },
+    { "id": "lint", "argv": ["npm", "run", "lint"], "expected_exit_code": 0 },
+    { "id": "plugin_validation", "argv": ["npm", "run", "validate:plugin"], "expected_exit_code": 0 },
+    { "id": "markdown_links", "argv": ["npm", "run", "verify:markdown-links"], "expected_exit_code": 0 },
+    { "id": "diff_check", "argv": ["git", "diff", "HEAD", "--check", "--"], "expected_exit_code": 0 }
+  ],
+  "expected_artifacts": [
+    { "path": "artifacts/s21/continuation-launcher-report.json", "kind": "continuation_launcher_protocol_evidence" },
+    { "path": "artifacts/s21/completion-receipt.json", "kind": "completion_receipt" },
+    { "path": "docs/代码链路.md", "kind": "code_path_index" },
+    { "path": "docs/架构.md", "kind": "implementation_architecture" }
+  ],
+  "unlocks": ["S22"]
+}

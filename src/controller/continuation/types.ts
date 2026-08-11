@@ -7,6 +7,7 @@ import type {
 import type { ModelDecision } from "../model-policy/index.js";
 import type { SliceContractV1 } from "../slices/index.js";
 import type {
+  CommitMode,
   EffectIdempotencyKey,
   EffectRecord,
   RunStatus,
@@ -29,10 +30,20 @@ export interface ResumeEnvelope {
   readonly run_id: string;
   readonly current_slice_id: string;
   readonly goal_prompt: string;
+  readonly source_thread_id: string;
+  readonly compression_task_id: string;
+  readonly compression_turn_id?: string;
+  readonly handoff_receipt_schema_version?: 2;
   readonly handoff_markdown_path: string;
   readonly evidence_index_path: string;
+  readonly handoff_artifact_digest: Sha256Digest;
+  readonly handoff_digest: Sha256Digest;
   readonly consumer_contract: SynthesizeFirstConsumerContract;
   readonly expected_workspace_identity: WorkspaceIdentity;
+  readonly lease_id: string;
+  readonly write_epoch: number;
+  readonly observed_state_version: number;
+  readonly commit_mode: CommitMode;
   /** Legacy envelope decode compatibility only; new envelopes omit this field. */
   readonly expected_owned_diff_digest?: Sha256Digest;
 }

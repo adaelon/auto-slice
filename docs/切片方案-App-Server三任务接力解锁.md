@@ -1,6 +1,6 @@
 # App Server 三任务接力解锁切片方案
 
-> 状态：Implementation in progress（2026-08-11，S17–S20 已完成并分别由 release verifier 锁定，下一刀 S21）。S15/S16 的回执保留为历史证据，但不再代表真实三任务链可用。
+> 状态：Implementation in progress（2026-08-11，S17–S21 已完成并分别由 release verifier 锁定，下一刀 S22）。S15/S16 的回执保留为历史证据，但不再代表真实三任务链可用。
 > 权威边界：[`CONTEXT.md`](../CONTEXT.md)、[ADR-0011](adr/0011-export-owned-revision-and-fresh-task-launchers.md)、[OpenAI Docs: Codex App Server](https://developers.openai.com/codex/app-server/)。
 
 ## 目标与排除
@@ -329,11 +329,12 @@ S20 + S21 -> S22 默认生产链端到端验收
 
 ## S21 · 真实 Continuation launcher
 
+- **状态**：COMPLETE；证据见 `contracts/slices/S21.json` 与 `artifacts/s21/completion-receipt.json`。
 - **做**：实现默认 `AppServerContinuationLauncher`；fresh read-only root 的第一 Turn 接收两个带 `text_elements:[]` 的 goal＋已验证 Handoff 正文 item；私有 projector 从 completed item 顺序确定性生成 ReadyReceipt；第一 Turn terminal 后以完整 workspaceWrite policy 启动第二 Turn、承接 write epoch，并从终态生成 ProgressReceipt。
 - **不做**：不复用 Source/Compression，不用 `turn/steer` 升权，不让 Controller 读取 Handoff/Worker 正文。
-- **判据**：三 UUID 两两不同；首 Turn 的第一份实质 `agentMessage` 在任何 command/fileChange/MCP/webSearch/collab item 之前并产生 draft digest，ReadyReceipt 不取模型自报字段；Handoff 字节与 receipt 不符时 turn/start 调用数为零；Ready 前 workspaceWrite 为零；第一 Turn 未 terminal 时第二 Turn 调用数为零；第二 Turn 精确使用完整 workspaceWrite/max；失败后旧 Source lease 不恢复。
-- **触达**：`continuation/*`、Task Host composition、Continuation prompt builder、event projector 与集成测试。
-- **失败闭合**：fresh-root、Handoff 注入、Ready、第二 Turn start、lease/progress 任一步失败均进入既有 `continuation_start_failed` 或 `handoff_integrity_failed`。
+- **判据**：三 UUID 两两不同；首 Turn 的第一份实质 `agentMessage` 在任何 command/fileChange/MCP/webSearch/collab item 之前并产生 draft digest，ReadyReceipt 不取模型自报字段；Handoff 字节与 receipt 不符时 turn/start 调用数为零；Ready 前 workspaceWrite 为零；第一 Turn 未 terminal 时第二 Turn 调用数为零；第二 Turn 精确使用完整 workspaceWrite/max；失败后旧 Source lease 不恢复；legacy Handoff receipt 在 V2 迁移期仍可由同一默认 Host 重放。
+- **触达**：`continuation/*`、Task Host composition、V2/legacy ResumeEnvelope、私有 event projector、process fixture、集成测试与 `verify-s21`。
+- **失败闭合**：Handoff 字节失败映射为 `handoff_integrity_failed/handoff_artifact_digest_mismatch`；Ready、epoch、第二 Turn 与 Progress 失败分别映射到既有 `consumer_contract_violated`、`write_epoch_mismatch`、`grant_call_failed`、`progress_call_failed`，写授权可能发生后冻结当前 epoch。
 
 ## S22 · 默认生产链验收与文档收口
 

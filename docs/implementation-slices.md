@@ -951,7 +951,38 @@ COMPLETED replay -> return persisted launch/receipt without skills/list or new t
 
 **Unlocks**：S21。
 
-## 22. 计划级验收矩阵
+## 22. S21 真实 Continuation launcher
+
+**状态**：COMPLETE；发布证据见 `artifacts/s21/continuation-launcher-report.json` 与 `artifacts/s21/completion-receipt.json`。
+
+**Requires**：S20、ADR-0011 与三任务接力切片方案 `## S21`。
+
+**Objective**：让默认 Task Host 以 fresh read-only Turn 消费已验证 Handoff，以私有终态投影签发 ReadyReceipt，再用同一 fresh root 的 workspace-write Turn 承接 write epoch 并签发 ProgressReceipt。
+
+**Exclusions**：不复用 Source/Compression root；不用 resume/fork/steer；不从模型自报字段构造回执；不读取正文进 Controller/RunStore/日志；不实现 S22 hermetic/live 三任务验收。
+
+**Owned outputs**：`contracts/slices/S21.json`、`continuation/app-server-continuation-launcher.ts`、V2/legacy coordinator 边界、Task Host 默认 composition、process fixture、失败矩阵、`verify-s21` 与发布证据。
+
+**Launcher contract**：
+
+```text
+verified Handoff bytes -> fresh continuation root
+readOnly turn(goal text + bounded Handoff text)
+  -> completed private items -> first substantive agentMessage before any tool/write
+  -> ReadyReceipt(write_access=false, draft/rollout digests)
+Ready + exact rotated epoch -> workspaceWrite turn(one bounded goal, no projected content)
+  -> completed terminal -> ProgressReceipt(terminal projection digest)
+V2 receipt -> bind Compression task/turn; legacy receipt -> replay-only binding without turn field
+launcher failure code -> existing ContinuationFailureReason -> NEEDS_USER/frozen epoch
+```
+
+**Deterministic checks**：默认 Host 与真实 Coordinator 覆盖 V2 全链、legacy 重放、changed bytes 零 turn/start、tool-before-draft、无 draft、非 terminal、模型伪回执、错误 epoch、write Turn 失败与租约冻结；build、typecheck、目标/全量测试、lint、插件、Markdown 与 diff check 全绿。
+
+**Completion evidence**：Continuation launcher surface digest、失败映射与负向矩阵、九项发布门禁回执与 S21 `CompletionReceipt`。
+
+**Unlocks**：S22。
+
+## 23. 计划级验收矩阵
 
 实现开始前和每个切片完成后，使用下表检查计划没有被悄悄削弱：
 
@@ -976,5 +1007,6 @@ COMPLETED replay -> return persisted launch/receipt without skills/list or new t
 | Source interruption revisionless 且 export 独占内容 revision | S18 | S22 |
 | fresh task 共用单 client、顺序 Turn 且私有内容不进 Controller | S19 | S22 |
 | Compression skill、attempt 与 receipt 只取确定性机器证据 | S20 | S22 |
+| Continuation 双 Turn、Ready/epoch 门禁与 receipt 只取私有终态投影 | S21 | S22 |
 
 任何一行缺少对应测试、回执或产物 digest，相关切片不得标记 `COMPLETE`。

@@ -1,0 +1,79 @@
+{
+  "schema_version": 1,
+  "launcher": {
+    "default_host_composition": true,
+    "continuation_thread_roots": 1,
+    "continuation_turns": 2,
+    "first_turn_input_items": 2,
+    "first_turn_sandbox": "readOnly",
+    "second_turn_sandbox": "workspaceWrite",
+    "model": "gpt-5.6-sol/max",
+    "workspace_write_turns_before_ready": 0
+  },
+  "receipts": {
+    "ready_source": "private terminal projection",
+    "lease_source": "ResumeEnvelope lease and write epoch",
+    "progress_source": "workspace-write terminal projection",
+    "model_reported_fields": 0
+  },
+  "compatibility": {
+    "handoff_receipt_v2": true,
+    "legacy_handoff_replay": true
+  },
+  "failure_mapping": {
+    "HANDOFF_INTEGRITY_FAILED": "handoff_integrity_failed/handoff_artifact_digest_mismatch",
+    "READY_EVIDENCE_INVALID": "continuation_start_failed/consumer_contract_violated",
+    "WRITE_EPOCH_MISMATCH": "continuation_start_failed/write_epoch_mismatch",
+    "CONTINUATION_WRITE_TURN_FAILED": "continuation_start_failed/progress_call_failed"
+  },
+  "surfaces": [
+    {
+      "path": "src/controller/continuation/app-server-continuation-launcher.ts",
+      "digest": "sha256:5492c4c2358dd974f332b08e0f69fef0a7918eed668a18db0f6a18e89e39067f"
+    },
+    {
+      "path": "src/controller/continuation/continuation-coordinator.ts",
+      "digest": "sha256:79ae02e96ef798d9cb99a6846c7888b8df7a49218c4c802b80972c988d282185"
+    },
+    {
+      "path": "src/controller/continuation/index.ts",
+      "digest": "sha256:6c6dcfac65705f0b09bbeb59dbdfe6c04c73b61238d1e63afc50cbc7f1276e86"
+    },
+    {
+      "path": "src/controller/continuation/types.ts",
+      "digest": "sha256:1513c28e648e2c3ea807a5f09c60c6679169192eda220e64106e2f082920c25d"
+    },
+    {
+      "path": "src/controller/production/codex-app-server-task-host.ts",
+      "digest": "sha256:e72eb3721a1db3d379c0858d0d1ff8f8f4c77a8135da265412bc6d053937dcb9"
+    },
+    {
+      "path": "test/continuation.test.ts",
+      "digest": "sha256:af83aac76b16eebd40f1a74e317806f0b4542062201ac1418e7bcb11345dc8e0"
+    },
+    {
+      "path": "test/file-production-runtime.test.ts",
+      "digest": "sha256:f378ba4cd001973f0a74cdda83099ee030d98314e74d7503f8e2a5a5a9c66391"
+    },
+    {
+      "path": "test/production-orchestrator.test.ts",
+      "digest": "sha256:43f3beb7e7ceb9a333345168c8d9723a2a61bae827cb70cdda40fedc66447c8c"
+    },
+    {
+      "path": "test/fixtures/process/fake-s21-app-server.mjs",
+      "digest": "sha256:b4b99126ec2608f18debf483705b629334a559e58ab55f28d69fbd57dc5a4ed7"
+    }
+  ],
+  "slice_id": "S21",
+  "result": "PASS",
+  "surface_digest": "sha256:6ebe06f7681aa26286f6d20ab3be6c5588daf09f147ea77525c4667d09fe4e3a",
+  "negative_contracts": [
+    "changed, missing, linked, oversized, non-UTF-8, or boundary-colliding Handoff rejected before task input",
+    "non-fresh or reused Continuation identity rejected",
+    "tool/write before draft, missing draft, and non-completed first Turn produce no ReadyReceipt",
+    "workspace-write Turn cannot start before verified ReadyReceipt or with a different write epoch",
+    "model-reported receipt fields provide zero Ready, Lease, or Progress fields",
+    "failed workspace-write terminal produces no ProgressReceipt and freezes the rotated lease",
+    "legacy Handoff receipt remains replayable while machine V2 is the production input"
+  ]
+}

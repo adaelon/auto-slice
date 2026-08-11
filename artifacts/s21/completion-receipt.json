@@ -1,0 +1,166 @@
+{
+  "schema_version": 1,
+  "slice_id": "S21",
+  "result": "PASS",
+  "contract_digest": "sha256:fe8e1a97731c4c240ec22c9c1ffcc2ba04372ae785e9cf4e7f7f098eb414c820",
+  "input_receipt_digests": [
+    {
+      "path": "artifacts/s20/completion-receipt.json",
+      "digest": "sha256:6bd0367648ee4226122c0b137a154b92de1b15aee7c4f77fa49cdf4d02764f1d"
+    }
+  ],
+  "surface_digest": "sha256:6ebe06f7681aa26286f6d20ab3be6c5588daf09f147ea77525c4667d09fe4e3a",
+  "output_digests": [
+    {
+      "path": "artifacts/s21/continuation-launcher-report.json",
+      "digest": "sha256:8d2b2a93e8ea50bb386ccb01a6f4ffe22699d802b0c06c20f12f64ff749d248c"
+    },
+    {
+      "path": "contracts/slices/S21.json",
+      "digest": "sha256:fe8e1a97731c4c240ec22c9c1ffcc2ba04372ae785e9cf4e7f7f098eb414c820"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:0a88db0c50d74c0ed186317655987f43933ec808d9131c64a30f79bf27fdea91"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:b3d018770b2357913b83dc112e3257cae51db389e327cd87247c09484c3319c3"
+    },
+    {
+      "path": "docs/切片方案-App-Server三任务接力解锁.md",
+      "digest": "sha256:3ac74d0e8107b1e24484badab5238ccae598e6c896ee9f0c4343290a923c81fb"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:eef7823859e53ba3baba85175066d93d148467f3bf9cc4775a4dab52c39100d0"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:0675821cb4bbbc954e0313364716c314e4c28ec3b41e77a54330c3e1e0f3e32c"
+    },
+    {
+      "path": "scripts/verify-s21.mjs",
+      "digest": "sha256:6734e11a3bc2bf7bf0d03d300bb946ff1ac6fe52260de889b68fa32e92011632"
+    },
+    {
+      "path": "src/controller/continuation/app-server-continuation-launcher.ts",
+      "digest": "sha256:5492c4c2358dd974f332b08e0f69fef0a7918eed668a18db0f6a18e89e39067f"
+    },
+    {
+      "path": "src/controller/continuation/continuation-coordinator.ts",
+      "digest": "sha256:79ae02e96ef798d9cb99a6846c7888b8df7a49218c4c802b80972c988d282185"
+    },
+    {
+      "path": "src/controller/continuation/index.ts",
+      "digest": "sha256:6c6dcfac65705f0b09bbeb59dbdfe6c04c73b61238d1e63afc50cbc7f1276e86"
+    },
+    {
+      "path": "src/controller/continuation/types.ts",
+      "digest": "sha256:1513c28e648e2c3ea807a5f09c60c6679169192eda220e64106e2f082920c25d"
+    },
+    {
+      "path": "src/controller/production/codex-app-server-task-host.ts",
+      "digest": "sha256:e72eb3721a1db3d379c0858d0d1ff8f8f4c77a8135da265412bc6d053937dcb9"
+    },
+    {
+      "path": "test/continuation.test.ts",
+      "digest": "sha256:af83aac76b16eebd40f1a74e317806f0b4542062201ac1418e7bcb11345dc8e0"
+    },
+    {
+      "path": "test/file-production-runtime.test.ts",
+      "digest": "sha256:f378ba4cd001973f0a74cdda83099ee030d98314e74d7503f8e2a5a5a9c66391"
+    },
+    {
+      "path": "test/fixtures/process/fake-s21-app-server.mjs",
+      "digest": "sha256:b4b99126ec2608f18debf483705b629334a559e58ab55f28d69fbd57dc5a4ed7"
+    }
+  ],
+  "check_receipts": [
+    {
+      "check_id": "surface",
+      "argv": [
+        "node",
+        "scripts/verify-s21.mjs",
+        "--surface-only"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "target_test",
+      "argv": [
+        "node",
+        "--test",
+        "dist/test/continuation.test.js",
+        "dist/test/file-production-runtime.test.js",
+        "dist/test/production-orchestrator.test.js"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "plugin_validation",
+      "argv": [
+        "npm",
+        "run",
+        "validate:plugin"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "markdown_links",
+      "argv": [
+        "npm",
+        "run",
+        "verify:markdown-links"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "diff_check",
+      "argv": [
+        "git",
+        "diff",
+        "HEAD",
+        "--check",
+        "--"
+      ],
+      "exit_code": 0
+    }
+  ]
+}

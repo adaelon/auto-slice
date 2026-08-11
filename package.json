@@ -34,6 +34,7 @@
     "verify:s18": "node scripts/verify-s18.mjs",
     "verify:s19": "node scripts/verify-s19.mjs",
     "verify:s20": "node scripts/verify-s20.mjs",
+    "verify:s21": "node scripts/verify-s21.mjs",
     "verify:markdown-links": "node scripts/check-markdown-links.mjs",
     "state:replay": "node scripts/replay-run-events.mjs"
   },

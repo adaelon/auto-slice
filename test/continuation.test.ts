@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import {
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -11,6 +12,7 @@ import test, { type TestContext } from "node:test";
 
 import { createWorkspaceIdentity } from "../src/contracts/workspace-identity.js";
 import {
+  AppServerContinuationLauncherError,
   ContinuationCoordinator,
   ContinuationError,
   type ContinuationDecision,
@@ -22,10 +24,15 @@ import {
 } from "../src/controller/continuation/index.js";
 import type {
   HandoffReceipt,
+  HandoffReceiptV2,
   SynthesizeFirstConsumerContract,
 } from "../src/controller/handoff/index.js";
 import type { ModelDecision } from "../src/controller/model-policy/index.js";
 import type { SliceContractV1 } from "../src/controller/slices/index.js";
+import {
+  CodexAppServerTaskHost,
+  type CodexAppServerTaskHostOptions,
+} from "../src/controller/production/index.js";
 import {
   createInitialRunState,
   FileRunStore,
@@ -43,12 +50,16 @@ import {
 
 const SOURCE_THREAD_ID = "00000000-0000-7000-8000-000000001001";
 const COMPRESSION_TASK_ID = "00000000-0000-7000-8000-000000001002";
+const COMPRESSION_TURN_ID = "00000000-0000-7000-8000-000000001004";
 const CONTINUATION_TASK_ID = "00000000-0000-7000-8000-000000001003";
 const COMPACTION_ID = "compaction-s10";
 const CURRENT_SLICE_ID = "slice-current-s10";
 const SOURCE_REVISION = `sha256:${"a".repeat(64)}`;
 const OBSERVED_AT = "2026-08-09T08:00:00.000Z";
 const EXPECTED_OWNED_DIFF_DIGEST = sha256Bytes("owned-before-continuation");
+const S21_FIXTURE = path.resolve("test/fixtures/process/fake-s21-app-server.mjs");
+const S21_COMPRESSION_TASK_ID = "019fe6ab-0000-7000-8000-000000000620";
+const S21_CONTINUATION_TASK_ID = "019fe6ab-0000-7000-8000-000000000621";
 
 const CONTINUATION_DECISION = {
   mode: "model",
@@ -99,7 +110,7 @@ interface Fixture {
   readonly lease: ProjectLease;
   readonly rotated_lease: ProjectLease;
   readonly state_version: number;
-  readonly handoff_receipt: HandoffReceipt;
+  readonly handoff_receipt: HandoffReceipt | HandoffReceiptV2;
 }
 
 interface LauncherOptions {
@@ -163,25 +174,23 @@ function unwrapLease<T>(result: T | WorkspaceGuardError): T {
   return result;
 }
 
-function handoffArtifactDigest(
-  receipt: Omit<HandoffReceipt, "artifact_digest" | "retained_work_dir">,
+function handoffArtifactDigestV2(
+  receipt: Omit<HandoffReceiptV2, "artifact_digest">,
 ): Sha256Digest {
-  return sha256Json({
-    compression_task_id: receipt.compression_task_id,
-    consumer_contract: receipt.consumer_contract,
-    evidence_index_digest: receipt.evidence_index_digest,
-    evidence_index_path: receipt.evidence_index_path,
-    frame_digest: receipt.frame_digest,
-    handoff_digest: receipt.handoff_digest,
-    markdown_path: receipt.markdown_path,
-    source_revision: receipt.source_revision,
-    source_thread_id: receipt.source_thread_id,
-    verify_evidence: receipt.verify_evidence,
-    workflow_version: receipt.workflow_version,
-  });
+  return sha256Json(receipt);
 }
 
-function fixture(context: TestContext, suffix: string): Fixture {
+function legacyHandoffArtifactDigest(
+  receipt: Omit<HandoffReceipt, "artifact_digest" | "retained_work_dir">,
+): Sha256Digest {
+  return sha256Json(receipt);
+}
+
+function fixture(
+  context: TestContext,
+  suffix: string,
+  receiptSchema: "v2" | "legacy" = "v2",
+): Fixture {
   const root = temporaryDirectory(context, suffix);
   const workspaceRoot = path.join(root, "workspace");
   mkdirSync(workspaceRoot);
@@ -203,7 +212,23 @@ function fixture(context: TestContext, suffix: string): Fixture {
   }, null, 2)}\n`;
   writeFileSync(markdownPath, markdown, "utf8");
   writeFileSync(evidencePath, evidence, "utf8");
-  const handoffMaterial = {
+  const handoffMaterialV2 = {
+    receipt_schema_version: 2,
+    compression_task_id: COMPRESSION_TASK_ID,
+    compression_turn_id: COMPRESSION_TURN_ID,
+    source_thread_id: SOURCE_THREAD_ID,
+    workflow_version: 2,
+    markdown_path: markdownPath,
+    evidence_index_path: evidencePath,
+    source_revision: SOURCE_REVISION,
+    structural_digest: `sha256:${"c".repeat(64)}`,
+    handoff_digest: sha256Bytes(markdown),
+    evidence_index_digest: sha256Bytes(evidence),
+    verify_evidence: "PASS",
+    verify_evidence_result_digest: sha256Bytes("verify-evidence-result"),
+    consumer_contract: CONSUMER_CONTRACT,
+  } as const satisfies Omit<HandoffReceiptV2, "artifact_digest">;
+  const handoffMaterialLegacy = {
     compression_task_id: COMPRESSION_TASK_ID,
     source_thread_id: SOURCE_THREAD_ID,
     workflow_version: "v2",
@@ -216,10 +241,15 @@ function fixture(context: TestContext, suffix: string): Fixture {
     verify_evidence: "PASS",
     consumer_contract: CONSUMER_CONTRACT,
   } as const satisfies Omit<HandoffReceipt, "artifact_digest" | "retained_work_dir">;
-  const handoffReceipt: HandoffReceipt = {
-    ...handoffMaterial,
-    artifact_digest: handoffArtifactDigest(handoffMaterial),
-  };
+  const handoffReceipt: HandoffReceipt | HandoffReceiptV2 = receiptSchema === "v2"
+    ? {
+      ...handoffMaterialV2,
+      artifact_digest: handoffArtifactDigestV2(handoffMaterialV2),
+    }
+    : {
+      ...handoffMaterialLegacy,
+      artifact_digest: legacyHandoffArtifactDigest(handoffMaterialLegacy),
+    };
 
   const store = openStore(path.join(root, "state"));
   unwrapStored(store.create(createInitialRunState({
@@ -738,4 +768,221 @@ void test("a stale caller cannot repeat Continuation side effects", async (conte
   assert.equal(result.code, "stale_state");
   assert.equal(launcher.start_side_effects, 0);
   assert.equal(unwrapStored(value.store.load(value.run_id)).state.status, "CONTINUATION_STARTING");
+});
+
+function s21Trace(context: TestContext): string {
+  const root = temporaryDirectory(context, "s21-trace");
+  return path.join(root, "protocol.jsonl");
+}
+
+function readS21Trace(trace: string): readonly Readonly<Record<string, unknown>>[] {
+  if (!readFileSync(trace, { encoding: "utf8", flag: "a+" }).trim()) return [];
+  return readFileSync(trace, "utf8")
+    .trim()
+    .split(/\r?\n/u)
+    .map((line) => JSON.parse(line) as Readonly<Record<string, unknown>>);
+}
+
+function s21Host(
+  context: TestContext,
+  scenario: string,
+  trace: string,
+): CodexAppServerTaskHost {
+  const options = {
+    command: process.execPath,
+    args: [S21_FIXTURE, scenario, trace],
+    request_timeout_ms: 5_000,
+    now: () => new Date(OBSERVED_AT),
+  } satisfies CodexAppServerTaskHostOptions;
+  const host = new CodexAppServerTaskHost(options);
+  context.after(async () => host.dispose());
+  return host;
+}
+
+function s21Envelope(
+  context: TestContext,
+  suffix: string,
+  overrides: Partial<ResumeEnvelope> = {},
+): ResumeEnvelope {
+  const workspaceRoot = temporaryDirectory(context, `s21-${suffix}`);
+  const markdownPath = path.join(workspaceRoot, "handoff-s21.md");
+  const evidencePath = path.join(workspaceRoot, "handoff-s21.evidence.json");
+  const markdown = "# Codex Handoff\n\nworkflow: handoff-v2\n\nContinue S21.\n";
+  writeFileSync(markdownPath, markdown, "utf8");
+  writeFileSync(evidencePath, "{}\n", "utf8");
+  return {
+    run_id: `run-s21-${suffix}`,
+    current_slice_id: "S21",
+    goal_prompt: `设定goal：阅读[Handoff Markdown](${markdownPath.replaceAll("\\", "/")})，继续实现S21，完成后commit，刷新checkpoint`,
+    source_thread_id: SOURCE_THREAD_ID,
+    compression_task_id: S21_COMPRESSION_TASK_ID,
+    compression_turn_id: "019fe6ab-0000-7000-8000-000000000624",
+    handoff_receipt_schema_version: 2,
+    handoff_markdown_path: markdownPath,
+    evidence_index_path: evidencePath,
+    handoff_artifact_digest: sha256Bytes("s21-artifact"),
+    handoff_digest: sha256Bytes(markdown),
+    consumer_contract: CONSUMER_CONTRACT,
+    expected_workspace_identity: createWorkspaceIdentity(workspaceRoot),
+    lease_id: "lease-s21",
+    write_epoch: 7,
+    observed_state_version: 9,
+    commit_mode: "after_slice",
+    ...overrides,
+  };
+}
+
+void test("S21 default Host launches exact readOnly then workspaceWrite Continuation Turns", async (context) => {
+  const trace = s21Trace(context);
+  const host = s21Host(context, "happy", trace);
+  const envelope = s21Envelope(context, "happy");
+
+  const rawTaskId = await host.continuation_launcher.start(envelope, CONTINUATION_DECISION);
+  assert.equal(rawTaskId, S21_CONTINUATION_TASK_ID);
+  const ready = await host.continuation_launcher.awaitReady(S21_CONTINUATION_TASK_ID) as ReadyReceipt;
+  assert.equal(ready.task_id, S21_CONTINUATION_TASK_ID);
+  assert.equal(ready.first_deliverable_draft_digest, sha256Bytes("S21 first substantive draft"));
+  assert.equal(ready.write_access, false);
+  const lease = await host.continuation_launcher.grantWrite(S21_CONTINUATION_TASK_ID, 7) as LeaseReceipt;
+  assert.equal(lease.write_epoch, 7);
+  const progress = await host.continuation_launcher.awaitProgress(S21_CONTINUATION_TASK_ID) as ProgressReceipt;
+  assert.ok(progress.verification_receipt_digest?.startsWith("sha256:"));
+
+  const requests = readS21Trace(trace);
+  assert.equal(requests.filter((entry) => entry.method === "thread/start").length, 1);
+  assert.equal(requests.filter((entry) => entry.method === "turn/start").length, 2);
+});
+
+void test("S21 default Host and ContinuationCoordinator consume one HandoffReceiptV2 end to end", async (context) => {
+  const value = fixture(context, "s21-default-host-coordinator");
+  const trace = s21Trace(context);
+  const host = s21Host(context, "happy", trace);
+
+  const decision = unwrapDecision(
+    await coordinator(value, host.continuation_launcher).continueFromHandoff(input(value)),
+  );
+
+  assert.equal(decision.outcome, "CONTINUED");
+  assert.equal(decision.continuation_task_id, S21_CONTINUATION_TASK_ID);
+  assert.equal(decision.ready_receipt.handoff_artifact_digest, value.handoff_receipt.artifact_digest);
+  assert.equal(decision.lease_receipt.write_epoch, value.rotated_lease.epoch);
+  assert.ok(decision.progress_receipt.verification_receipt_digest?.startsWith("sha256:"));
+  assert.equal(unwrapStored(value.store.load(value.run_id)).state.status, "SLICE_RUNNING");
+  const requests = readS21Trace(trace);
+  assert.equal(requests.filter((entry) => entry.method === "turn/start").length, 2);
+});
+
+void test("S21 default Host replays a legacy Handoff receipt during V2 migration", async (context) => {
+  const value = fixture(context, "s21-legacy-host-coordinator", "legacy");
+  const trace = s21Trace(context);
+  const host = s21Host(context, "happy", trace);
+  const subject = coordinator(value, host.continuation_launcher);
+
+  const decision = unwrapDecision(await subject.continueFromHandoff(input(value)));
+  const replayed = unwrapDecision(await subject.continueFromHandoff(input(value)));
+
+  assert.equal(decision.outcome, "CONTINUED");
+  assert.equal(replayed.outcome, "ALREADY_CONTINUED");
+  assert.equal("compression_turn_id" in decision.envelope, false);
+  assert.equal("handoff_receipt_schema_version" in decision.envelope, false);
+  const requests = readS21Trace(trace);
+  assert.equal(requests.filter((entry) => entry.method === "thread/start").length, 1);
+  assert.equal(requests.filter((entry) => entry.method === "turn/start").length, 2);
+});
+
+for (const [scenario, reason, diagnosticCode, turnStarts] of [
+  ["no-draft", "consumer_contract_violated", "READY_EVIDENCE_INVALID", 1],
+  ["write-turn-failed", "progress_call_failed", "CONTINUATION_WRITE_TURN_FAILED", 2],
+] as const) {
+  void test(`S21 maps ${scenario} through the real Coordinator without restoring write`, async (context) => {
+    const value = fixture(context, `s21-coordinator-${scenario}`);
+    const trace = s21Trace(context);
+    const host = s21Host(context, scenario, trace);
+
+    const result = await coordinator(value, host.continuation_launcher)
+      .continueFromHandoff(input(value));
+
+    const error = expectContinuationError(result, reason);
+    assert.equal(error.diagnostic_code, diagnosticCode);
+    assert.equal(unwrapStored(value.store.load(value.run_id)).state.status, "NEEDS_USER");
+    assert.equal(
+      readS21Trace(trace).filter((entry) => entry.method === "turn/start").length,
+      turnStarts,
+    );
+    if (scenario === "write-turn-failed") {
+      const currentEpoch = value.guard.assertWritable(
+        value.rotated_lease.lease_id,
+        value.rotated_lease.epoch,
+      );
+      assert.ok(currentEpoch instanceof WorkspaceGuardError);
+      assert.equal(currentEpoch.code, "lease_lost");
+    }
+  });
+}
+
+void test("S21 rejects changed Handoff bytes before any Continuation turn/start", async (context) => {
+  const trace = s21Trace(context);
+  const host = s21Host(context, "happy", trace);
+  const envelope = s21Envelope(context, "tampered", {
+    handoff_digest: sha256Bytes("different Handoff bytes"),
+  });
+
+  await assert.rejects(
+    host.continuation_launcher.start(envelope, CONTINUATION_DECISION),
+    (error: unknown) => error instanceof AppServerContinuationLauncherError &&
+      error.code === "HANDOFF_INTEGRITY_FAILED",
+  );
+  const requests = readS21Trace(trace);
+  assert.equal(requests.filter((entry) => entry.method === "turn/start").length, 0);
+});
+
+for (const scenario of ["tool-before-draft", "non-terminal-first", "no-draft"] as const) {
+  void test(`S21 refuses Ready and write grant for ${scenario}`, async (context) => {
+    const trace = s21Trace(context);
+    const host = s21Host(context, scenario, trace);
+    const envelope = s21Envelope(context, scenario);
+    const taskId = await host.continuation_launcher.start(envelope, CONTINUATION_DECISION);
+    assert.equal(taskId, S21_CONTINUATION_TASK_ID);
+    await assert.rejects(
+      host.continuation_launcher.awaitReady(S21_CONTINUATION_TASK_ID),
+      (error: unknown) => error instanceof AppServerContinuationLauncherError,
+    );
+    await assert.rejects(
+      host.continuation_launcher.grantWrite(S21_CONTINUATION_TASK_ID, 7),
+      (error: unknown) => error instanceof AppServerContinuationLauncherError,
+    );
+    const requests = readS21Trace(trace);
+    assert.equal(requests.filter((entry) => entry.method === "turn/start").length, 1);
+  });
+}
+
+void test("S21 ignores model-reported receipt fields and binds the exact write epoch", async (context) => {
+  const trace = s21Trace(context);
+  const host = s21Host(context, "model-receipt", trace);
+  const envelope = s21Envelope(context, "model-receipt");
+  await host.continuation_launcher.start(envelope, CONTINUATION_DECISION);
+  const ready = await host.continuation_launcher.awaitReady(S21_CONTINUATION_TASK_ID) as ReadyReceipt;
+  assert.equal(ready.task_id, S21_CONTINUATION_TASK_ID);
+  assert.notEqual(ready.first_deliverable_draft_digest, `sha256:${"f".repeat(64)}`);
+  await assert.rejects(
+    host.continuation_launcher.grantWrite(S21_CONTINUATION_TASK_ID, 8),
+    (error: unknown) => error instanceof AppServerContinuationLauncherError &&
+      error.code === "WRITE_EPOCH_MISMATCH",
+  );
+  const requests = readS21Trace(trace);
+  assert.equal(requests.filter((entry) => entry.method === "turn/start").length, 1);
+});
+
+void test("S21 closes a failed workspaceWrite Turn without a ProgressReceipt", async (context) => {
+  const trace = s21Trace(context);
+  const host = s21Host(context, "write-turn-failed", trace);
+  const envelope = s21Envelope(context, "write-turn-failed");
+  await host.continuation_launcher.start(envelope, CONTINUATION_DECISION);
+  await host.continuation_launcher.awaitReady(S21_CONTINUATION_TASK_ID);
+  await host.continuation_launcher.grantWrite(S21_CONTINUATION_TASK_ID, 7);
+  await assert.rejects(
+    host.continuation_launcher.awaitProgress(S21_CONTINUATION_TASK_ID),
+    (error: unknown) => error instanceof AppServerContinuationLauncherError &&
+      error.code === "CONTINUATION_WRITE_TURN_FAILED",
+  );
 });

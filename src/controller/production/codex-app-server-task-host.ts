@@ -1,4 +1,7 @@
-import type { ContinuationLauncher } from "../continuation/index.js";
+import {
+  AppServerContinuationTaskLauncher,
+  type ContinuationLauncher,
+} from "../continuation/index.js";
 import {
   AppServerCompressionTaskLauncher,
   type CompressionTaskLauncher,
@@ -10,22 +13,7 @@ import {
   CodexAppServerFreshTaskSessions,
   type CodexAppServerFreshTaskSessionsOptions,
 } from "./app-server-fresh-task-session.js";
-import { ProductionRuntimeError } from "./errors.js";
 import type { ProductionTaskHostPorts } from "./file-production-runtime.js";
-
-function unavailableContinuation(): ProductionRuntimeError {
-  return new ProductionRuntimeError(
-    "continuation_start_failed",
-    "This App Server composition has no production Continuation Task launcher configured.",
-  );
-}
-
-const FAIL_CLOSED_CONTINUATION_LAUNCHER: ContinuationLauncher = {
-  start: () => Promise.reject(unavailableContinuation()),
-  awaitReady: () => Promise.reject(unavailableContinuation()),
-  grantWrite: () => Promise.reject(unavailableContinuation()),
-  awaitProgress: () => Promise.reject(unavailableContinuation()),
-};
 
 export interface CodexAppServerTaskHostOptions extends CodexAppServerDevelopmentTaskOptions {
   readonly compression_launcher?: CompressionTaskLauncher;
@@ -33,6 +21,7 @@ export interface CodexAppServerTaskHostOptions extends CodexAppServerDevelopment
   readonly fresh_task_sessions?: CodexAppServerFreshTaskSessionsOptions;
   readonly handoff_artifact_storage_root?: string;
   readonly compression_verify_evidence_timeout_ms?: number;
+  readonly continuation_maximum_handoff_markdown_bytes?: number;
 }
 
 export class CodexAppServerTaskHost implements ProductionTaskHostPorts {
@@ -67,7 +56,17 @@ export class CodexAppServerTaskHost implements ProductionTaskHostPorts {
           : { verify_evidence_timeout_ms: options.compression_verify_evidence_timeout_ms }),
         ...(options.now === undefined ? {} : { now: options.now }),
       });
-    this.continuation_launcher = options.continuation_launcher ?? FAIL_CLOSED_CONTINUATION_LAUNCHER;
+    this.continuation_launcher = options.continuation_launcher ??
+      new AppServerContinuationTaskLauncher({
+        fresh_task_sessions: this.fresh_task_sessions,
+        ...(options.continuation_maximum_handoff_markdown_bytes === undefined
+          ? {}
+          : {
+            maximum_handoff_markdown_bytes:
+              options.continuation_maximum_handoff_markdown_bytes,
+          }),
+        ...(options.now === undefined ? {} : { now: options.now }),
+      });
   }
 
   public dispose(): Promise<void> {

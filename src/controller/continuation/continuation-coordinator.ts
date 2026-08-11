@@ -1,9 +1,10 @@
-import { readFile, realpath } from "node:fs/promises";
+import { lstat, readFile, realpath } from "node:fs/promises";
 import path from "node:path";
 
 import type { WorkspaceIdentity } from "../../contracts/index.js";
 import type {
   HandoffReceipt,
+  HandoffReceiptV2,
   SynthesizeFirstConsumerContract,
 } from "../handoff/index.js";
 import {
@@ -44,7 +45,7 @@ const SHA256_PATTERN = /^sha256:[0-9a-f]{64}$/u;
 const RAW_SHA256_PATTERN = /^[0-9a-f]{64}$/u;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/iu;
 
-const HANDOFF_RECEIPT_KEYS = [
+const LEGACY_HANDOFF_RECEIPT_KEYS = [
   "compression_task_id",
   "source_thread_id",
   "workflow_version",
@@ -57,6 +58,24 @@ const HANDOFF_RECEIPT_KEYS = [
   "artifact_digest",
   "verify_evidence",
   "consumer_contract",
+] as const;
+
+const HANDOFF_RECEIPT_V2_KEYS = [
+  "receipt_schema_version",
+  "compression_task_id",
+  "compression_turn_id",
+  "source_thread_id",
+  "workflow_version",
+  "markdown_path",
+  "evidence_index_path",
+  "source_revision",
+  "structural_digest",
+  "handoff_digest",
+  "evidence_index_digest",
+  "verify_evidence",
+  "verify_evidence_result_digest",
+  "consumer_contract",
+  "artifact_digest",
 ] as const;
 
 const CONSUMER_CONTRACT_KEYS = [
@@ -127,6 +146,8 @@ interface WorkflowReceipts {
   readonly lease: LeaseReceipt;
   readonly progress: ProgressReceipt;
 }
+
+type VerifiedHandoffReceipt = HandoffReceipt | HandoffReceiptV2;
 
 class BoundedCallError extends Error {
   public constructor(
@@ -235,7 +256,7 @@ function decodeConsumerContract(value: unknown): SynthesizeFirstConsumerContract
   return value as unknown as SynthesizeFirstConsumerContract;
 }
 
-function handoffArtifactDigest(
+function legacyHandoffArtifactDigest(
   receipt: Omit<HandoffReceipt, "artifact_digest" | "retained_work_dir">,
 ): Sha256Digest {
   return sha256Json({
@@ -253,11 +274,38 @@ function handoffArtifactDigest(
   });
 }
 
+function isHandoffReceiptV2(
+  receipt: VerifiedHandoffReceipt,
+): receipt is HandoffReceiptV2 {
+  return "receipt_schema_version" in receipt;
+}
+
 function diagnosticCode(error: unknown): string | undefined {
   const candidate = error instanceof BoundedCallError ? error.cause : error;
   return isRecord(candidate) && typeof candidate.code === "string"
     ? candidate.code
     : undefined;
+}
+
+function launcherFailureReason(code: string | undefined): ContinuationFailureReason | undefined {
+  switch (code) {
+    case "INVALID_CONTINUATION_REQUEST":
+      return "invalid_request";
+    case "CONTINUATION_TASK_START_FAILED":
+      return "task_start_failed";
+    case "READY_EVIDENCE_INVALID":
+      return "consumer_contract_violated";
+    case "WRITE_EPOCH_MISMATCH":
+      return "write_epoch_mismatch";
+    case "CONTINUATION_WRITE_TURN_START_FAILED":
+      return "grant_call_failed";
+    case "CONTINUATION_WRITE_TURN_FAILED":
+      return "progress_call_failed";
+    case "RECEIPT_REPLAY_MISMATCH":
+      return "receipt_replay_mismatch";
+    default:
+      return undefined;
+  }
 }
 
 export class ContinuationCoordinator {
@@ -340,7 +388,7 @@ export class ContinuationCoordinator {
       );
     }
 
-    let handoff: HandoffReceipt;
+    let handoff: VerifiedHandoffReceipt;
     try {
       handoff = await this.decodeAndVerifyHandoffReceipt(
         input.handoff_receipt,
@@ -360,6 +408,8 @@ export class ContinuationCoordinator {
       state,
       sliceContract,
       handoff,
+      input.lease_id,
+      input.expected_state_version,
       input.expected_owned_diff_digest,
     );
     if (envelope instanceof ContinuationError) {
@@ -462,7 +512,7 @@ export class ContinuationCoordinator {
         { reason: "model_policy_invalid" },
       );
     }
-    let handoff: HandoffReceipt;
+    let handoff: VerifiedHandoffReceipt;
     try {
       handoff = await this.decodeAndVerifyHandoffReceipt(
         input.handoff_receipt,
@@ -480,6 +530,8 @@ export class ContinuationCoordinator {
       loaded.state,
       sliceContract,
       handoff,
+      input.lease_id,
+      input.expected_state_version,
       input.expected_owned_diff_digest,
     );
     if (envelope instanceof ContinuationError) {
@@ -513,7 +565,7 @@ export class ContinuationCoordinator {
     state: RunState,
     input: ContinueFromHandoffInput,
     sliceContract: SliceContractV1,
-    handoff: HandoffReceipt,
+    handoff: VerifiedHandoffReceipt,
     envelope: ResumeEnvelope,
     effectStateVersion: number,
     position: WorkflowPosition,
@@ -770,14 +822,21 @@ export class ContinuationCoordinator {
     value: unknown,
     state: RunState,
     terminal: boolean,
-  ): Promise<HandoffReceipt> {
-    if (
-      !isRecord(value) ||
-      !exactKeys(value, HANDOFF_RECEIPT_KEYS, ["retained_work_dir"])
-    ) {
+  ): Promise<VerifiedHandoffReceipt> {
+    if (!isRecord(value)) {
       throw new ContinuationError(
         "handoff_integrity_failed",
-        "S10 received a Handoff receipt outside the frozen v2 schema.",
+        "Continuation received a Handoff receipt outside the frozen schema.",
+        { reason: "handoff_binding_mismatch" },
+      );
+    }
+    if (exactKeys(value, HANDOFF_RECEIPT_V2_KEYS, ["retained_work_dir"])) {
+      return this.decodeAndVerifyHandoffReceiptV2(value, state, terminal);
+    }
+    if (!exactKeys(value, LEGACY_HANDOFF_RECEIPT_KEYS, ["retained_work_dir"])) {
+      throw new ContinuationError(
+        "handoff_integrity_failed",
+        "Continuation Handoff receipt matches neither machine V2 nor legacy replay schema.",
         { reason: "handoff_binding_mismatch" },
       );
     }
@@ -800,7 +859,7 @@ export class ContinuationCoordinator {
     ) {
       throw new ContinuationError(
         "handoff_integrity_failed",
-        "S10 Handoff receipt does not prove a distinct verified v2 task pair.",
+        "Legacy Handoff receipt does not prove a distinct verified task pair.",
         { reason: "handoff_binding_mismatch" },
       );
     }
@@ -832,14 +891,14 @@ export class ContinuationCoordinator {
       verify_evidence: value.verify_evidence,
       consumer_contract: consumerContract,
     } satisfies Omit<HandoffReceipt, "artifact_digest" | "retained_work_dir">;
-    if (handoffArtifactDigest(material) !== value.artifact_digest) {
+    if (legacyHandoffArtifactDigest(material) !== value.artifact_digest) {
       throw new ContinuationError(
         "handoff_integrity_failed",
         "Handoff receipt fields no longer match artifact_digest.",
         { reason: "handoff_artifact_digest_mismatch" },
       );
     }
-    await this.verifyPublishedArtifacts(material, state.workspace_identity.canonical_root);
+    await this.verifyPublishedArtifacts(material);
     return {
       ...material,
       artifact_digest: value.artifact_digest,
@@ -849,9 +908,92 @@ export class ContinuationCoordinator {
     };
   }
 
+  private async decodeAndVerifyHandoffReceiptV2(
+    value: Readonly<Record<string, unknown>>,
+    state: RunState,
+    terminal: boolean,
+  ): Promise<HandoffReceiptV2> {
+    const consumerContract = decodeConsumerContract(value.consumer_contract);
+    if (
+      value.receipt_schema_version !== 2 ||
+      value.workflow_version !== 2 ||
+      value.verify_evidence !== "PASS" ||
+      !validTaskId(value.source_thread_id) ||
+      !validTaskId(value.compression_task_id) ||
+      !validTaskId(value.compression_turn_id) ||
+      value.source_thread_id === value.compression_task_id ||
+      !sha256Digest(value.source_revision) ||
+      !sha256Digest(value.structural_digest) ||
+      !sha256Digest(value.handoff_digest) ||
+      !sha256Digest(value.evidence_index_digest) ||
+      !sha256Digest(value.verify_evidence_result_digest) ||
+      !sha256Digest(value.artifact_digest) ||
+      typeof value.markdown_path !== "string" ||
+      typeof value.evidence_index_path !== "string" ||
+      (value.retained_work_dir !== undefined && (
+        typeof value.retained_work_dir !== "string" ||
+        !path.isAbsolute(value.retained_work_dir)
+      ))
+    ) {
+      throw new ContinuationError(
+        "handoff_integrity_failed",
+        "HandoffReceiptV2 does not prove one machine-verified Compression task and Turn.",
+        { reason: "handoff_binding_mismatch" },
+      );
+    }
+    if (
+      state.handoff === undefined ||
+      state.handoff.compression_task_id !== value.compression_task_id ||
+      state.handoff.markdown_path !== value.markdown_path ||
+      state.handoff.evidence_index_path !== value.evidence_index_path ||
+      state.handoff.artifact_digest !== value.artifact_digest ||
+      (!terminal && state.source_thread_id !== value.source_thread_id) ||
+      (terminal && state.source_thread_id === value.source_thread_id)
+    ) {
+      throw new ContinuationError(
+        "handoff_integrity_failed",
+        "HandoffReceiptV2 identity differs from the persisted Run Handoff binding.",
+        { reason: "handoff_binding_mismatch" },
+      );
+    }
+    const material = {
+      receipt_schema_version: value.receipt_schema_version,
+      compression_task_id: value.compression_task_id,
+      compression_turn_id: value.compression_turn_id,
+      source_thread_id: value.source_thread_id,
+      workflow_version: value.workflow_version,
+      markdown_path: value.markdown_path,
+      evidence_index_path: value.evidence_index_path,
+      source_revision: value.source_revision,
+      structural_digest: value.structural_digest,
+      handoff_digest: value.handoff_digest,
+      evidence_index_digest: value.evidence_index_digest,
+      verify_evidence: value.verify_evidence,
+      verify_evidence_result_digest: value.verify_evidence_result_digest,
+      consumer_contract: consumerContract,
+      ...(value.retained_work_dir === undefined
+        ? {}
+        : { retained_work_dir: value.retained_work_dir }),
+    } satisfies Omit<HandoffReceiptV2, "artifact_digest">;
+    if (sha256Json(material) !== value.artifact_digest) {
+      throw new ContinuationError(
+        "handoff_integrity_failed",
+        "HandoffReceiptV2 fields no longer match artifact_digest.",
+        { reason: "handoff_artifact_digest_mismatch" },
+      );
+    }
+    await this.verifyPublishedArtifacts(material);
+    return { ...material, artifact_digest: value.artifact_digest };
+  }
+
   private async verifyPublishedArtifacts(
-    receipt: Omit<HandoffReceipt, "artifact_digest" | "retained_work_dir">,
-    workspaceRoot: string,
+    receipt: Readonly<{
+      markdown_path: string;
+      evidence_index_path: string;
+      source_revision: string;
+      handoff_digest: Sha256Digest;
+      evidence_index_digest: Sha256Digest;
+    }>,
   ): Promise<void> {
     if (
       !path.isAbsolute(receipt.markdown_path) ||
@@ -864,14 +1006,27 @@ export class ContinuationCoordinator {
         { reason: "handoff_path_invalid" },
       );
     }
-    let realWorkspace: string;
     let realMarkdown: string;
     let realEvidence: string;
     let markdown: Buffer;
     let evidence: Buffer;
     try {
-      [realWorkspace, realMarkdown, realEvidence, markdown, evidence] = await Promise.all([
-        realpath(workspaceRoot),
+      const [markdownBefore, evidenceBefore] = await Promise.all([
+        lstat(receipt.markdown_path),
+        lstat(receipt.evidence_index_path),
+      ]);
+      if (
+        !markdownBefore.isFile() ||
+        markdownBefore.isSymbolicLink() ||
+        !evidenceBefore.isFile() ||
+        evidenceBefore.isSymbolicLink() ||
+        (markdownBefore.dev === evidenceBefore.dev &&
+          markdownBefore.ino !== 0 &&
+          markdownBefore.ino === evidenceBefore.ino)
+      ) {
+        throw new Error("Handoff pair is not two independent regular files");
+      }
+      [realMarkdown, realEvidence, markdown, evidence] = await Promise.all([
         realpath(receipt.markdown_path),
         realpath(receipt.evidence_index_path),
         readFile(receipt.markdown_path),
@@ -885,12 +1040,12 @@ export class ContinuationCoordinator {
       );
     }
     if (
-      !this.isWithin(realWorkspace, realMarkdown) ||
-      !this.isWithin(realWorkspace, realEvidence)
+      path.relative(path.resolve(receipt.markdown_path), realMarkdown) !== "" ||
+      path.relative(path.resolve(receipt.evidence_index_path), realEvidence) !== ""
     ) {
       throw new ContinuationError(
         "handoff_integrity_failed",
-        "Handoff artifacts escaped the persisted workspace identity.",
+        "Handoff artifacts changed their verified publication paths.",
         { reason: "handoff_path_invalid" },
       );
     }
@@ -904,7 +1059,19 @@ export class ContinuationCoordinator {
         { reason: "handoff_artifact_digest_mismatch" },
       );
     }
-    if (!markdown.toString("utf8").includes("handoff-v2")) {
+    let markdownText: string;
+    let evidenceText: string;
+    try {
+      markdownText = new TextDecoder("utf-8", { fatal: true }).decode(markdown);
+      evidenceText = new TextDecoder("utf-8", { fatal: true }).decode(evidence);
+    } catch (error: unknown) {
+      throw new ContinuationError(
+        "handoff_integrity_failed",
+        "Published Handoff pair is not strict UTF-8.",
+        { reason: "handoff_artifact_digest_mismatch", cause: error },
+      );
+    }
+    if (!markdownText.includes("handoff-v2")) {
       throw new ContinuationError(
         "handoff_integrity_failed",
         "Published Markdown is not a Handoff v2 artifact.",
@@ -913,7 +1080,7 @@ export class ContinuationCoordinator {
     }
     let index: unknown;
     try {
-      index = JSON.parse(evidence.toString("utf8")) as unknown;
+      index = JSON.parse(evidenceText) as unknown;
     } catch (error: unknown) {
       throw new ContinuationError(
         "handoff_integrity_failed",
@@ -940,7 +1107,9 @@ export class ContinuationCoordinator {
   private createEnvelope(
     state: RunState,
     sliceContract: SliceContractV1,
-    handoff: HandoffReceipt,
+    handoff: VerifiedHandoffReceipt,
+    leaseId: string,
+    observedStateVersion: number,
     legacyExpectedOwnedDiffDigest?: Sha256Digest,
   ): ResumeEnvelope | ContinuationError {
     const runtimeOverride = state.slice_commit_mode_overrides?.[sliceContract.slice_id];
@@ -961,10 +1130,24 @@ export class ContinuationCoordinator {
       run_id: state.run_id,
       current_slice_id: state.current_slice_id as string,
       goal_prompt: goalPrompt,
+      source_thread_id: handoff.source_thread_id,
+      compression_task_id: handoff.compression_task_id,
+      ...(isHandoffReceiptV2(handoff)
+        ? {
+          compression_turn_id: handoff.compression_turn_id,
+          handoff_receipt_schema_version: handoff.receipt_schema_version,
+        }
+        : {}),
       handoff_markdown_path: handoff.markdown_path,
       evidence_index_path: handoff.evidence_index_path,
+      handoff_artifact_digest: handoff.artifact_digest,
+      handoff_digest: handoff.handoff_digest,
       consumer_contract: handoff.consumer_contract,
       expected_workspace_identity: state.workspace_identity,
+      lease_id: leaseId,
+      write_epoch: state.write_epoch,
+      observed_state_version: observedStateVersion,
+      commit_mode: commitMode,
       ...(legacyExpectedOwnedDiffDigest === undefined
         ? {}
         : { expected_owned_diff_digest: legacyExpectedOwnedDiffDigest }),
@@ -974,7 +1157,7 @@ export class ContinuationCoordinator {
   private decodeTaskId(
     value: unknown,
     state: RunState,
-    handoff: HandoffReceipt,
+    handoff: VerifiedHandoffReceipt,
     expectedTaskId?: string,
   ): string {
     if (!validTaskId(value)) {
@@ -1009,7 +1192,7 @@ export class ContinuationCoordinator {
     value: unknown,
     taskId: string,
     state: RunState,
-    handoff: HandoffReceipt,
+    handoff: VerifiedHandoffReceipt,
     observedStateVersion: number,
   ): ReadyReceipt {
     if (!isRecord(value) || !exactKeys(value, READY_RECEIPT_KEYS)) {
@@ -1378,14 +1561,28 @@ export class ContinuationCoordinator {
       return await this.bounded(label, operation);
     } catch (error: unknown) {
       const bounded = error instanceof BoundedCallError ? error : undefined;
+      const code = diagnosticCode(error);
+      if (code === "HANDOFF_INTEGRITY_FAILED") {
+        throw new ContinuationError(
+          "handoff_integrity_failed",
+          "Continuation launcher rejected changed Handoff bytes before task input.",
+          {
+            reason: "handoff_artifact_digest_mismatch",
+            diagnostic_code: code,
+            cause: bounded?.cause,
+          },
+        );
+      }
       throw new ContinuationError(
         "continuation_start_failed",
         `${label} ${bounded?.reason === "timeout" ? "timed out" : "failed"}.`,
         {
-          reason: bounded?.reason === "timeout" ? timeoutReason : callReason,
-          ...(diagnosticCode(error) === undefined
+          reason: bounded?.reason === "timeout"
+            ? timeoutReason
+            : launcherFailureReason(code) ?? callReason,
+          ...(code === undefined
             ? {}
-            : { diagnostic_code: diagnosticCode(error) as string }),
+            : { diagnostic_code: code }),
           cause: error,
         },
       );
@@ -1416,15 +1613,6 @@ export class ContinuationCoordinator {
       value.mode === "model" &&
       value.model === "gpt-5.6-sol" &&
       value.effort === "max";
-  }
-
-  private isWithin(root: string, candidate: string): boolean {
-    const relative = path.relative(root, candidate);
-    return relative === "" || (
-      relative !== ".." &&
-      !relative.startsWith(`..${path.sep}`) &&
-      !path.isAbsolute(relative)
-    );
   }
 
   private asContinuationError(error: unknown): ContinuationError {
