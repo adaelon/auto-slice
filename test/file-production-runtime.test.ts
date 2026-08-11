@@ -13,7 +13,10 @@ import path from "node:path";
 import { test, type TestContext } from "node:test";
 
 import { runControllerCli, type ControllerIo } from "../src/controller/main.js";
-import type { CompressionTaskLauncher } from "../src/controller/handoff/index.js";
+import {
+  AppServerCompressionLauncherError,
+  type CompressionTaskLauncher,
+} from "../src/controller/handoff/index.js";
 import type { ContinuationLauncher } from "../src/controller/continuation/index.js";
 import {
   CodexAppServerTaskHost,
@@ -388,13 +391,13 @@ void test("run-plan CLI composes a file Production Plan into the orchestrator", 
   assert.equal(git(workspaceRoot, ["rev-parse", "HEAD"]), beforeHead);
 });
 
-void test("default App Server Task Host fails closed when Compression launchers are absent", async () => {
+void test("default App Server Task Host wires Compression and keeps Continuation fail closed", async () => {
   const host = new CodexAppServerTaskHost();
 
   await assert.rejects(
     host.compression_launcher.start({} as never),
-    (error: unknown) => error instanceof ProductionRuntimeError &&
-      error.code === "handoff_export_failed",
+    (error: unknown) => error instanceof AppServerCompressionLauncherError &&
+      error.code === "INVALID_COMPRESSION_REQUEST",
   );
   await assert.rejects(
     host.continuation_launcher.start({} as never, {} as never),

@@ -11,10 +11,14 @@ import type {
 } from "../state/index.js";
 import type { InterruptReceipt } from "../thread-control/index.js";
 
-export const HANDOFF_WORKFLOW_VERSION = "v2" as const;
+export const HANDOFF_RECEIPT_SCHEMA_VERSION = 2 as const;
+export const HANDOFF_WORKFLOW_VERSION = 2 as const;
+export const LEGACY_HANDOFF_WORKFLOW_VERSION = "v2" as const;
 export const DEFAULT_HANDOFF_EXPORT_TIMEOUT_MS = 600_000 as const;
 
 export interface CompressionRequest {
+  readonly run_id: string;
+  readonly slice_id: string;
   readonly source_thread_id: string;
   readonly prompt: string;
   readonly workspace_identity: WorkspaceIdentity;
@@ -53,7 +57,7 @@ export interface SynthesizeFirstConsumerContract {
 export interface HandoffReceipt {
   readonly compression_task_id: string;
   readonly source_thread_id: string;
-  readonly workflow_version: typeof HANDOFF_WORKFLOW_VERSION;
+  readonly workflow_version: typeof LEGACY_HANDOFF_WORKFLOW_VERSION;
   readonly markdown_path: string;
   readonly evidence_index_path: string;
   readonly source_revision: string;
@@ -63,6 +67,29 @@ export interface HandoffReceipt {
   readonly artifact_digest: Sha256Digest;
   readonly verify_evidence: "PASS";
   readonly consumer_contract: SynthesizeFirstConsumerContract;
+  readonly retained_work_dir?: string;
+}
+
+/**
+ * Machine-verifiable receipt produced by the S20 App Server Compression launcher.
+ * The legacy `HandoffReceipt` remains exported only for S10/S21 migration compatibility.
+ */
+export interface HandoffReceiptV2 {
+  readonly receipt_schema_version: typeof HANDOFF_RECEIPT_SCHEMA_VERSION;
+  readonly compression_task_id: string;
+  readonly compression_turn_id: string;
+  readonly source_thread_id: string;
+  readonly workflow_version: typeof HANDOFF_WORKFLOW_VERSION;
+  readonly markdown_path: string;
+  readonly evidence_index_path: string;
+  readonly source_revision: string;
+  readonly structural_digest: Sha256Digest;
+  readonly handoff_digest: Sha256Digest;
+  readonly evidence_index_digest: Sha256Digest;
+  readonly verify_evidence: "PASS";
+  readonly verify_evidence_result_digest: Sha256Digest;
+  readonly consumer_contract: SynthesizeFirstConsumerContract;
+  readonly artifact_digest: Sha256Digest;
   readonly retained_work_dir?: string;
 }
 
@@ -108,7 +135,7 @@ export interface CompressionHandoffDecision {
   readonly state_version: number;
   readonly status: Extract<RunStatus, "CONTINUATION_STARTING">;
   readonly effect_idempotency_key: Sha256Digest;
-  readonly receipt: HandoffReceipt;
+  readonly receipt: HandoffReceiptV2;
 }
 
 export type CompressionHandoffFailureReason =
@@ -122,6 +149,8 @@ export type CompressionHandoffFailureReason =
   | "handoff_already_attempted"
   | "task_start_timeout"
   | "task_start_failed"
+  | "skill_resolution_failed"
+  | "artifact_allocation_failed"
   | "worker_unavailable"
   | "skill_budget_failed"
   | "task_launch_receipt_invalid"
@@ -132,6 +161,9 @@ export type CompressionHandoffFailureReason =
   | "task_model_mismatch"
   | "export_timeout"
   | "export_call_failed"
+  | "compression_turn_failed"
+  | "command_chain_invalid"
+  | "helper_output_invalid"
   | "handoff_receipt_invalid"
   | "handoff_workflow_version_mismatch"
   | "handoff_source_mismatch"

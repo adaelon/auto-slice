@@ -9,7 +9,10 @@ import type {
   ContinuationDecision,
   ContinueFromHandoffInput,
 } from "../src/controller/continuation/index.js";
-import type { CompressionHandoffDecision, HandoffReceipt } from "../src/controller/handoff/index.js";
+import type {
+  CompressionHandoffDecision,
+  HandoffReceiptV2,
+} from "../src/controller/handoff/index.js";
 import type { ModelInvocationDecision } from "../src/controller/model-policy/index.js";
 import {
   ProductionOrchestrator,
@@ -441,18 +444,20 @@ void test("ProductionOrchestrator hands a timed-out probed Slice to a distinct C
   const completion = new Promise<DevelopmentTaskReceipt>((resolve) => {
     resolveCompletion = resolve;
   });
-  const handoffReceipt: HandoffReceipt = {
+  const handoffReceiptMaterial: Omit<HandoffReceiptV2, "artifact_digest"> = {
+    receipt_schema_version: 2,
     compression_task_id: compressionTaskId,
+    compression_turn_id: "00000000-0000-7000-8000-000000001304",
     source_thread_id: sourceThreadId,
-    workflow_version: "v2",
+    workflow_version: 2,
     markdown_path: "handoff.md",
     evidence_index_path: "handoff.evidence.json",
     source_revision: sha256Bytes("source-revision"),
-    frame_digest: sha256Bytes("frame"),
+    structural_digest: sha256Bytes("frame"),
     handoff_digest: sha256Bytes("handoff"),
     evidence_index_digest: sha256Bytes("evidence"),
-    artifact_digest: sha256Bytes("artifact"),
     verify_evidence: "PASS",
+    verify_evidence_result_digest: sha256Bytes("verify-evidence-result"),
     consumer_contract: {
       formatVersion: 1,
       kind: "codex-handoff-synthesize-first-consumer-contract",
@@ -464,6 +469,10 @@ void test("ProductionOrchestrator hands a timed-out probed Slice to a distinct C
       forbidBroadSearch: true,
       forbidFullFileReread: true,
     },
+  };
+  const handoffReceipt: HandoffReceiptV2 = {
+    ...handoffReceiptMaterial,
+    artifact_digest: sha256Json(handoffReceiptMaterial),
   };
   const developmentTasks: DevelopmentTaskPort = {
     start(request) {

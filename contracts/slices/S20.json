@@ -1,0 +1,86 @@
+{
+  "id": "S20",
+  "contract_version": 1,
+  "requires": ["S18", "S19"],
+  "objective": "让默认 CodexAppServerTaskHost 以真实 fresh Compression Task 执行 export-codex-handoff，并只从持久 attempt、绑定 command 链、发布字节和 Host verify-evidence 构造 HandoffReceiptV2。",
+  "exclusions": [
+    "不实现或修改 Continuation launcher/coordinator 的生产流程",
+    "不解析模型 final reply 或 agentMessage 来补 receipt 字段",
+    "不从 CompressionRequest 回显 Source revision",
+    "不复用 Source Thread、旧 Compression Thread 或旧 attempt 产物",
+    "不授予 Project Write Lease",
+    "不在 Source 工作区写默认 Handoff 文件"
+  ],
+  "inputs": [
+    {
+      "path": "artifacts/s18/completion-receipt.json",
+      "digest": "sha256:2268cf6f76d9bc93c18d54420fe5cafffb0a351da7f6434b146f84dd5e179686",
+      "producer_slice": "S18"
+    },
+    {
+      "path": "artifacts/s19/completion-receipt.json",
+      "digest": "sha256:0ab077d66dd6e4f1a042bbd58fcce962cfe7bb6b21bb3fdd73da97bd6ef837d2",
+      "producer_slice": "S19"
+    }
+  ],
+  "owned_paths": [
+    "contracts/slices/S20.json",
+    "src/controller/continuation/types.ts",
+    "src/controller/handoff/app-server-compression-task-launcher.ts",
+    "src/controller/handoff/compression-handoff-coordinator.ts",
+    "src/controller/handoff/index.ts",
+    "src/controller/handoff/types.ts",
+    "src/controller/production/codex-app-server-task-host.ts",
+    "test/handoff.test.ts",
+    "test/file-production-runtime.test.ts",
+    "test/production-orchestrator.test.ts",
+    "test/fixtures/export-codex-handoff/SKILL.md",
+    "test/fixtures/export-codex-handoff/scripts/export-handoff.mjs",
+    "test/fixtures/process/fake-s20-app-server.mjs",
+    "scripts/verify-s20.mjs",
+    "package.json",
+    "docs/切片方案-App-Server三任务接力解锁.md",
+    "docs/implementation-slices.md",
+    "docs/架构.md",
+    "docs/代码链路.md",
+    "artifacts/s20/**"
+  ],
+  "budgets": {
+    "resolved_export_skills": 1,
+    "compression_turn_input_items": 2,
+    "handoff_target_files_per_attempt": 2,
+    "accepted_command_evidence_items": 2,
+    "maximum_command_output_bytes": 65536,
+    "verify_evidence_timeout_ms": 120000,
+    "project_write_leases": 0,
+    "model_final_reply_fields": 0
+  },
+  "checks": [
+    { "id": "surface", "argv": ["node", "scripts/verify-s20.mjs", "--surface-only"], "expected_exit_code": 0 },
+    { "id": "build", "argv": ["npm", "run", "build"], "expected_exit_code": 0 },
+    { "id": "typecheck", "argv": ["npm", "run", "typecheck"], "expected_exit_code": 0 },
+    {
+      "id": "target_test",
+      "argv": [
+        "node",
+        "--test",
+        "dist/test/handoff.test.js",
+        "dist/test/file-production-runtime.test.js",
+        "dist/test/production-orchestrator.test.js"
+      ],
+      "expected_exit_code": 0
+    },
+    { "id": "test", "argv": ["npm", "run", "test"], "expected_exit_code": 0 },
+    { "id": "lint", "argv": ["npm", "run", "lint"], "expected_exit_code": 0 },
+    { "id": "plugin_validation", "argv": ["npm", "run", "validate:plugin"], "expected_exit_code": 0 },
+    { "id": "markdown_links", "argv": ["npm", "run", "verify:markdown-links"], "expected_exit_code": 0 },
+    { "id": "diff_check", "argv": ["git", "diff", "HEAD", "--check", "--"], "expected_exit_code": 0 }
+  ],
+  "expected_artifacts": [
+    { "path": "artifacts/s20/compression-launcher-report.json", "kind": "compression_launcher_protocol_evidence" },
+    { "path": "artifacts/s20/completion-receipt.json", "kind": "completion_receipt" },
+    { "path": "docs/代码链路.md", "kind": "code_path_index" },
+    { "path": "docs/架构.md", "kind": "implementation_architecture" }
+  ],
+  "unlocks": ["S21"]
+}

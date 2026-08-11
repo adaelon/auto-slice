@@ -1,6 +1,6 @@
 # App Server 三任务接力解锁切片方案
 
-> 状态：Implementation in progress（2026-08-11，S17 已完成并由 `verify:s17` 锁定，下一刀 S18）。S15/S16 的回执保留为历史证据，但不再代表真实三任务链可用。
+> 状态：Implementation in progress（2026-08-11，S17–S20 已完成并分别由 release verifier 锁定，下一刀 S21）。S15/S16 的回执保留为历史证据，但不再代表真实三任务链可用。
 > 权威边界：[`CONTEXT.md`](../CONTEXT.md)、[ADR-0011](adr/0011-export-owned-revision-and-fresh-task-launchers.md)、[OpenAI Docs: Codex App Server](https://developers.openai.com/codex/app-server/)。
 
 ## 目标与排除
@@ -311,6 +311,7 @@ S20 + S21 -> S22 默认生产链端到端验收
 
 ## S19 · Fresh-task App Server session 基座
 
+- **状态**：COMPLETE；证据见 `contracts/slices/S19.json` 与 `artifacts/s19/completion-receipt.json`。
 - **做**：让 Task Host 持有一个初始化后的 App Server client；在 raw notification 入口按注册 thread/turn 分流为既有 Controller firewall 与私有 launcher projector，新增只负责 `thread/start`、fresh-root 证明、顺序 turn 注册/终态等待和 bounded completed-item projection 的 session 基座。
 - **不做**：不注入 export skill，不构造 HandoffReceipt，不授权 Continuation 写入。
 - **判据**：同连接顺序创建三个 distinct root UUID；状态机允许 `TURN_ACTIVE -> TURN_TERMINAL -> TURN_ACTIVE`，拒绝两个 active Turn、迟到 item、resume/fork、ephemeral、parent/fork id、非空 history 和交叉 thread/turn event；Controller listener、RunStore、日志与错误详情零 raw content；dispose 只关闭一次 client。
@@ -319,6 +320,7 @@ S20 + S21 -> S22 默认生产链端到端验收
 
 ## S20 · 真实 Compression launcher 与可信 receipt
 
+- **状态**：COMPLETE；证据见 `contracts/slices/S20.json` 与 `artifacts/s20/completion-receipt.json`。
 - **做**：实现默认 `AppServerCompressionTaskLauncher`；以 `skills/list` 唯一解析 skill，在 effect 绑定的 `Handoff Artifact Root` 分配新 attempt 双路径，按 exact wire 发送含 UUID/mode/路径的 text＋skill item；等待 Compression Turn terminal；只从同 Turn 已绑定的 prepare/publish completed command 链、预分配路径、双文件和 Host 独立 `verify-evidence` 构造 `HandoffReceiptV2`。
 - **不做**：不解析模型 final reply，不回显请求 revision，不修改 Continuation coordinator。
 - **判据**：默认 Host 不再返回“no production Compression Task launcher”；fake Host 精确看到 `skills/list`、两项 input 和完整 workspaceWrite policy；真实 helper fixture 的 prepare→publish 链产生 `sha256:<64hex>` receipt；同 effect 重放不再运行 skill；缺/重复/乱序 prepare、workDir 替换、旧文件碰撞、symlink/reparse escape、默认 cwd 输出、组合 shell command、echo/fake frame/final-message 攻击、SOURCE_CHANGED、单文件发布、digest/path/consumer contract 篡改全部失败。

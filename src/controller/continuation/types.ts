@@ -1,6 +1,7 @@
 import type { WorkspaceIdentity } from "../../contracts/index.js";
 import type {
   HandoffReceipt,
+  HandoffReceiptV2,
   SynthesizeFirstConsumerContract,
 } from "../handoff/index.js";
 import type { ModelDecision } from "../model-policy/index.js";
@@ -135,7 +136,8 @@ export interface ContinuationCoordinatorOptions {
 export interface ContinueFromHandoffInput {
   readonly run_id: string;
   readonly lease_id: string;
-  readonly handoff_receipt: HandoffReceipt;
+  /** S21 will make V2 the only production decode path; legacy is retained for replay tests. */
+  readonly handoff_receipt: HandoffReceipt | HandoffReceiptV2;
   readonly slice_contract: SliceContractV1;
   readonly model_decision: ModelDecision;
   /** Accepted only for legacy callers and ignored by runtime decisions. */

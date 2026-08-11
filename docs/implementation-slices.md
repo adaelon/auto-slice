@@ -920,7 +920,38 @@ identity/order/budget violation -> app_server_protocol_error without raw content
 
 **Unlocks**：S20、S21。
 
-## 21. 计划级验收矩阵
+## 21. S20 真实 Compression launcher 与可信 receipt
+
+**状态**：COMPLETE；发布证据见 `artifacts/s20/compression-launcher-report.json` 与 `artifacts/s20/completion-receipt.json`。
+
+**Requires**：S18、S19、ADR-0011 与三任务接力切片方案 `## S20`。
+
+**Objective**：让默认 Task Host 解析并调用真实 `export-codex-handoff` skill，以持久 attempt、机器 command 证明、发布字节和 Host verifier 生成 `HandoffReceiptV2`。
+
+**Exclusions**：不实现 Continuation launcher；不解析模型 final reply；不回显请求 revision；不授予 Project Write Lease；不覆盖旧 attempt 或向 Source 工作区发布默认文件。
+
+**Owned outputs**：`contracts/slices/S20.json`、`handoff/app-server-compression-task-launcher.ts`、V2 receipt/coordinator 边界、Task Host 默认 composition、真实 helper/process fixture、失败矩阵、`verify-s20` 与发布证据。
+
+**Launcher contract**：
+
+```text
+skills/list(forceReload=true) -> one enabled canonical export skill
+effect journal ALLOCATED(attempt=N) -> materialize new Run/Slice/attempt directory
+thread/start(fresh compression) -> turn/start(frozen text + exact skill item)
+private completed items -> exactly prepare -> publish, direct argv and same workDir
+published pair bytes + Evidence sourceRevision + Host verify-evidence
+  -> HandoffReceiptV2 + canonical artifact_digest -> journal COMPLETED
+FAILED/unfinished attempt -> preserve paths/workDir -> retry writes attempt=N+1 first
+COMPLETED replay -> return persisted launch/receipt without skills/list or new task
+```
+
+**Deterministic checks**：真实 fake App Server/helper 覆盖 exact wire、持久成功重放、失败重试、占用 attempt、symlink/reparse、skill 缺失/重复/disabled/error、prepare 缺失/重复/乱序、组合 shell、默认输出、workDir 替换、echo/final-message、JSON malformed/oversize、SOURCE_CHANGED、单文件、digest/path/consumer 篡改及 verifier 失败；build、typecheck、目标/全量测试、lint、插件、Markdown 与 diff check 全绿。
+
+**Completion evidence**：Compression launcher surface digest、负向矩阵、九项发布门禁回执与 S20 `CompletionReceipt`。
+
+**Unlocks**：S21。
+
+## 22. 计划级验收矩阵
 
 实现开始前和每个切片完成后，使用下表检查计划没有被悄悄削弱：
 
@@ -944,5 +975,6 @@ identity/order/budget violation -> app_server_protocol_error without raw content
 | App Server 0.146.0 exact wire 字段与 discriminant fail closed | S17 | S22 |
 | Source interruption revisionless 且 export 独占内容 revision | S18 | S22 |
 | fresh task 共用单 client、顺序 Turn 且私有内容不进 Controller | S19 | S22 |
+| Compression skill、attempt 与 receipt 只取确定性机器证据 | S20 | S22 |
 
 任何一行缺少对应测试、回执或产物 digest，相关切片不得标记 `COMPLETE`。

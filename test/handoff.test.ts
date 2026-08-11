@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import os from "node:os";
@@ -11,15 +14,18 @@ import test, { type TestContext } from "node:test";
 
 import { createWorkspaceIdentity } from "../src/contracts/workspace-identity.js";
 import {
+  AppServerCompressionLauncherError,
   CompressionHandoffCoordinator,
   CompressionHandoffError,
   type CompressionHandoffDecision,
   type CompressionRequest,
   type CompressionTaskLauncher,
-  type HandoffReceipt,
+  type CompressionTaskLaunchReceipt,
+  type HandoffReceiptV2,
   type SynthesizeFirstConsumerContract,
 } from "../src/controller/handoff/index.js";
 import type { ModelDecision } from "../src/controller/model-policy/index.js";
+import { CodexAppServerTaskHost } from "../src/controller/production/index.js";
 import {
   createInitialRunState,
   FileRunStore,
@@ -34,10 +40,12 @@ import type { InterruptReceipt } from "../src/controller/thread-control/index.js
 
 const SOURCE_THREAD_ID = "00000000-0000-7000-8000-000000000901";
 const COMPRESSION_TASK_ID = "00000000-0000-7000-8000-000000000902";
+const COMPRESSION_TURN_ID = "00000000-0000-7000-8000-000000000904";
 const COMPACTION_ID = "compaction-s09";
 const SOURCE_REVISION = `sha256:${"a".repeat(64)}`;
 const OBSERVED_AT = "2026-08-09T00:00:31.000Z";
 const CREATED_AT = "2026-08-09T00:00:32.000Z";
+const S20_APP_SERVER_FIXTURE = path.resolve("test/fixtures/process/fake-s20-app-server.mjs");
 
 const COMPRESSION_DECISION = {
   mode: "model",
@@ -162,21 +170,57 @@ function fixture(context: TestContext, suffix: string): Fixture {
 }
 
 function receiptArtifactDigest(
-  receipt: Omit<HandoffReceipt, "artifact_digest" | "retained_work_dir">,
+  receipt: Omit<HandoffReceiptV2, "artifact_digest">,
 ): Sha256Digest {
-  return sha256Json({
-    compression_task_id: receipt.compression_task_id,
-    consumer_contract: receipt.consumer_contract,
-    evidence_index_digest: receipt.evidence_index_digest,
-    evidence_index_path: receipt.evidence_index_path,
-    frame_digest: receipt.frame_digest,
-    handoff_digest: receipt.handoff_digest,
-    markdown_path: receipt.markdown_path,
-    source_revision: receipt.source_revision,
-    source_thread_id: receipt.source_thread_id,
-    verify_evidence: receipt.verify_evidence,
-    workflow_version: receipt.workflow_version,
+  return sha256Json(receipt);
+}
+
+function s20Request(workspaceRoot: string, suffix: string): CompressionRequest {
+  return {
+    run_id: `run-s20-${suffix}`,
+    slice_id: "S20",
+    source_thread_id: SOURCE_THREAD_ID,
+    prompt: `$export-codex-handoff ${SOURCE_THREAD_ID}`,
+    workspace_identity: createWorkspaceIdentity(workspaceRoot),
+    compaction_id: `compaction-s20-${suffix}`,
+    model: "gpt-5.6-sol",
+    reasoning_effort: "medium",
+    idempotency_key: sha256Bytes(`s20-effect-${suffix}`),
+  };
+}
+
+function s20Host(
+  scenario: string,
+  storageRoot: string,
+  tracePath: string,
+): CodexAppServerTaskHost {
+  return new CodexAppServerTaskHost({
+    command: process.execPath,
+    args: [S20_APP_SERVER_FIXTURE, scenario, tracePath],
+    request_timeout_ms: 5_000,
+    handoff_artifact_storage_root: storageRoot,
+    compression_verify_evidence_timeout_ms: 5_000,
   });
+}
+
+function s20Trace(tracePath: string): readonly Readonly<Record<string, unknown>>[] {
+  if (!existsSync(tracePath)) return [];
+  return readFileSync(tracePath, "utf8")
+    .trim()
+    .split(/\r?\n/u)
+    .filter((line) => line.length > 0)
+    .map((line) => JSON.parse(line) as Readonly<Record<string, unknown>>);
+}
+
+function unwrapS20Launch(value: unknown): CompressionTaskLaunchReceipt {
+  assert.equal(typeof value, "object");
+  assert.ok(value !== null);
+  assert.equal((value as CompressionTaskLaunchReceipt).source_thread_id, SOURCE_THREAD_ID);
+  return value as CompressionTaskLaunchReceipt;
+}
+
+function hasLauncherCode(error: unknown, code: string): boolean {
+  return error instanceof AppServerCompressionLauncherError && error.code === code;
 }
 
 class MemoryCompressionLauncher implements CompressionTaskLauncher {
@@ -257,18 +301,24 @@ class MemoryCompressionLauncher implements CompressionTaskLauncher {
       writeFileSync(markdownPath, markdown, "utf8");
       writeFileSync(evidencePath, evidence, "utf8");
       const material = {
+        receipt_schema_version: 2,
         compression_task_id: compressionTaskId,
+        compression_turn_id: COMPRESSION_TURN_ID,
         source_thread_id: request.source_thread_id,
-        workflow_version: "v2",
+        workflow_version: 2,
         markdown_path: markdownPath,
         evidence_index_path: evidencePath,
         source_revision: SOURCE_REVISION,
-        frame_digest: `sha256:${"c".repeat(64)}`,
+        structural_digest: `sha256:${"c".repeat(64)}`,
         handoff_digest: sha256Bytes(markdown),
         evidence_index_digest: sha256Bytes(evidence),
         verify_evidence: "PASS",
+        verify_evidence_result_digest: sha256Json({
+          valid: true,
+          sourceRevision: SOURCE_REVISION,
+        }),
         consumer_contract: CONSUMER_CONTRACT,
-      } as const satisfies Omit<HandoffReceipt, "artifact_digest" | "retained_work_dir">;
+      } as const satisfies Omit<HandoffReceiptV2, "artifact_digest">;
       const receipt = {
         ...material,
         artifact_digest: receiptArtifactDigest(material),
@@ -611,6 +661,35 @@ void test("worker capacity failure is retained and cannot auto-retry", async (co
   assert.equal(launcher.handoff_side_effects, 0);
 });
 
+for (const scenario of [
+  { code: "SKILL_RESOLUTION_FAILED", reason: "skill_resolution_failed", stage: "start", failure: "handoff_export_failed" },
+  { code: "ARTIFACT_ALLOCATION_FAILED", reason: "artifact_allocation_failed", stage: "start", failure: "handoff_export_failed" },
+  { code: "COMPRESSION_TURN_FAILED", reason: "compression_turn_failed", stage: "handoff", failure: "handoff_export_failed" },
+  { code: "COMMAND_CHAIN_INVALID", reason: "command_chain_invalid", stage: "handoff", failure: "handoff_export_failed" },
+  { code: "HELPER_OUTPUT_INVALID", reason: "helper_output_invalid", stage: "handoff", failure: "handoff_export_failed" },
+  { code: "HANDOFF_PATH_INVALID", reason: "handoff_path_invalid", stage: "handoff", failure: "handoff_integrity_failed" },
+  { code: "HANDOFF_ARTIFACT_MISSING", reason: "handoff_artifact_missing", stage: "handoff", failure: "handoff_integrity_failed" },
+  { code: "HANDOFF_ARTIFACT_DIGEST_MISMATCH", reason: "handoff_artifact_digest_mismatch", stage: "handoff", failure: "handoff_integrity_failed" },
+  { code: "HANDOFF_VERIFY_FAILED", reason: "handoff_verify_failed", stage: "handoff", failure: "handoff_integrity_failed" },
+  { code: "HANDOFF_RECEIPT_INVALID", reason: "handoff_receipt_invalid", stage: "handoff", failure: "handoff_integrity_failed" },
+  { code: "RECEIPT_REPLAY_MISMATCH", reason: "receipt_replay_mismatch", stage: "handoff", failure: "handoff_integrity_failed" },
+] as const) {
+  void test(`S20 maps launcher diagnostic ${scenario.code}`, async (context) => {
+    const value = fixture(context, `diagnostic-${scenario.code.toLowerCase()}`);
+    const error = Object.assign(new Error("bounded S20 diagnostic"), { code: scenario.code });
+    const launcher = new MemoryCompressionLauncher(
+      scenario.stage === "start" ? { start_error: error } : { handoff_error: error },
+    );
+    const result = await coordinator(value, launcher).exportHandoff(
+      value.run_id,
+      value.interrupt_receipt,
+      COMPRESSION_DECISION,
+      value.state_version,
+    );
+    expectHandoffError(result, scenario.reason, scenario.failure);
+  });
+}
+
 void test("an unavailable exact model closes before task creation", async (context) => {
   const value = fixture(context, "model-unavailable");
   const launcher = new MemoryCompressionLauncher();
@@ -629,4 +708,286 @@ void test("an unavailable exact model closes before task creation", async (conte
   const state = unwrapStored(value.store.load(value.run_id)).state;
   assert.equal(state.status, "NEEDS_USER");
   assert.equal(state.compaction?.handoff_attempted, false);
+});
+
+void test("S20 default Host publishes and persistently replays one verified HandoffReceiptV2", async (context) => {
+  const root = temporaryDirectory(context, "s20-happy");
+  const workspaceRoot = path.join(root, "workspace");
+  const storageRoot = path.join(root, "handoff-storage");
+  const tracePath = path.join(root, "first-protocol.jsonl");
+  mkdirSync(workspaceRoot);
+  const request = s20Request(workspaceRoot, "happy");
+  const host = s20Host("happy", storageRoot, tracePath);
+  context.after(async () => host.dispose());
+
+  const launch = unwrapS20Launch(await host.compression_launcher.start(request));
+  const rawReceipt = await host.compression_launcher.awaitHandoff(
+    launch.compression_task_id,
+    request.idempotency_key,
+  );
+  const receipt = rawReceipt as HandoffReceiptV2;
+  assert.equal(receipt.receipt_schema_version, 2);
+  assert.equal(receipt.workflow_version, 2);
+  assert.equal(receipt.compression_task_id, launch.compression_task_id);
+  assert.equal(receipt.source_thread_id, request.source_thread_id);
+  assert.match(receipt.source_revision, /^sha256:[0-9a-f]{64}$/u);
+  assert.match(receipt.structural_digest, /^sha256:[0-9a-f]{64}$/u);
+  assert.equal(receipt.handoff_digest, sha256Bytes(readFileSync(receipt.markdown_path)));
+  assert.equal(receipt.evidence_index_digest, sha256Bytes(readFileSync(receipt.evidence_index_path)));
+  const { artifact_digest: artifactDigest, ...receiptMaterial } = receipt;
+  assert.equal(artifactDigest, sha256Json(receiptMaterial));
+  assert.equal(path.dirname(receipt.markdown_path), path.dirname(receipt.evidence_index_path));
+  const relativeArtifact = path.relative(storageRoot, receipt.markdown_path);
+  assert.ok(relativeArtifact.length > 0);
+  assert.equal(path.isAbsolute(relativeArtifact), false);
+  assert.equal(relativeArtifact.startsWith(`..${path.sep}`), false);
+  assert.equal(path.relative(workspaceRoot, receipt.markdown_path).startsWith(".."), true);
+
+  const journalPath = path.join(
+    storageRoot,
+    "handoff-launcher-journal",
+    `${request.idempotency_key.slice("sha256:".length)}.json`,
+  );
+  const journal = JSON.parse(readFileSync(journalPath, "utf8")) as {
+    readonly attempt_number: number;
+    readonly attempt_id: string;
+    readonly status: string;
+    readonly receipt: HandoffReceiptV2;
+  };
+  assert.equal(journal.attempt_number, 1);
+  assert.match(journal.attempt_id, /^attempt-000001-[0-9a-f]{16}$/u);
+  assert.equal(journal.status, "COMPLETED");
+  assert.deepEqual(journal.receipt, receipt);
+
+  const replayLaunch = unwrapS20Launch(await host.compression_launcher.start(request));
+  const replayReceipt = await host.compression_launcher.awaitHandoff(
+    replayLaunch.compression_task_id,
+    request.idempotency_key,
+  );
+  assert.deepEqual(replayLaunch, launch);
+  assert.deepEqual(replayReceipt, receipt);
+  const methods = s20Trace(tracePath).map((entry) => entry.method);
+  assert.equal(methods.filter((method) => method === "skills/list").length, 1);
+  assert.equal(methods.filter((method) => method === "thread/start").length, 1);
+  assert.equal(methods.filter((method) => method === "turn/start").length, 1);
+  await host.dispose();
+
+  const restartTrace = path.join(root, "restart-protocol.jsonl");
+  const restartedHost = s20Host("skill-missing", storageRoot, restartTrace);
+  context.after(async () => restartedHost.dispose());
+  const restartedLaunch = unwrapS20Launch(await restartedHost.compression_launcher.start(request));
+  const restartedReceipt = await restartedHost.compression_launcher.awaitHandoff(
+    restartedLaunch.compression_task_id,
+    request.idempotency_key,
+  );
+  assert.deepEqual(restartedLaunch, launch);
+  assert.deepEqual(restartedReceipt, receipt);
+  assert.deepEqual(s20Trace(restartTrace), []);
+});
+
+void test("S20 failed journal retry claims a new attempt before publishing", async (context) => {
+  const root = temporaryDirectory(context, "s20-retry");
+  const workspaceRoot = path.join(root, "workspace");
+  const storageRoot = path.join(root, "handoff-storage");
+  mkdirSync(workspaceRoot);
+  const request = s20Request(workspaceRoot, "retry");
+  const journalPath = path.join(
+    storageRoot,
+    "handoff-launcher-journal",
+    `${request.idempotency_key.slice("sha256:".length)}.json`,
+  );
+  const failedHost = s20Host("source-changed", storageRoot, path.join(root, "failed.jsonl"));
+  context.after(async () => failedHost.dispose());
+  const failedLaunch = unwrapS20Launch(await failedHost.compression_launcher.start(request));
+  let retainedWorkDir: string | undefined;
+  await assert.rejects(
+    failedHost.compression_launcher.awaitHandoff(
+      failedLaunch.compression_task_id,
+      request.idempotency_key,
+    ),
+    (error: unknown) => {
+      if (
+        error instanceof AppServerCompressionLauncherError &&
+        error.code === "SOURCE_CHANGED"
+      ) {
+        retainedWorkDir = error.retained_work_dir;
+        return true;
+      }
+      return false;
+    },
+  );
+  assert.ok(retainedWorkDir !== undefined);
+  assert.match(path.basename(retainedWorkDir), /^codex-handoff-task-/u);
+  context.after(() => {
+    rmSync(retainedWorkDir as string, { recursive: true, force: true });
+  });
+  const failedJournal = JSON.parse(readFileSync(journalPath, "utf8")) as {
+    readonly attempt_number: number;
+    readonly artifact_root: string;
+    readonly status: string;
+    readonly diagnostic_code: string;
+    readonly retained_work_dir: string;
+  };
+  assert.equal(failedJournal.attempt_number, 1);
+  assert.equal(failedJournal.status, "FAILED");
+  assert.equal(failedJournal.diagnostic_code, "SOURCE_CHANGED");
+  assert.equal(failedJournal.retained_work_dir, retainedWorkDir);
+  await failedHost.dispose();
+
+  const retryHost = s20Host("happy", storageRoot, path.join(root, "retry.jsonl"));
+  context.after(async () => retryHost.dispose());
+  const retryLaunch = unwrapS20Launch(await retryHost.compression_launcher.start(request));
+  const receipt = await retryHost.compression_launcher.awaitHandoff(
+    retryLaunch.compression_task_id,
+    request.idempotency_key,
+  ) as HandoffReceiptV2;
+  const completedJournal = JSON.parse(readFileSync(journalPath, "utf8")) as {
+    readonly attempt_number: number;
+    readonly artifact_root: string;
+    readonly status: string;
+  };
+  assert.equal(completedJournal.attempt_number, 2);
+  assert.equal(completedJournal.status, "COMPLETED");
+  assert.notEqual(completedJournal.artifact_root, failedJournal.artifact_root);
+  assert.match(completedJournal.artifact_root, /attempt-000002-[0-9a-f]{16}$/u);
+  assert.equal(path.dirname(receipt.markdown_path), completedJournal.artifact_root);
+});
+
+for (const [scenario, stage, expectedCode] of [
+  ["skill-missing", "start", "SKILL_RESOLUTION_FAILED"],
+  ["skill-duplicate", "start", "SKILL_RESOLUTION_FAILED"],
+  ["skill-disabled", "start", "SKILL_RESOLUTION_FAILED"],
+  ["skill-errors", "start", "SKILL_RESOLUTION_FAILED"],
+  ["skill-path-relative", "start", "SKILL_RESOLUTION_FAILED"],
+  ["missing-prepare", "handoff", "COMMAND_CHAIN_INVALID"],
+  ["duplicate-prepare", "handoff", "COMMAND_CHAIN_INVALID"],
+  ["out-of-order", "handoff", "COMMAND_CHAIN_INVALID"],
+  ["extra-echo", "handoff", "COMMAND_CHAIN_INVALID"],
+  ["bare-node", "handoff", "COMMAND_CHAIN_INVALID"],
+  ["combined-shell", "handoff", "COMMAND_CHAIN_INVALID"],
+  ["default-output", "handoff", "COMMAND_CHAIN_INVALID"],
+  ["workdir-swap", "handoff", "COMMAND_CHAIN_INVALID"],
+  ["final-message-only", "handoff", "COMMAND_CHAIN_INVALID"],
+  ["malformed-prepare-output", "handoff", "HELPER_OUTPUT_INVALID"],
+  ["oversized-prepare-output", "handoff", "HELPER_OUTPUT_INVALID"],
+  ["source-changed", "handoff", "SOURCE_CHANGED"],
+  ["single-file", "handoff", "HANDOFF_ARTIFACT_MISSING"],
+  ["hardlink-pair", "handoff", "HANDOFF_PATH_INVALID"],
+  ["digest-tamper", "handoff", "HANDOFF_ARTIFACT_DIGEST_MISMATCH"],
+  ["consumer-tamper", "handoff", "HANDOFF_RECEIPT_INVALID"],
+  ["path-tamper", "handoff", "HANDOFF_RECEIPT_INVALID"],
+  ["verify-fail", "handoff", "HANDOFF_VERIFY_FAILED"],
+] as const) {
+  void test(`S20 fails closed for ${scenario}`, async (context) => {
+    const root = temporaryDirectory(context, `s20-${scenario}`);
+    const workspaceRoot = path.join(root, "workspace");
+    const storageRoot = path.join(root, "handoff-storage");
+    mkdirSync(workspaceRoot);
+    const request = s20Request(workspaceRoot, scenario);
+    const host = s20Host(scenario, storageRoot, path.join(root, "protocol.jsonl"));
+    context.after(async () => host.dispose());
+    if (stage === "start") {
+      await assert.rejects(
+        host.compression_launcher.start(request),
+        (error: unknown) => hasLauncherCode(error, expectedCode),
+      );
+      return;
+    }
+    const launch = unwrapS20Launch(await host.compression_launcher.start(request));
+    await assert.rejects(
+      host.compression_launcher.awaitHandoff(
+        launch.compression_task_id,
+        request.idempotency_key,
+      ),
+      (error: unknown) => hasLauncherCode(error, expectedCode),
+    );
+  });
+}
+
+void test("S20 preserves a helper-managed workDir only when publish reports it", async (context) => {
+  const root = temporaryDirectory(context, "s20-retain-workdir");
+  const workspaceRoot = path.join(root, "workspace");
+  const storageRoot = path.join(root, "handoff-storage");
+  mkdirSync(workspaceRoot);
+  const request = s20Request(workspaceRoot, "retain-workdir");
+  const host = s20Host("retain-workdir", storageRoot, path.join(root, "protocol.jsonl"));
+  context.after(async () => host.dispose());
+  const launch = unwrapS20Launch(await host.compression_launcher.start(request));
+  const receipt = await host.compression_launcher.awaitHandoff(
+    launch.compression_task_id,
+    request.idempotency_key,
+  ) as HandoffReceiptV2;
+  assert.ok(receipt.retained_work_dir !== undefined);
+  assert.match(path.basename(receipt.retained_work_dir), /^codex-handoff-task-/u);
+  assert.equal(existsSync(receipt.retained_work_dir), true);
+  context.after(() => {
+    rmSync(receipt.retained_work_dir as string, { recursive: true, force: true });
+  });
+});
+
+void test("S20 journals an occupied attempt and retries only in a new directory", async (context) => {
+  const root = temporaryDirectory(context, "s20-collision");
+  const workspaceRoot = path.join(root, "workspace");
+  const storageRoot = path.join(root, "handoff-storage");
+  mkdirSync(workspaceRoot);
+  const request = s20Request(workspaceRoot, "collision");
+  const digestHex = request.idempotency_key.slice("sha256:".length);
+  const occupiedAttempt = path.join(
+    storageRoot,
+    "handoffs",
+    request.run_id,
+    request.slice_id,
+    `attempt-000001-${digestHex.slice(0, 16)}`,
+  );
+  mkdirSync(occupiedAttempt, { recursive: true });
+  writeFileSync(path.join(occupiedAttempt, "foreign.txt"), "do not overwrite\n", "utf8");
+  const firstHost = s20Host("happy", storageRoot, path.join(root, "first.jsonl"));
+  context.after(async () => firstHost.dispose());
+  await assert.rejects(
+    firstHost.compression_launcher.start(request),
+    (error: unknown) => hasLauncherCode(error, "ARTIFACT_ALLOCATION_FAILED"),
+  );
+  assert.equal(readFileSync(path.join(occupiedAttempt, "foreign.txt"), "utf8"), "do not overwrite\n");
+  const journalPath = path.join(storageRoot, "handoff-launcher-journal", `${digestHex}.json`);
+  const failed = JSON.parse(readFileSync(journalPath, "utf8")) as {
+    readonly attempt_number: number;
+    readonly status: string;
+  };
+  assert.equal(failed.attempt_number, 1);
+  assert.equal(failed.status, "FAILED");
+  await firstHost.dispose();
+
+  const retryHost = s20Host("happy", storageRoot, path.join(root, "retry.jsonl"));
+  context.after(async () => retryHost.dispose());
+  const launch = unwrapS20Launch(await retryHost.compression_launcher.start(request));
+  const receipt = await retryHost.compression_launcher.awaitHandoff(
+    launch.compression_task_id,
+    request.idempotency_key,
+  ) as HandoffReceiptV2;
+  assert.match(path.dirname(receipt.markdown_path), /attempt-000002-[0-9a-f]{16}$/u);
+  assert.equal(readFileSync(path.join(occupiedAttempt, "foreign.txt"), "utf8"), "do not overwrite\n");
+});
+
+void test("S20 rejects a symlinked Handoff directory before starting a fresh task", async (context) => {
+  const root = temporaryDirectory(context, "s20-symlink");
+  const workspaceRoot = path.join(root, "workspace");
+  const storageRoot = path.join(root, "handoff-storage");
+  const outsideRoot = path.join(root, "outside");
+  mkdirSync(workspaceRoot);
+  mkdirSync(storageRoot);
+  mkdirSync(outsideRoot);
+  symlinkSync(
+    outsideRoot,
+    path.join(storageRoot, "handoffs"),
+    process.platform === "win32" ? "junction" : "dir",
+  );
+  const request = s20Request(workspaceRoot, "symlink");
+  const tracePath = path.join(root, "protocol.jsonl");
+  const host = s20Host("happy", storageRoot, tracePath);
+  context.after(async () => host.dispose());
+  await assert.rejects(
+    host.compression_launcher.start(request),
+    (error: unknown) => hasLauncherCode(error, "ARTIFACT_ALLOCATION_FAILED"),
+  );
+  assert.equal(s20Trace(tracePath).filter((entry) => entry.method === "thread/start").length, 0);
 });

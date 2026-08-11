@@ -1,4 +1,4 @@
-import { readFile, realpath } from "node:fs/promises";
+import { lstat, readFile, realpath } from "node:fs/promises";
 import path from "node:path";
 
 import type { ModelDecision } from "../model-policy/index.js";
@@ -19,6 +19,7 @@ import { buildCompressionPrompt } from "../production/prompt-builder.js";
 import { CompressionHandoffError } from "./errors.js";
 import {
   DEFAULT_HANDOFF_EXPORT_TIMEOUT_MS,
+  HANDOFF_RECEIPT_SCHEMA_VERSION,
   HANDOFF_WORKFLOW_VERSION,
   type CompressionHandoffCoordinatorOptions,
   type CompressionHandoffDecision,
@@ -26,12 +27,14 @@ import {
   type CompressionHandoffFailureReason,
   type CompressionRequest,
   type CompressionTaskLaunchReceipt,
-  type HandoffReceipt,
+  type HandoffReceiptV2,
   type SynthesizeFirstConsumerContract,
 } from "./types.js";
 
 const SHA256_PATTERN = /^sha256:[0-9a-f]{64}$/u;
 const RAW_SHA256_PATTERN = /^[0-9a-f]{64}$/u;
+const CANONICAL_UUID =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
 
 const LAUNCH_RECEIPT_KEYS = [
   "compression_task_id",
@@ -45,18 +48,21 @@ const LAUNCH_RECEIPT_KEYS = [
 ] as const;
 
 const HANDOFF_RECEIPT_KEYS = [
+  "receipt_schema_version",
   "compression_task_id",
+  "compression_turn_id",
   "source_thread_id",
   "workflow_version",
   "markdown_path",
   "evidence_index_path",
   "source_revision",
-  "frame_digest",
+  "structural_digest",
   "handoff_digest",
   "evidence_index_digest",
-  "artifact_digest",
   "verify_evidence",
+  "verify_evidence_result_digest",
   "consumer_contract",
+  "artifact_digest",
 ] as const;
 
 const CONSUMER_CONTRACT_KEYS = [
@@ -171,20 +177,8 @@ function decodeConsumerContract(value: unknown): SynthesizeFirstConsumerContract
   return value as unknown as SynthesizeFirstConsumerContract;
 }
 
-function artifactDigest(receipt: Omit<HandoffReceipt, "artifact_digest" | "retained_work_dir">): Sha256Digest {
-  return sha256Json({
-    compression_task_id: receipt.compression_task_id,
-    consumer_contract: receipt.consumer_contract,
-    evidence_index_digest: receipt.evidence_index_digest,
-    evidence_index_path: receipt.evidence_index_path,
-    frame_digest: receipt.frame_digest,
-    handoff_digest: receipt.handoff_digest,
-    markdown_path: receipt.markdown_path,
-    source_revision: receipt.source_revision,
-    source_thread_id: receipt.source_thread_id,
-    verify_evidence: receipt.verify_evidence,
-    workflow_version: receipt.workflow_version,
-  });
+function artifactDigest(receipt: Omit<HandoffReceiptV2, "artifact_digest">): Sha256Digest {
+  return sha256Json(receipt);
 }
 
 function diagnostic(error: unknown): {
@@ -225,6 +219,19 @@ function reasonForDiagnostic(
   if (code === "SOURCE_CHANGED" || code === "SOURCE_REVISION_MISMATCH") {
     return "source_revision_mismatch";
   }
+  if (code === "SKILL_RESOLUTION_FAILED") return "skill_resolution_failed";
+  if (code === "ARTIFACT_ALLOCATION_FAILED") return "artifact_allocation_failed";
+  if (code === "COMPRESSION_TURN_FAILED") return "compression_turn_failed";
+  if (code === "COMMAND_CHAIN_INVALID") return "command_chain_invalid";
+  if (code === "HELPER_OUTPUT_INVALID") return "helper_output_invalid";
+  if (code === "HANDOFF_PATH_INVALID") return "handoff_path_invalid";
+  if (code === "HANDOFF_ARTIFACT_MISSING") return "handoff_artifact_missing";
+  if (code === "HANDOFF_ARTIFACT_DIGEST_MISMATCH") {
+    return "handoff_artifact_digest_mismatch";
+  }
+  if (code === "HANDOFF_VERIFY_FAILED") return "handoff_verify_failed";
+  if (code === "HANDOFF_RECEIPT_INVALID") return "handoff_receipt_invalid";
+  if (code === "RECEIPT_REPLAY_MISMATCH") return "receipt_replay_mismatch";
   return fallback;
 }
 
@@ -514,7 +521,7 @@ export class CompressionHandoffCoordinator {
     request: CompressionRequest,
     state: RunState,
     idempotencyKey: Sha256Digest,
-  ): Promise<HandoffReceipt | CompressionHandoffError> {
+  ): Promise<HandoffReceiptV2 | CompressionHandoffError> {
     let raw: unknown;
     try {
       raw = await this.bounded(
@@ -643,7 +650,7 @@ export class CompressionHandoffCoordinator {
     value: unknown,
     launch: CompressionTaskLaunchReceipt,
     request: CompressionRequest,
-  ): Promise<HandoffReceipt> {
+  ): Promise<HandoffReceiptV2> {
     if (!isRecord(value) || !exactKeys(value, HANDOFF_RECEIPT_KEYS, ["retained_work_dir"])) {
       throw new CompressionHandoffError(
         "handoff_integrity_failed",
@@ -651,16 +658,21 @@ export class CompressionHandoffCoordinator {
         { reason: "handoff_receipt_invalid" },
       );
     }
-    if (value.workflow_version !== HANDOFF_WORKFLOW_VERSION) {
+    if (
+      value.receipt_schema_version !== HANDOFF_RECEIPT_SCHEMA_VERSION ||
+      value.workflow_version !== HANDOFF_WORKFLOW_VERSION
+    ) {
       throw new CompressionHandoffError(
         "handoff_integrity_failed",
-        "Only Handoff workflow v2 can unlock a Continuation Task.",
+        "Only machine-verifiable HandoffReceiptV2 can unlock a Continuation Task.",
         { reason: "handoff_workflow_version_mismatch" },
       );
     }
     if (
       value.compression_task_id !== launch.compression_task_id ||
-      value.source_thread_id !== request.source_thread_id
+      value.source_thread_id !== request.source_thread_id ||
+      typeof value.compression_turn_id !== "string" ||
+      !CANONICAL_UUID.test(value.compression_turn_id)
     ) {
       throw new CompressionHandoffError(
         "handoff_integrity_failed",
@@ -670,9 +682,10 @@ export class CompressionHandoffCoordinator {
     }
     if (
       !sha256Digest(value.source_revision) ||
-      !sha256Digest(value.frame_digest) ||
+      !sha256Digest(value.structural_digest) ||
       !sha256Digest(value.handoff_digest) ||
       !sha256Digest(value.evidence_index_digest) ||
+      !sha256Digest(value.verify_evidence_result_digest) ||
       !sha256Digest(value.artifact_digest)
     ) {
       throw new CompressionHandoffError(
@@ -691,7 +704,10 @@ export class CompressionHandoffCoordinator {
     if (
       typeof value.markdown_path !== "string" ||
       typeof value.evidence_index_path !== "string" ||
-      (value.retained_work_dir !== undefined && typeof value.retained_work_dir !== "string")
+      (value.retained_work_dir !== undefined && (
+        typeof value.retained_work_dir !== "string" ||
+        !path.isAbsolute(value.retained_work_dir)
+      ))
     ) {
       throw new CompressionHandoffError(
         "handoff_integrity_failed",
@@ -701,18 +717,24 @@ export class CompressionHandoffCoordinator {
     }
     const consumerContract = decodeConsumerContract(value.consumer_contract);
     const material = {
+      receipt_schema_version: value.receipt_schema_version,
       compression_task_id: value.compression_task_id,
+      compression_turn_id: value.compression_turn_id,
       source_thread_id: value.source_thread_id,
       workflow_version: value.workflow_version,
       markdown_path: value.markdown_path,
       evidence_index_path: value.evidence_index_path,
       source_revision: value.source_revision,
-      frame_digest: value.frame_digest,
+      structural_digest: value.structural_digest,
       handoff_digest: value.handoff_digest,
       evidence_index_digest: value.evidence_index_digest,
       verify_evidence: value.verify_evidence,
+      verify_evidence_result_digest: value.verify_evidence_result_digest,
       consumer_contract: consumerContract,
-    } satisfies Omit<HandoffReceipt, "artifact_digest" | "retained_work_dir">;
+      ...(value.retained_work_dir === undefined
+        ? {}
+        : { retained_work_dir: value.retained_work_dir }),
+    } satisfies Omit<HandoffReceiptV2, "artifact_digest">;
     if (artifactDigest(material) !== value.artifact_digest) {
       throw new CompressionHandoffError(
         "handoff_integrity_failed",
@@ -720,19 +742,15 @@ export class CompressionHandoffCoordinator {
         { reason: "handoff_artifact_digest_mismatch" },
       );
     }
-    await this.verifyPublishedArtifacts(material, request.workspace_identity.canonical_root);
+    await this.verifyPublishedArtifacts(material);
     return {
       ...material,
       artifact_digest: value.artifact_digest,
-      ...(value.retained_work_dir === undefined
-        ? {}
-        : { retained_work_dir: value.retained_work_dir }),
     };
   }
 
   private async verifyPublishedArtifacts(
-    receipt: Omit<HandoffReceipt, "artifact_digest" | "retained_work_dir">,
-    workspaceRoot: string,
+    receipt: Omit<HandoffReceiptV2, "artifact_digest">,
   ): Promise<void> {
     if (
       !path.isAbsolute(receipt.markdown_path) ||
@@ -745,14 +763,28 @@ export class CompressionHandoffCoordinator {
         { reason: "handoff_path_invalid" },
       );
     }
-    let realWorkspace: string;
     let realMarkdown: string;
     let realEvidence: string;
     let markdown: Buffer;
     let evidence: Buffer;
+    let aliasesOneFile = false;
     try {
-      [realWorkspace, realMarkdown, realEvidence, markdown, evidence] = await Promise.all([
-        realpath(workspaceRoot),
+      const [markdownMetadata, evidenceMetadata] = await Promise.all([
+        lstat(receipt.markdown_path),
+        lstat(receipt.evidence_index_path),
+      ]);
+      if (
+        !markdownMetadata.isFile() ||
+        markdownMetadata.isSymbolicLink() ||
+        !evidenceMetadata.isFile() ||
+        evidenceMetadata.isSymbolicLink()
+      ) {
+        throw new Error("published pair is not two regular non-link files");
+      }
+      aliasesOneFile = markdownMetadata.ino !== 0 &&
+        markdownMetadata.dev === evidenceMetadata.dev &&
+        markdownMetadata.ino === evidenceMetadata.ino;
+      [realMarkdown, realEvidence, markdown, evidence] = await Promise.all([
         realpath(receipt.markdown_path),
         realpath(receipt.evidence_index_path),
         readFile(receipt.markdown_path),
@@ -765,13 +797,20 @@ export class CompressionHandoffCoordinator {
         { reason: "handoff_artifact_missing", cause: error },
       );
     }
+    if (aliasesOneFile) {
+      throw new CompressionHandoffError(
+        "handoff_integrity_failed",
+        "Published Handoff pair aliases one filesystem identity.",
+        { reason: "handoff_path_invalid" },
+      );
+    }
     if (
-      !this.isWithin(realWorkspace, realMarkdown) ||
-      !this.isWithin(realWorkspace, realEvidence)
+      path.relative(path.resolve(receipt.markdown_path), realMarkdown) !== "" ||
+      path.relative(path.resolve(receipt.evidence_index_path), realEvidence) !== ""
     ) {
       throw new CompressionHandoffError(
         "handoff_integrity_failed",
-        "Published Handoff artifacts escaped the Source workspace.",
+        "Published Handoff artifacts replaced their preallocated file identities.",
         { reason: "handoff_path_invalid" },
       );
     }
@@ -980,6 +1019,13 @@ export class CompressionHandoffCoordinator {
         { reason: "active_compaction_missing" },
       );
     }
+    if (state.current_slice_id === null) {
+      return new CompressionHandoffError(
+        "handoff_export_failed",
+        "Handoff export has no current Slice identity.",
+        { reason: "invalid_request" },
+      );
+    }
     if (
       !terminal &&
       state.state_version === expectedStateVersion &&
@@ -1006,6 +1052,8 @@ export class CompressionHandoffCoordinator {
       );
     }
     return {
+      run_id: state.run_id,
+      slice_id: state.current_slice_id as string,
       source_thread_id: state.source_thread_id as string,
       prompt,
       workspace_identity: state.workspace_identity,
@@ -1135,7 +1183,7 @@ export class CompressionHandoffCoordinator {
   private isTerminalSuccess(
     state: RunState,
     expectedStateVersion: number,
-    receipt: HandoffReceipt,
+    receipt: HandoffReceiptV2,
   ): boolean {
     return state.status === "CONTINUATION_STARTING" &&
       state.state_version === expectedStateVersion + 2 &&
@@ -1147,7 +1195,7 @@ export class CompressionHandoffCoordinator {
     state: RunState,
     outcome: CompressionHandoffDecision["outcome"],
     effectIdempotencyKey: Sha256Digest,
-    receipt: HandoffReceipt,
+    receipt: HandoffReceiptV2,
   ): CompressionHandoffDecision {
     if (
       state.status !== "CONTINUATION_STARTING" ||
@@ -1188,15 +1236,6 @@ export class CompressionHandoffCoordinator {
         clearTimeout(timeout);
       }
     }
-  }
-
-  private isWithin(root: string, candidate: string): boolean {
-    const relative = path.relative(root, candidate);
-    return relative === "" || (
-      relative !== ".." &&
-      !relative.startsWith(`..${path.sep}`) &&
-      !path.isAbsolute(relative)
-    );
   }
 
   private asCompressionError(

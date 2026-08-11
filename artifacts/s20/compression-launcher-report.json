@@ -1,0 +1,93 @@
+{
+  "schema_version": 1,
+  "launcher": {
+    "default_host_composition": true,
+    "resolved_export_skills": 1,
+    "compression_turn_input_items": 2,
+    "projected_completed_item_types": [
+      "commandExecution"
+    ],
+    "attempt_transition": "JOURNAL_ALLOCATED -> ATTEMPT_DIRECTORY -> FRESH_TASK",
+    "handoff_target_files_per_attempt": 2,
+    "project_write_lease": false,
+    "model_final_reply_fields": 0
+  },
+  "receipt": {
+    "receipt_schema_version": 2,
+    "workflow_version": 2,
+    "accepted_command_chain": "prepare -> publish",
+    "accepted_command_evidence_items": 2,
+    "source_revision_authority": "export-codex-handoff",
+    "host_verify_evidence": true,
+    "canonical_artifact_digest": true,
+    "legacy_receipt_retained_for_s21": true
+  },
+  "persistence": {
+    "completed_effect_replay_without_skill": true,
+    "failed_attempt_preserved": true,
+    "retry_uses_incremented_attempt": true,
+    "occupied_attempt_never_overwritten": true
+  },
+  "surfaces": [
+    {
+      "path": "src/controller/continuation/types.ts",
+      "digest": "sha256:48ac205da237af7bd4cb163ca0289d966a90c02b1823a69915bd34207d97f61f"
+    },
+    {
+      "path": "src/controller/handoff/app-server-compression-task-launcher.ts",
+      "digest": "sha256:e131d124a33e620f67b356351cbc36696d7f8106ce2740ce0894e4ec94831447"
+    },
+    {
+      "path": "src/controller/handoff/compression-handoff-coordinator.ts",
+      "digest": "sha256:af8249fadd021441495ef06619bb185861565688d9cd4fa1c6246d5a8093cd0c"
+    },
+    {
+      "path": "src/controller/handoff/index.ts",
+      "digest": "sha256:417e188799538f011f55ccb61695d524d98d35e44c93c2da91c847a70e3ac6e2"
+    },
+    {
+      "path": "src/controller/handoff/types.ts",
+      "digest": "sha256:126017b9dff5d9cfd3cc2549fe76f006fd4bdcdf0c1552fabd2dd7e14b11a581"
+    },
+    {
+      "path": "src/controller/production/codex-app-server-task-host.ts",
+      "digest": "sha256:839acea961f29c6ba58e0d2af1bfbe63a232f5c521560c1a42657c6b4c1705cf"
+    },
+    {
+      "path": "test/handoff.test.ts",
+      "digest": "sha256:7778744e52c283118afa52ead0c63b0d9795e323b4391da5e100c7ab5a425caf"
+    },
+    {
+      "path": "test/file-production-runtime.test.ts",
+      "digest": "sha256:e5d9250e2cfd306abc49285fed14d7a993700d386420376fb1dddc2ee98f3f11"
+    },
+    {
+      "path": "test/production-orchestrator.test.ts",
+      "digest": "sha256:7318d0959457cba37e75418f6804df088df8bd7727030d73d2ceb97f485a068a"
+    },
+    {
+      "path": "test/fixtures/export-codex-handoff/SKILL.md",
+      "digest": "sha256:f9b634cd67b388dd51797158b8536b2cbc787de0d02aa10241a63511b7654280"
+    },
+    {
+      "path": "test/fixtures/export-codex-handoff/scripts/export-handoff.mjs",
+      "digest": "sha256:56ed9fbcdaf9368302d9af0d117ff8c07c25239e4160a8ddccc59081676953f9"
+    },
+    {
+      "path": "test/fixtures/process/fake-s20-app-server.mjs",
+      "digest": "sha256:565caf1785b7e6e67a4661a567d0f77ee43f12cdeff9c2ff6ec1b3e38b4be410"
+    }
+  ],
+  "slice_id": "S20",
+  "result": "PASS",
+  "surface_digest": "sha256:5f85435915b55cd3934c8ae0ec6019a3aa7bb79a9859dc9affe3beec88690ee2",
+  "negative_contracts": [
+    "ambiguous, disabled, errored, or noncanonical skill rejected",
+    "missing, duplicate, reordered, composed, default-output, or substituted command rejected",
+    "model final message and unrelated echo command provide zero receipt fields",
+    "malformed or oversized helper JSON rejected",
+    "SOURCE_CHANGED and failed Host verify-evidence publish no receipt",
+    "missing pair, hardlink alias, digest drift, path drift, consumer-contract drift, and symlink escape rejected",
+    "occupied and failed attempts remain untouched while retry increments attempt_number"
+  ]
+}
