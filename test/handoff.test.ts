@@ -152,11 +152,12 @@ function fixture(context: TestContext, suffix: string): Fixture {
     state_version: exporting.state.state_version,
     interrupt_receipt: {
       thread_id: SOURCE_THREAD_ID,
+      turn_id: "00000000-0000-7000-8000-000000000903",
+      terminal_status: "interrupted",
       execution_stopped: true,
       thread_persisted: true,
-      persisted_revision: SOURCE_REVISION,
       observed_at: OBSERVED_AT,
-    },
+    } as unknown as InterruptReceipt,
   };
 }
 
@@ -191,6 +192,7 @@ class MemoryCompressionLauncher implements CompressionTaskLauncher {
 
   public start(request: CompressionRequest): Promise<unknown> {
     this.start_invocations += 1;
+    assert.equal("source_persisted_revision" in request, false);
     assert.equal(
       request.prompt,
       `$export-codex-handoff ${SOURCE_THREAD_ID}`,
@@ -247,7 +249,7 @@ class MemoryCompressionLauncher implements CompressionTaskLauncher {
       );
       const markdown = "# Codex Handoff\n\nworkflow: handoff-v2\n";
       const evidence = `${JSON.stringify({
-        source: { sourceRevision: request.source_persisted_revision },
+        source: { sourceRevision: SOURCE_REVISION },
         anchors: [],
         semanticCoverage: { turns: [], claims: [] },
         integrity: { indexDigest: "b".repeat(64) },
@@ -260,7 +262,7 @@ class MemoryCompressionLauncher implements CompressionTaskLauncher {
         workflow_version: "v2",
         markdown_path: markdownPath,
         evidence_index_path: evidencePath,
-        source_revision: request.source_persisted_revision,
+        source_revision: SOURCE_REVISION,
         frame_digest: `sha256:${"c".repeat(64)}`,
         handoff_digest: sha256Bytes(markdown),
         evidence_index_digest: sha256Bytes(evidence),
@@ -510,11 +512,11 @@ const HANDOFF_FAILURES = [
     }),
   },
   {
-    id: "revision_drift",
-    reason: "handoff_source_revision_mismatch" as const,
+    id: "noncanonical_export_revision",
+    reason: "handoff_receipt_invalid" as const,
     transform: (receipt: Readonly<Record<string, unknown>>) => ({
       ...receipt,
-      source_revision: `sha256:${"d".repeat(64)}`,
+      source_revision: "legacy-opaque-revision",
     }),
   },
   {

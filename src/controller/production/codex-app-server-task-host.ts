@@ -1,9 +1,6 @@
 import type { ContinuationLauncher } from "../continuation/index.js";
 import type { CompressionTaskLauncher } from "../handoff/index.js";
-import {
-  CodexAppServerDevelopmentTask,
-  FAIL_CLOSED_THREAD_REVISION_PROVIDER,
-} from "./codex-app-server-development-task.js";
+import { CodexAppServerDevelopmentTask } from "./codex-app-server-development-task.js";
 import type { CodexAppServerDevelopmentTaskOptions } from "./codex-app-server-development-task.js";
 import { ProductionRuntimeError } from "./errors.js";
 import type { ProductionTaskHostPorts } from "./file-production-runtime.js";
@@ -48,11 +45,7 @@ export class CodexAppServerTaskHost implements ProductionTaskHostPorts {
   public readonly continuation_launcher: ContinuationLauncher;
 
   public constructor(options: CodexAppServerTaskHostOptions = {}) {
-    this.developmentTask = new CodexAppServerDevelopmentTask({
-      ...options,
-      thread_revision_provider:
-        options.thread_revision_provider ?? FAIL_CLOSED_THREAD_REVISION_PROVIDER,
-    });
+    this.developmentTask = new CodexAppServerDevelopmentTask(options);
     this.development_tasks = this.developmentTask;
     this.thread_control = this.developmentTask;
     this.compression_launcher = options.compression_launcher ?? FAIL_CLOSED_COMPRESSION_LAUNCHER;

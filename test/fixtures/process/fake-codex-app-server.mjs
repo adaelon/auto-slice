@@ -64,7 +64,7 @@ function turn(status, items = []) {
   };
 }
 
-function thread(turns) {
+function thread(turns = []) {
   return {
     id: threadId,
     sessionId: threadId,
@@ -87,7 +87,7 @@ function thread(turns) {
     agentRole: null,
     gitInfo: null,
     name: null,
-    ...(turns === undefined ? {} : { turns }),
+    turns,
   };
 }
 
@@ -230,6 +230,10 @@ function afterTurnStarted() {
   }
   if (
     scenario === "interrupt" ||
+    scenario === "interrupt-completed" ||
+    scenario === "metadata-archived-readable" ||
+    scenario === "metadata-closed-readable" ||
+    scenario === "metadata-deleted" ||
     scenario === "metadata-malicious-turns" ||
     scenario === "metadata-malicious-items"
   ) {
@@ -242,6 +246,13 @@ function afterTurnStarted() {
         item: { type: "contextCompaction", id: "compaction-timeout" },
       },
     });
+    if (scenario === "metadata-archived-readable") {
+      write({ method: "thread/archived", params: { threadId } });
+    } else if (scenario === "metadata-closed-readable") {
+      write({ method: "thread/closed", params: { threadId } });
+    } else if (scenario === "metadata-deleted") {
+      write({ method: "thread/deleted", params: { threadId } });
+    }
     return;
   }
   if (scenario === "reroute") {
@@ -362,7 +373,7 @@ input.on("line", (line) => {
   }
   if (message.method === "turn/interrupt") {
     response(message.id, {});
-    setImmediate(() => sendTerminal("interrupted"));
+    setImmediate(() => sendTerminal(scenario === "interrupt-completed" ? "completed" : "interrupted"));
     return;
   }
   if (message.method === "thread/read") {

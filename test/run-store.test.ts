@@ -23,6 +23,7 @@ import {
   sha256Bytes,
   sha256Json,
   StateStoreError,
+  type RunCompactionState,
   type RunEventRecord,
   type RunState,
   type RunStatus,
@@ -450,6 +451,39 @@ void test("allows only the digest-bound S09 attempt claim as a same-state transi
     to: "HANDOFF_EXPORTING",
     updates: { compaction: claimed.state.compaction },
   }), "invalid_transition");
+});
+
+void test("persists the S18 interruption schema marker while legacy compaction state remains replayable", (context) => {
+  const storageRoot = temporaryDirectory(context);
+  const store = openStore(storageRoot);
+
+  for (const [runId, currentSchema] of [
+    ["s18-current-compaction", true],
+    ["s18-legacy-compaction", false],
+  ] as const) {
+    unwrap(store.create(initialState(runId)));
+    unwrap(store.compareAndSwap(runId, 0, { action: "prepare_s18_state", to: "PREPARING" }));
+    unwrap(store.compareAndSwap(runId, 1, { action: "start_s18_state", to: "SLICE_RUNNING" }));
+    const compaction = {
+      compaction_id: `compaction-${runId}`,
+      observed_started_at: FIXED_TIME,
+      deadline_at: "2026-08-08T00:00:30.000Z",
+      handoff_attempted: false,
+      ...(currentSchema ? { source_interruption_schema_version: 2 } : {}),
+    } as unknown as RunCompactionState;
+    const waiting = unwrap(store.compareAndSwap(runId, 2, {
+      action: "observe_s18_state",
+      to: "COMPACTION_WAIT",
+      updates: { compaction },
+    }));
+    const replayed = unwrap(store.replayRunEvents(runId));
+    assert.deepEqual(replayed.state, waiting.state);
+    assert.equal(
+      (replayed.state.compaction as unknown as Readonly<Record<string, unknown>>)
+        .source_interruption_schema_version,
+      currentSchema ? 2 : undefined,
+    );
+  }
 });
 
 interface WorkerResult {

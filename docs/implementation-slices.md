@@ -860,7 +860,36 @@ Revision provider 属于 Host Adapter 边界，只能返回定长不透明 token
 
 **Unlocks**：S18、S19。
 
-## 19. 计划级验收矩阵
+## 19. S18 Export-owned revision 迁移
+
+**状态**：COMPLETE；发布证据见 `artifacts/s18/migration-report.json` 与 `artifacts/s18/completion-receipt.json`。
+
+**Requires**：S17、ADR-0011 与三任务接力切片方案 `## S18`。
+
+**Objective**：用同 thread/turn 的 interrupted 终态和 summary-only 持久读取证明 Source interruption，把内容 revision 权威留在 export 边界。
+
+**Exclusions**：不创建 fresh task；不修改 export skill、Receipt V2 或 30 秒 timeout；不重写旧 interruption effect receipt。
+
+**Owned outputs**：`contracts/slices/S18.json`、state marker、`thread-control`、App Server adapter、revisionless Handoff request、S18 测试矩阵、`verify-s18` 与发布证据。
+
+**Migration contract**：
+
+```text
+new compaction -> source_interruption_schema_version=2
+turn/interrupt -> same thread/turn terminal_status=interrupted
+thread/read(includeTurns=false) -> persistent + turns=[] + no items
+  -> HANDOFF_EXPORTING with revisionless InterruptReceiptV2
+legacy in-flight marker missing -> frozen lease + NEEDS_USER(migration-required)
+export-codex-handoff -> SourceEvidenceRevision sha256 authority
+```
+
+**Deterministic checks**：`turns:[]` 接受、非空 turns/items 拒绝、completed terminal 拒绝、delete 闭合、archive/closed 可由真实 read 裁决、旧 state replay 与 migration-required、Handoff canonical export revision、生产目录零 legacy revision symbol；build、typecheck、目标/全量测试、lint、插件、Markdown 与 diff check 全绿。
+
+**Completion evidence**：migration surface digest、目标测试矩阵、全量门禁回执与 S18 `CompletionReceipt`。
+
+**Unlocks**：S19。
+
+## 20. 计划级验收矩阵
 
 实现开始前和每个切片完成后，使用下表检查计划没有被悄悄削弱：
 
@@ -882,5 +911,6 @@ Revision provider 属于 Host Adapter 边界，只能返回定长不透明 token
 | Source 持久性核验零 full-turn read | S15 | S16 |
 | 控制信号和持久成本与 Worker Content 大小无关 | S14 | S16 |
 | App Server 0.146.0 exact wire 字段与 discriminant fail closed | S17 | S22 |
+| Source interruption revisionless 且 export 独占内容 revision | S18 | S22 |
 
 任何一行缺少对应测试、回执或产物 digest，相关切片不得标记 `COMPLETE`。

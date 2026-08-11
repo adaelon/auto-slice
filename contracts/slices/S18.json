@@ -1,0 +1,81 @@
+{
+  "id": "S18",
+  "contract_version": 1,
+  "requires": ["S17"],
+  "objective": "把现有 Source Thread interruption 迁移为同 thread/turn interrupted 终态加 summary-only 持久读取证明，并把 Source revision 权威收回 export-codex-handoff。",
+  "exclusions": [
+    "不创建 fresh Compression 或 Continuation Task",
+    "不修改 export-codex-handoff skill 或 Handoff Receipt V2",
+    "不改变 30 秒 Compaction Timeout",
+    "不把 archive/closed 通知伪装成 summary read 的负事实",
+    "不重写旧 revision-bearing interruption effect receipt"
+  ],
+  "inputs": [
+    {
+      "path": "artifacts/s17/completion-receipt.json",
+      "digest": "sha256:0d37c3821893197fd9c07aea0a851c22a4ef0a9f090ba05c59af6734747b2ec2",
+      "producer_slice": "S17"
+    }
+  ],
+  "owned_paths": [
+    "contracts/slices/S18.json",
+    "src/controller/state/types.ts",
+    "src/controller/state/validation.ts",
+    "src/controller/compaction-monitor/compaction-monitor.ts",
+    "src/controller/thread-control/types.ts",
+    "src/controller/thread-control/index.ts",
+    "src/controller/thread-control/source-interruption-coordinator.ts",
+    "src/controller/production/codex-app-server-development-task.ts",
+    "src/controller/production/codex-app-server-task-host.ts",
+    "src/controller/production/index.ts",
+    "src/controller/handoff/types.ts",
+    "src/controller/handoff/compression-handoff-coordinator.ts",
+    "test/thread-control.test.ts",
+    "test/app-server-development-task.test.ts",
+    "test/handoff.test.ts",
+    "test/run-store.test.ts",
+    "test/production-orchestrator.test.ts",
+    "test/fixtures/process/fake-codex-app-server.mjs",
+    "scripts/verify-s18.mjs",
+    "package.json",
+    "docs/implementation-slices.md",
+    "docs/切片方案-App-Server三任务接力解锁.md",
+    "docs/架构.md",
+    "docs/代码链路.md",
+    "artifacts/s18/**"
+  ],
+  "budgets": {
+    "source_interruption_schema_version": 2,
+    "thread_read_include_turns": false,
+    "legacy_revision_symbols_under_src": 0,
+    "fresh_task_launches": 0
+  },
+  "checks": [
+    { "id": "surface", "argv": ["node", "scripts/verify-s18.mjs", "--surface-only"], "expected_exit_code": 0 },
+    { "id": "build", "argv": ["npm", "run", "build"], "expected_exit_code": 0 },
+    { "id": "typecheck", "argv": ["npm", "run", "typecheck"], "expected_exit_code": 0 },
+    {
+      "id": "target_test",
+      "argv": [
+        "node",
+        "--test",
+        "dist/test/thread-control.test.js",
+        "dist/test/app-server-development-task.test.js",
+        "dist/test/handoff.test.js",
+        "dist/test/run-store.test.js",
+        "dist/test/production-orchestrator.test.js"
+      ],
+      "expected_exit_code": 0
+    },
+    { "id": "test", "argv": ["npm", "run", "test"], "expected_exit_code": 0 },
+    { "id": "lint", "argv": ["npm", "run", "lint"], "expected_exit_code": 0 },
+    { "id": "plugin_validation", "argv": ["npm", "run", "validate:plugin"], "expected_exit_code": 0 },
+    { "id": "markdown_links", "argv": ["npm", "run", "verify:markdown-links"], "expected_exit_code": 0 },
+    { "id": "diff_check", "argv": ["git", "diff", "HEAD", "--check", "--"], "expected_exit_code": 0 }
+  ],
+  "expected_artifacts": [
+    { "path": "artifacts/s18/migration-report.json", "kind": "revisionless_interruption_migration_report" },
+    { "path": "artifacts/s18/completion-receipt.json", "kind": "completion_receipt" }
+  ],
+  "unlocks": ["S19"]
+}

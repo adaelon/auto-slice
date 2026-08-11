@@ -129,7 +129,7 @@ function decodeCompaction(
   assertExactKeys(
     record,
     ["compaction_id", "observed_started_at", "deadline_at", "handoff_attempted"],
-    [],
+    ["source_interruption_schema_version"],
     "RunState.compaction",
     code,
   );
@@ -138,6 +138,12 @@ function decodeCompaction(
   requireTimestamp(record.deadline_at, "RunState.compaction.deadline_at", code);
   if (typeof record.handoff_attempted !== "boolean") {
     fail(code, "RunState.compaction.handoff_attempted must be boolean.");
+  }
+  if (
+    record.source_interruption_schema_version !== undefined &&
+    record.source_interruption_schema_version !== 2
+  ) {
+    fail(code, "RunState.compaction.source_interruption_schema_version must be 2 when present.");
   }
   return record as unknown as RunCompactionState;
 }

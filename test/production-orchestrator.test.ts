@@ -531,11 +531,12 @@ void test("ProductionOrchestrator hands a timed-out probed Slice to a distinct C
       }));
       const interruptReceipt = {
         thread_id: sourceThreadId,
+        turn_id: "turn-production-timeout",
+        terminal_status: "interrupted" as const,
         execution_stopped: true as const,
         thread_persisted: true as const,
-        persisted_revision: sha256Bytes("persisted-source"),
         observed_at: FIXED_TIME,
-      };
+      } as unknown as SourceInterruptionDecision["receipt"];
       const completionMaterial: Omit<DevelopmentTaskReceipt, "receipt_digest"> = {
         schema_version: 1,
         run_id: plan.run_id,

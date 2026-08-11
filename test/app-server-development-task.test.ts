@@ -16,7 +16,6 @@ import { sha256Bytes } from "../src/controller/state/index.js";
 
 const FIXTURE = path.resolve("test/fixtures/process/fake-codex-app-server.mjs");
 const FIXED_TIME = "2026-08-09T12:00:10.000Z";
-const STABLE_REVISION = "r".repeat(64);
 const MINUTE_MS = 60_000;
 const CONTENT_CANARIES = [
   "S14_MESSAGE_CANARY",
@@ -97,13 +96,10 @@ function probeRuntime(
     args: [FIXTURE, scenario],
     now: () => clock.now(),
     request_timeout_ms: 5_000,
-    thread_revision_provider: {
-      read: () => Promise.resolve(STABLE_REVISION),
-    },
     host_capabilities: { context_compaction_events: capability },
     compaction_content_probe: probe,
     compaction_probe_scheduler: scheduler,
-  } as CodexAppServerDevelopmentTaskOptions);
+  });
   context.after(() => adapter.dispose());
   return { adapter, scheduler };
 }
@@ -111,42 +107,21 @@ function probeRuntime(
 function runtime(
   context: TestContext,
   scenario: string,
-  revisions: readonly unknown[] = [STABLE_REVISION],
 ): CodexAppServerDevelopmentTask {
-  let revisionIndex = 0;
   const options = {
     command: process.execPath,
     args: [FIXTURE, scenario],
     now: () => new Date(FIXED_TIME),
     request_timeout_ms: 5_000,
-    thread_revision_provider: {
-      read: () => Promise.resolve(
-        revisions[Math.min(revisionIndex++, revisions.length - 1)],
-      ),
-    },
   } as CodexAppServerDevelopmentTaskOptions;
   const adapter = new CodexAppServerDevelopmentTask(options);
   context.after(() => adapter.dispose());
   return adapter;
 }
 
-function failClosedRuntime(
-  context: TestContext,
-  scenario: string,
-): CodexAppServerDevelopmentTask {
-  const adapter = new CodexAppServerDevelopmentTask({
-    command: process.execPath,
-    args: [FIXTURE, scenario],
-    now: () => new Date(FIXED_TIME),
-    request_timeout_ms: 5_000,
-  });
-  context.after(() => adapter.dispose());
-  return adapter;
-}
-
 async function startInterruptible(
   adapter: CodexAppServerDevelopmentTask,
-): Promise<{ readonly thread_id: string }> {
+): Promise<{ readonly thread_id: string; readonly turn_id: string }> {
   const handle = await adapter.start(request());
   assert.ok(!(handle instanceof ProductionRuntimeError));
   const iterator = handle.events[Symbol.asyncIterator]();
@@ -406,49 +381,60 @@ void test("App Server adapter interrupts and independently re-reads a persisted 
   const interrupt = await adapter.interrupt(handle.thread_id, sha256Bytes("interrupt-once"));
   assert.deepEqual(interrupt, {
     thread_id: handle.thread_id,
+    turn_id: handle.turn_id,
+    terminal_status: "interrupted",
     execution_stopped: true,
     thread_persisted: true,
-    persisted_revision: (interrupt as { persisted_revision: string }).persisted_revision,
     observed_at: FIXED_TIME,
   });
   const repeated = await adapter.interrupt(handle.thread_id, sha256Bytes("interrupt-once"));
   assert.deepEqual(repeated, interrupt);
   const inspection = await adapter.inspect(handle.thread_id) as {
-    persisted_revision: string;
-    archived: boolean;
-    deleted: boolean;
+    thread_id: string;
+    readable: boolean;
+    persistent: boolean;
   };
-  assert.equal(inspection.persisted_revision, (interrupt as { persisted_revision: string }).persisted_revision);
-  assert.equal(inspection.archived, false);
-  assert.equal(inspection.deleted, false);
+  assert.deepEqual(inspection, {
+    thread_id: handle.thread_id,
+    readable: true,
+    persistent: true,
+    observed_at: FIXED_TIME,
+  });
 });
 
-void test("App Server adapter fails closed when no stable Thread revision capability is injected", async (context) => {
-  const adapter = failClosedRuntime(context, "interrupt");
+void test("App Server adapter rejects a completed terminal after turn/interrupt was accepted", async (context) => {
+  const adapter = runtime(context, "interrupt-completed");
   const handle = await startInterruptible(adapter);
 
   await assert.rejects(
-    adapter.interrupt(handle.thread_id, sha256Bytes("revision-unavailable")),
+    adapter.interrupt(handle.thread_id, sha256Bytes("completed-not-interrupted")),
     (error: unknown) => {
       assert.ok(error instanceof Error);
-      assert.equal((error as Error & { readonly reason?: string }).reason, "thread_revision_unavailable");
+      assert.equal((error as Error & { readonly reason?: string }).reason, "interrupt_receipt_invalid");
       return true;
     },
   );
 });
 
-void test("App Server adapter rejects malformed opaque Thread revision tokens", async (context) => {
-  const adapter = runtime(context, "interrupt", ["short-token"]);
-  const handle = await startInterruptible(adapter);
+for (const scenario of ["metadata-archived-readable", "metadata-closed-readable"] as const) {
+  void test(`App Server summary-only read decides persistence after ${scenario}`, async (context) => {
+    const adapter = runtime(context, scenario);
+    const handle = await startInterruptible(adapter);
+    await adapter.interrupt(handle.thread_id, sha256Bytes(`interrupt-${scenario}`));
 
-  await assert.rejects(
-    adapter.interrupt(handle.thread_id, sha256Bytes("revision-invalid")),
-    (error: unknown) => {
-      assert.ok(error instanceof Error);
-      assert.equal((error as Error & { readonly reason?: string }).reason, "thread_revision_invalid");
-      return true;
-    },
-  );
+    const inspection = await adapter.inspect(handle.thread_id) as Readonly<Record<string, unknown>>;
+    assert.equal(inspection.thread_id, handle.thread_id);
+    assert.equal(inspection.persistent, true);
+    assert.equal("archived" in inspection, false);
+    assert.equal("deleted" in inspection, false);
+  });
+}
+
+void test("App Server summary-only inspection rejects an observed delete without reading content", async (context) => {
+  const adapter = runtime(context, "metadata-deleted");
+  const handle = await startInterruptible(adapter);
+  await adapter.interrupt(handle.thread_id, sha256Bytes("interrupt-metadata-deleted"));
+  await assert.rejects(adapter.inspect(handle.thread_id), ProductionRuntimeError);
 });
 
 for (const scenario of ["metadata-malicious-turns", "metadata-malicious-items"] as const) {

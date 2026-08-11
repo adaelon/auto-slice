@@ -12,10 +12,13 @@ import {
   type ThreadControlPort,
 } from "../src/controller/thread-control/index.js";
 import {
+  createEffectIdempotencyKey,
   createInitialRunState,
   FileRunStore,
   sha256Bytes,
+  sha256Json,
   StateStoreError,
+  type RunCompactionState,
   type RunTransition,
   type Sha256Digest,
   type StoredRun,
@@ -29,10 +32,11 @@ import {
 
 const OBSERVED_AT = "2026-08-08T00:00:31.000Z";
 const INSPECTED_AT = "2026-08-08T00:00:31.001Z";
+const REPLAYED_AT = "2026-08-08T00:00:31.002Z";
+const REPLAY_INSPECTED_AT = "2026-08-08T00:00:31.003Z";
 const SOURCE_THREAD_ID = "thread-source-s08";
+const SOURCE_TURN_ID = "turn-source-s08";
 const COMPACTION_ID = "compaction-s08";
-const STABLE_REVISION = "r".repeat(64);
-const SECOND_STABLE_REVISION = "s".repeat(64);
 
 interface Deferred {
   readonly promise: Promise<void>;
@@ -75,9 +79,7 @@ class MemoryThreadControl implements ThreadControlPort {
   public inspection_invocations = 0;
   public execution_stopped = false;
   public readable = true;
-  public archived = false;
-  public deleted = false;
-  public persisted_revision = STABLE_REVISION;
+  public persistent = true;
   private readonly receipts = new Map<Sha256Digest, Readonly<Record<string, unknown>>>();
 
   public constructor(private readonly options: MemoryThreadControlOptions = {}) {}
@@ -104,9 +106,10 @@ class MemoryThreadControl implements ThreadControlPort {
       this.execution_stopped = true;
       receipt = {
         thread_id: threadId,
+        turn_id: SOURCE_TURN_ID,
+        terminal_status: "interrupted",
         execution_stopped: true,
         thread_persisted: true,
-        persisted_revision: this.persisted_revision,
         observed_at: OBSERVED_AT,
       };
       this.receipts.set(idempotencyKey, receipt);
@@ -124,10 +127,8 @@ class MemoryThreadControl implements ThreadControlPort {
     }
     const inspection = {
       thread_id: threadId,
-      persisted_revision: this.persisted_revision,
       readable: this.readable,
-      archived: this.archived,
-      deleted: this.deleted,
+      persistent: this.persistent,
       observed_at: INSPECTED_AT,
     };
     return Promise.resolve(this.options.inspection_transform?.(inspection) ?? inspection);
@@ -210,7 +211,7 @@ function unwrapDecision(
 
 function expectInterruptionError(
   result: SourceInterruptionDecision | SourceInterruptionError,
-  reason?: SourceInterruptionError["reason"],
+  reason?: string,
 ): SourceInterruptionError {
   assert.ok(result instanceof SourceInterruptionError);
   assert.equal(result.code, "source_interrupt_failed");
@@ -223,6 +224,7 @@ function expectInterruptionError(
 function sourceInterruptingFixture(
   context: TestContext,
   suffix: string,
+  legacyInterruptionSchema = false,
 ): Fixture {
   const root = temporaryDirectory(context, `auto-slice-s08-${suffix}-`);
   const workspaceRoot = path.join(root, "workspace");
@@ -266,7 +268,8 @@ function sourceInterruptingFixture(
         observed_started_at: "2026-08-08T00:00:00.000Z",
         deadline_at: "2026-08-08T00:00:30.000Z",
         handoff_attempted: false,
-      },
+        ...(legacyInterruptionSchema ? {} : { source_interruption_schema_version: 2 }),
+      } as unknown as RunCompactionState,
     },
   }));
   const interrupting = unwrapStored(store.compareAndSwap(runId, 3, {
@@ -320,6 +323,14 @@ void test("freezes, verifies, rotates, and replays one idempotent terminal inter
 
   assert.equal(first.outcome, "INTERRUPTED");
   assert.equal(repeated.outcome, "ALREADY_INTERRUPTED");
+  assert.deepEqual(first.receipt, {
+    thread_id: SOURCE_THREAD_ID,
+    turn_id: SOURCE_TURN_ID,
+    terminal_status: "interrupted",
+    execution_stopped: true,
+    thread_persisted: true,
+    observed_at: OBSERVED_AT,
+  });
   assert.deepEqual(repeated.receipt, first.receipt);
   assert.equal(control.interrupt_invocations, 2);
   assert.equal(control.interrupt_side_effects, 1);
@@ -377,35 +388,21 @@ void test("the lease is frozen before interrupt and rejects writes both during a
 
 const FAILURE_SCENARIOS = [
   {
-    id: "revision_unavailable",
-    reason: "thread_revision_unavailable" as const,
-    expected_inspection_invocations: 0,
-    options: {
-      interrupt_error: new SourceInterruptionError(
-        "source_interrupt_failed",
-        "injected unavailable revision capability",
-        { reason: "thread_revision_unavailable" },
-      ),
-    },
-  },
-  {
-    id: "receipt_revision_invalid",
-    reason: "thread_revision_invalid" as const,
+    id: "receipt_terminal_status_wrong",
+    reason: "interrupt_receipt_invalid" as const,
     options: {
       receipt_transform: (receipt: Readonly<Record<string, unknown>>) => ({
         ...receipt,
-        persisted_revision: "short-token",
+        terminal_status: "completed",
       }),
     },
   },
   {
-    id: "inspection_revision_invalid",
-    reason: "thread_revision_invalid" as const,
+    id: "receipt_turn_identity_missing",
+    reason: "interrupt_receipt_invalid" as const,
     options: {
-      inspection_transform: (inspection: Readonly<Record<string, unknown>>) => ({
-        ...inspection,
-        persisted_revision: "short-token",
-      }),
+      receipt_transform: (receipt: Readonly<Record<string, unknown>>) =>
+        Object.fromEntries(Object.entries(receipt).filter(([key]) => key !== "turn_id")),
     },
   },
   {
@@ -429,32 +426,22 @@ const FAILURE_SCENARIOS = [
     },
   },
   {
-    id: "thread_archived",
+    id: "thread_not_persistent",
     reason: "thread_not_persisted" as const,
     options: {
       inspection_transform: (inspection: Readonly<Record<string, unknown>>) => ({
         ...inspection,
-        archived: true,
+        persistent: false,
       }),
     },
   },
   {
-    id: "thread_deleted",
-    reason: "thread_not_persisted" as const,
+    id: "inspection_identity_mismatch",
+    reason: "interrupt_receipt_identity_mismatch" as const,
     options: {
       inspection_transform: (inspection: Readonly<Record<string, unknown>>) => ({
         ...inspection,
-        deleted: true,
-      }),
-    },
-  },
-  {
-    id: "revision_mismatch",
-    reason: "thread_revision_mismatch" as const,
-    options: {
-      inspection_transform: (inspection: Readonly<Record<string, unknown>>) => ({
-        ...inspection,
-        persisted_revision: "m".repeat(64),
+        thread_id: "thread-impostor",
       }),
     },
   },
@@ -528,6 +515,47 @@ void test("interrupt timeout closes to NEEDS_USER without rotating the frozen ep
     unwrapLease(fixture.guard.inspectLeaseEvents(fixture.lease.lease_id)).map((entry) => entry.action),
     ["ACQUIRED", "FROZEN"],
   );
+});
+
+void test("legacy in-flight interruption becomes migration-required without rewriting its completed receipt", async (context) => {
+  const fixture = sourceInterruptingFixture(context, "legacy-migration", true);
+  const effectKey = createEffectIdempotencyKey(
+    fixture.run_id,
+    fixture.state_version,
+    "interrupt_source_thread",
+    SOURCE_THREAD_ID,
+  );
+  const payloadDigest = sha256Json({
+    compaction_id: COMPACTION_ID,
+    lease_id: fixture.lease.lease_id,
+    source_thread_id: SOURCE_THREAD_ID,
+    write_epoch: fixture.lease.epoch,
+  });
+  const legacyReceiptDigest = sha256Bytes("legacy-revision-bearing-interrupt-receipt");
+  const intended = fixture.store.appendEffectIntent(effectKey, payloadDigest);
+  assert.ok(!(intended instanceof StateStoreError));
+  const completed = fixture.store.completeEffect(effectKey, legacyReceiptDigest);
+  assert.ok(!(completed instanceof StateStoreError));
+
+  const control = new MemoryThreadControl();
+  const result = await coordinator(fixture, control).interruptSource(
+    fixture.run_id,
+    fixture.lease.lease_id,
+    fixture.lease.epoch,
+    fixture.state_version,
+  );
+
+  expectInterruptionError(result, "source_interruption_migration_required");
+  assert.equal(control.interrupt_invocations, 0);
+  assert.equal(unwrapStored(fixture.store.load(fixture.run_id)).state.status, "NEEDS_USER");
+  assert.deepEqual(
+    unwrapLease(fixture.guard.inspectLeaseEvents(fixture.lease.lease_id)).map((entry) => entry.action),
+    ["ACQUIRED", "FROZEN"],
+  );
+  const replayed = fixture.store.appendEffectIntent(effectKey, payloadDigest);
+  assert.ok(!(replayed instanceof StateStoreError));
+  assert.equal(replayed.status, "COMPLETED");
+  assert.equal(replayed.receipt_digest, legacyReceiptDigest);
 });
 
 void test("epoch rotation failure preserves the completed interrupt but keeps writes frozen", async (context) => {
@@ -649,11 +677,11 @@ void test("a different terminal receipt on replay is rejected", async (context) 
     receipt_transform: (receipt, invocation) => {
       replaying = invocation > 1;
       return replaying
-        ? { ...receipt, persisted_revision: SECOND_STABLE_REVISION }
+        ? { ...receipt, observed_at: REPLAYED_AT }
         : receipt;
     },
     inspection_transform: (inspection) => replaying
-      ? { ...inspection, persisted_revision: SECOND_STABLE_REVISION }
+      ? { ...inspection, observed_at: REPLAY_INSPECTED_AT }
       : inspection,
   });
   const subject = coordinator(fixture, control);

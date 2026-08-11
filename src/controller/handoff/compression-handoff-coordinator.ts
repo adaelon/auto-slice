@@ -84,7 +84,6 @@ const INTEGRITY_REASONS = new Set<CompressionHandoffFailureReason>([
   "handoff_receipt_invalid",
   "handoff_workflow_version_mismatch",
   "handoff_source_mismatch",
-  "handoff_source_revision_mismatch",
   "handoff_path_invalid",
   "handoff_artifact_missing",
   "handoff_artifact_digest_mismatch",
@@ -328,7 +327,7 @@ export class CompressionHandoffCoordinator {
     }
 
     const state = claimed.state;
-    const request = this.createRequest(state, interruptReceipt);
+    const request = this.createRequest(state);
     if (request instanceof CompressionHandoffError) {
       return this.closeFailure(
         state,
@@ -669,14 +668,8 @@ export class CompressionHandoffCoordinator {
         { reason: "handoff_source_mismatch" },
       );
     }
-    if (value.source_revision !== request.source_persisted_revision) {
-      throw new CompressionHandoffError(
-        "handoff_integrity_failed",
-        "The exported Source revision differs from the InterruptReceipt.",
-        { reason: "handoff_source_revision_mismatch" },
-      );
-    }
     if (
+      !sha256Digest(value.source_revision) ||
       !sha256Digest(value.frame_digest) ||
       !sha256Digest(value.handoff_digest) ||
       !sha256Digest(value.evidence_index_digest) ||
@@ -853,7 +846,7 @@ export class CompressionHandoffCoordinator {
       "export_handoff",
       state.compaction.compaction_id,
     );
-    const requestBase = this.createRequest(state, interruptReceipt);
+    const requestBase = this.createRequest(state);
     if (requestBase instanceof CompressionHandoffError) {
       return requestBase;
     }
@@ -937,9 +930,10 @@ export class CompressionHandoffCoordinator {
       this.exportTimeoutMs <= 0 ||
       !isRecord(runtimeReceipt) ||
       !validIdentifier(runtimeReceipt.thread_id) ||
+      !validIdentifier(runtimeReceipt.turn_id) ||
+      runtimeReceipt.terminal_status !== "interrupted" ||
       runtimeReceipt.execution_stopped !== true ||
       runtimeReceipt.thread_persisted !== true ||
-      !validIdentifier(runtimeReceipt.persisted_revision) ||
       canonicalTimestamp(runtimeReceipt.observed_at) === undefined
     ) {
       return new CompressionHandoffError(
@@ -1002,7 +996,6 @@ export class CompressionHandoffCoordinator {
 
   private createRequest(
     state: RunState,
-    receipt: InterruptReceipt,
   ): Omit<CompressionRequest, "idempotency_key"> | CompressionHandoffError {
     const prompt = buildCompressionPrompt(state.source_thread_id as string);
     if (typeof prompt !== "string") {
@@ -1015,7 +1008,6 @@ export class CompressionHandoffCoordinator {
     return {
       source_thread_id: state.source_thread_id as string,
       prompt,
-      source_persisted_revision: receipt.persisted_revision,
       workspace_identity: state.workspace_identity,
       compaction_id: state.compaction?.compaction_id as string,
       model: "gpt-5.6-sol",

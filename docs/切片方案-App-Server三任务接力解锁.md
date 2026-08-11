@@ -302,6 +302,7 @@ S20 + S21 -> S22 默认生产链端到端验收
 
 ## S18 · Export-owned revision 迁移
 
+- **状态**：COMPLETE；证据见 `contracts/slices/S18.json` 与 `artifacts/s18/completion-receipt.json`。
 - **做**：删除 `ThreadRevisionProvider`、`OpaqueStableRevision`、`THREAD_REVISION_UNAVAILABLE`、两次读取/比较和 `CompressionRequest.source_persisted_revision`；把 Interrupt/Inspection codec 切换到无 revision、绑定 thread/turn interrupted terminal 的本方案类型。
 - **不做**：不创建 Compression Task，不改 export skill，不改 Compaction Timeout。
 - **判据**：默认 Host 只在 `turn/interrupt` 成功且同 thread/turn `turn/completed.status="interrupted"` 后进入 `HANDOFF_EXPORTING`；`thread/read` 只发 `includeTurns:false`，接受 `turns:[]`、拒绝非空 turns/items；inspection 不再伪造 archived/deleted false；新 state schema 除历史文档/只读兼容 fixture 外零生产 `persisted_revision`，旧完成回执不改写，旧版在途 interruption 明确进入 migration-required `NEEDS_USER` 而不套用新语义。

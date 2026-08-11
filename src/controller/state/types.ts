@@ -31,6 +31,7 @@ export interface RunCompactionState {
   readonly observed_started_at: string;
   readonly deadline_at: string;
   readonly handoff_attempted: boolean;
+  readonly source_interruption_schema_version?: 2;
 }
 
 export interface RunHandoffState {

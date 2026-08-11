@@ -74,7 +74,6 @@ export {
 export {
   CodexAppServerThreadMetadataPort,
   CodexAppServerDevelopmentTask,
-  FAIL_CLOSED_THREAD_REVISION_PROVIDER,
   type CodexAppServerDevelopmentTaskOptions,
 } from "./codex-app-server-development-task.js";
 export {

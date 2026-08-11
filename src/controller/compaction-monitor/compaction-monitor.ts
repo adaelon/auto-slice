@@ -221,6 +221,7 @@ export class CompactionMonitor {
           observed_started_at: observed.iso,
           deadline_at: deadlineAt,
           handoff_attempted: false,
+          source_interruption_schema_version: 2,
         },
       },
     });

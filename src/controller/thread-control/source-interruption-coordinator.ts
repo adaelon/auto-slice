@@ -17,7 +17,6 @@ import {
 import { SourceInterruptionError } from "./errors.js";
 import {
   DEFAULT_SOURCE_INTERRUPT_TIMEOUT_MS,
-  isOpaqueStableRevision,
   type InterruptReceipt,
   type SourceInterruptionCoordinatorOptions,
   type SourceInterruptionDecision,
@@ -28,18 +27,17 @@ import {
 
 const INTERRUPT_RECEIPT_KEYS = [
   "thread_id",
+  "turn_id",
+  "terminal_status",
   "execution_stopped",
   "thread_persisted",
-  "persisted_revision",
   "observed_at",
 ] as const;
 
 const THREAD_INSPECTION_KEYS = [
   "thread_id",
-  "persisted_revision",
   "readable",
-  "archived",
-  "deleted",
+  "persistent",
   "observed_at",
 ] as const;
 
@@ -65,17 +63,6 @@ class BoundedCallError extends Error {
     super(message, options);
     this.name = "BoundedCallError";
   }
-}
-
-function revisionFailure(error: unknown): SourceInterruptionError | undefined {
-  if (
-    error instanceof SourceInterruptionError &&
-    (error.reason === "thread_revision_unavailable" ||
-      error.reason === "thread_revision_invalid")
-  ) {
-    return error;
-  }
-  return undefined;
 }
 
 function isRecord(value: unknown): value is Readonly<Record<string, unknown>> {
@@ -124,6 +111,8 @@ function decodeInterruptReceipt(value: unknown, expectedThreadId: string): Inter
     );
   }
   if (
+    !validIdentifier(value.turn_id) ||
+    value.terminal_status !== "interrupted" ||
     value.execution_stopped !== true ||
     value.thread_persisted !== true ||
     canonicalTimestamp(value.observed_at) === undefined
@@ -132,13 +121,6 @@ function decodeInterruptReceipt(value: unknown, expectedThreadId: string): Inter
       "source_interrupt_failed",
       "InterruptReceipt does not prove that execution stopped while the Source Thread persisted.",
       { reason: "interrupt_receipt_invalid" },
-    );
-  }
-  if (!isOpaqueStableRevision(value.persisted_revision)) {
-    throw new SourceInterruptionError(
-      "source_interrupt_failed",
-      "InterruptReceipt.persisted_revision is not a valid opaque stable revision.",
-      { reason: "thread_revision_invalid" },
     );
   }
   return value as unknown as InterruptReceipt;
@@ -164,27 +146,12 @@ function decodeThreadInspection(
   }
   if (
     value.readable !== true ||
-    value.archived !== false ||
-    value.deleted !== false
+    value.persistent !== true
   ) {
     throw new SourceInterruptionError(
       "source_interrupt_failed",
-      "The Source Thread is not persisted, readable, unarchived, and undeleted.",
+      "The Source Thread is not persisted and readable.",
       { reason: "thread_not_persisted" },
-    );
-  }
-  if (!isOpaqueStableRevision(value.persisted_revision)) {
-    throw new SourceInterruptionError(
-      "source_interrupt_failed",
-      "ThreadInspection.persisted_revision is not a valid opaque stable revision.",
-      { reason: "thread_revision_invalid" },
-    );
-  }
-  if (value.persisted_revision !== receipt.persisted_revision) {
-    throw new SourceInterruptionError(
-      "source_interrupt_failed",
-      "The readable Source Thread revision differs from the InterruptReceipt.",
-      { reason: "thread_revision_mismatch" },
     );
   }
   const inspectedAt = canonicalTimestamp(value.observed_at);
@@ -289,6 +256,14 @@ export class SourceInterruptionCoordinator {
         loaded.state,
         "lease_freeze_failed",
         `Project Write Lease could not be frozen: ${leasePosition.code}.`,
+      );
+    }
+    if (loaded.state.compaction?.source_interruption_schema_version !== 2) {
+      return this.closeFailure(
+        loaded.state,
+        "source_interruption_migration_required",
+        "The in-flight Source interruption predates the revisionless S18 receipt schema and requires explicit recovery.",
+        leasePosition.kind === "ROTATED" ? leasePosition.lease.epoch : undefined,
       );
     }
 
@@ -586,10 +561,6 @@ export class SourceInterruptionCoordinator {
         "interrupt",
       );
     } catch (error: unknown) {
-      const revisionError = revisionFailure(error);
-      if (revisionError !== undefined) {
-        return revisionError;
-      }
       const timedOut = error instanceof BoundedCallError && error.reason === "timeout";
       return new SourceInterruptionError(
         "source_interrupt_failed",
@@ -623,10 +594,6 @@ export class SourceInterruptionCoordinator {
         "inspect",
       );
     } catch (error: unknown) {
-      const revisionError = revisionFailure(error);
-      if (revisionError !== undefined) {
-        return revisionError;
-      }
       return new SourceInterruptionError(
         "source_interrupt_failed",
         "The interrupted Source Thread could not be inspected as readable and persisted.",
@@ -765,10 +732,6 @@ export class SourceInterruptionCoordinator {
         }, this.interruptTimeoutMs);
       });
       const operationPromise = Promise.resolve().then(operation).catch((error: unknown) => {
-        const revisionError = revisionFailure(error);
-        if (revisionError !== undefined) {
-          throw revisionError;
-        }
         throw new BoundedCallError("call_failed", `${label} failed.`, { cause: error });
       });
       return await Promise.race([operationPromise, timeoutPromise]);

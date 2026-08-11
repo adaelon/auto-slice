@@ -1,0 +1,199 @@
+{
+  "schema_version": 1,
+  "slice_id": "S18",
+  "result": "PASS",
+  "contract_digest": "sha256:3ca0ac9daa61a78798431608a9b49381678901c878a42a105245a879446cecca",
+  "input_receipt_digest": "sha256:0d37c3821893197fd9c07aea0a851c22a4ef0a9f090ba05c59af6734747b2ec2",
+  "surface_digest": "sha256:61df0558b8b0be277051993a6f818a9e084d4a3b84bf44a5e47ff1f461119921",
+  "output_digests": [
+    {
+      "path": "artifacts/s18/migration-report.json",
+      "digest": "sha256:22300878cb615dcbf84aef19527ae44553452626172e93a4936ece5766319a95"
+    },
+    {
+      "path": "contracts/slices/S18.json",
+      "digest": "sha256:3ca0ac9daa61a78798431608a9b49381678901c878a42a105245a879446cecca"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:e3dd8142db3f15e7b9151303dab16b199ce1d43c091926157b95d3bdc86acb79"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:ad581bb2520c741a1b80eaa8381fee4270aab24369a560119bdc4e4635e511bf"
+    },
+    {
+      "path": "docs/切片方案-App-Server三任务接力解锁.md",
+      "digest": "sha256:0884fdacad0fd5dfad9ad18faf5c133a73fd1a048ab2e1a88e64d683c71ad4dc"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:0f6edf7d12e4d7607f12f8d0fdc0ecb0ce29696c5efbff1ba19302b7cc9f7de3"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:d417dd62acc2ea2ab3bc3457932f35d84da4bb6c62616c9b194bbac7dd0d7aee"
+    },
+    {
+      "path": "scripts/verify-s18.mjs",
+      "digest": "sha256:1167e41eba15aa3b7d08e975c09bf865ae490d95cd280860eb2bb2f2f33abaf1"
+    },
+    {
+      "path": "src/controller/compaction-monitor/compaction-monitor.ts",
+      "digest": "sha256:4dc2efd238f3033cef038021f6c170590b280a6ed16fbf1eb199bebc05d43e27"
+    },
+    {
+      "path": "src/controller/handoff/compression-handoff-coordinator.ts",
+      "digest": "sha256:fc02fa506619f4e7f18d0361f2743652026a60381d6e5fd82547038abcdacad0"
+    },
+    {
+      "path": "src/controller/handoff/types.ts",
+      "digest": "sha256:417fcb006b7d65de7f2f2b8b8c172c0b7adce1c2e6f47d5b21c0a14325cf45e3"
+    },
+    {
+      "path": "src/controller/production/codex-app-server-development-task.ts",
+      "digest": "sha256:aa9dc3b204752a963e079aa50f0e551eaf4863bf145e977ff009b990fff22e60"
+    },
+    {
+      "path": "src/controller/production/codex-app-server-task-host.ts",
+      "digest": "sha256:1b692c33665f4753bdbbae4fbfb2c3ddbb7ad177d7e097ebbce7821a5a681c36"
+    },
+    {
+      "path": "src/controller/production/index.ts",
+      "digest": "sha256:38a5d462bafb43004db30637bc58e81c3e6c52fe0d2346e033846e44714b98c8"
+    },
+    {
+      "path": "src/controller/state/types.ts",
+      "digest": "sha256:a65cffd52eeb62833cd165bbcf9ef95a54379bb990fb63eee8eec2b218f19e31"
+    },
+    {
+      "path": "src/controller/state/validation.ts",
+      "digest": "sha256:84dc9a01464f7255f0d1b3128ee865d3c00d83791ca8923c5616acebfa66c5bd"
+    },
+    {
+      "path": "src/controller/thread-control/index.ts",
+      "digest": "sha256:5f9a4a9aeb78705fbd2ec36c7feb105163f30c54bdbd5a2647f08f81c1aa5fb1"
+    },
+    {
+      "path": "src/controller/thread-control/source-interruption-coordinator.ts",
+      "digest": "sha256:4200beb2deb3ce7afaf66b25fe127cb0eb8259b300b4ea3567b4860c6b53539e"
+    },
+    {
+      "path": "src/controller/thread-control/types.ts",
+      "digest": "sha256:7ea1ee1ec80f5dd3176006096cd220fdd446768b4c79fb67b550a2ca62909945"
+    },
+    {
+      "path": "test/app-server-development-task.test.ts",
+      "digest": "sha256:6db436166485809a0a7151b3bf37a549eb6557daf9aa7fe3fcff84d15fcc6779"
+    },
+    {
+      "path": "test/fixtures/process/fake-codex-app-server.mjs",
+      "digest": "sha256:b09ee86c444a8b6846fc3a68d29ebe59c42b18a900a0fc3794d8d04ee46db617"
+    },
+    {
+      "path": "test/handoff.test.ts",
+      "digest": "sha256:a27f4f5cc40f1f0a8b457a823c8e24f767728162d958959d0013f337963df041"
+    },
+    {
+      "path": "test/production-orchestrator.test.ts",
+      "digest": "sha256:323d266d04f30e19883bc6764f1527a19ef8a9e253ef704be6aa412a3cf8e78c"
+    },
+    {
+      "path": "test/run-store.test.ts",
+      "digest": "sha256:c547c8f886407260ec122e76fc5676d443201bb46e5484cb89c96ca2f5814750"
+    },
+    {
+      "path": "test/thread-control.test.ts",
+      "digest": "sha256:3f0f3127c211c3b842b6c0934adb17b186468e9b14ad7aff6260d4a84af3c65b"
+    }
+  ],
+  "check_receipts": [
+    {
+      "check_id": "surface",
+      "argv": [
+        "node",
+        "scripts/verify-s18.mjs",
+        "--surface-only"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "target_test",
+      "argv": [
+        "node",
+        "--test",
+        "dist/test/thread-control.test.js",
+        "dist/test/app-server-development-task.test.js",
+        "dist/test/handoff.test.js",
+        "dist/test/run-store.test.js",
+        "dist/test/production-orchestrator.test.js"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "plugin_validation",
+      "argv": [
+        "npm",
+        "run",
+        "validate:plugin"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "markdown_links",
+      "argv": [
+        "npm",
+        "run",
+        "verify:markdown-links"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "diff_check",
+      "argv": [
+        "git",
+        "diff",
+        "HEAD",
+        "--check",
+        "--"
+      ],
+      "exit_code": 0
+    }
+  ]
+}

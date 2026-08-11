@@ -17,7 +17,6 @@ export const DEFAULT_HANDOFF_EXPORT_TIMEOUT_MS = 600_000 as const;
 export interface CompressionRequest {
   readonly source_thread_id: string;
   readonly prompt: string;
-  readonly source_persisted_revision: string;
   readonly workspace_identity: WorkspaceIdentity;
   readonly compaction_id: string;
   readonly model: "gpt-5.6-sol";
@@ -136,7 +135,6 @@ export type CompressionHandoffFailureReason =
   | "handoff_receipt_invalid"
   | "handoff_workflow_version_mismatch"
   | "handoff_source_mismatch"
-  | "handoff_source_revision_mismatch"
   | "handoff_path_invalid"
   | "handoff_artifact_missing"
   | "handoff_artifact_digest_mismatch"

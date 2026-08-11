@@ -8,16 +8,16 @@ import {
 import { sha256Json, type Sha256Digest } from "../state/index.js";
 import {
   SourceInterruptionError,
-  THREAD_REVISION_UNAVAILABLE,
-  isOpaqueStableRevision,
   type InterruptReceipt,
-  type OpaqueStableRevision,
   type ThreadControlPort,
   type ThreadInspection,
   type ThreadMetadataPort,
-  type ThreadRevisionProvider,
   type ThreadSummary,
 } from "../thread-control/index.js";
+import {
+  decodeAppServerThreadReadParams,
+  decodeAppServerThreadReadResponse,
+} from "./app-server-protocol-v2.js";
 import {
   CodexAppServerClient,
   type CodexAppServerClientOptions,
@@ -109,6 +109,7 @@ interface TaskSession {
   turnId: string | null;
   forcedFailure: ProductionRuntimeError | null;
   terminal: DevelopmentTaskReceipt | ProductionRuntimeError | null;
+  terminalSignal: Extract<ControllerSignal, { readonly type: "TURN_TERMINAL" }> | null;
   interruptPromise: Promise<void> | null;
 }
 
@@ -117,7 +118,6 @@ const CODEX_WORKSPACE_WRITE_SANDBOX = "workspace-write" as const;
 
 export interface CodexAppServerDevelopmentTaskOptions extends CodexAppServerClientOptions {
   readonly now?: () => Date;
-  readonly thread_revision_provider?: ThreadRevisionProvider;
   readonly compaction_content_probe?: CompactionContentProbePort;
   readonly compaction_probe_scheduler?: DeadlineScheduler;
 }
@@ -194,8 +194,14 @@ function containsThreadContent(value: unknown): boolean {
       continue;
     }
     for (const [key, child] of Object.entries(current)) {
-      if (key === "turns" || key === "items") {
+      if (key === "items") {
         return true;
+      }
+      if (key === "turns") {
+        if (!Array.isArray(child) || child.length !== 0) {
+          return true;
+        }
+        continue;
       }
       if (typeof child === "object" && child !== null) {
         pending.push(child);
@@ -204,10 +210,6 @@ function containsThreadContent(value: unknown): boolean {
   }
   return false;
 }
-
-export const FAIL_CLOSED_THREAD_REVISION_PROVIDER: ThreadRevisionProvider = Object.freeze({
-  read: () => Promise.resolve(THREAD_REVISION_UNAVAILABLE),
-});
 
 export class CodexAppServerThreadMetadataPort implements ThreadMetadataPort {
   public constructor(
@@ -222,35 +224,35 @@ export class CodexAppServerThreadMetadataPort implements ThreadMetadataPort {
         "Thread metadata inspection requires a stable thread identity and includeTurns=false.",
       );
     }
-    const response = await this.client.request("thread/read", {
+    const params = decodeAppServerThreadReadParams({
       threadId,
       includeTurns: false,
     });
+    const response = await this.client.request("thread/read", params);
     if (response instanceof ProductionRuntimeError) {
       throw response;
     }
+    if (containsThreadContent(response)) {
+      throw new ProductionRuntimeError(
+        "app_server_protocol_error",
+        "Summary-only thread/read contained forbidden non-empty turns or items.",
+      );
+    }
+    const decoded = decodeAppServerThreadReadResponse(response);
     if (
-      !isRecord(response) ||
-      !isRecord(response.thread) ||
-      response.thread.id !== threadId ||
-      response.thread.ephemeral !== false
+      decoded.thread.id !== threadId ||
+      decoded.thread.ephemeral ||
+      decoded.thread.turns.length !== 0
     ) {
       throw new ProductionRuntimeError(
         "app_server_protocol_error",
         "Summary-only thread/read did not return the persisted Source Thread.",
       );
     }
-    if (containsThreadContent(response.thread)) {
-      throw new ProductionRuntimeError(
-        "app_server_protocol_error",
-        "Summary-only thread/read contained forbidden turns or items.",
-      );
-    }
     return {
       thread_id: threadId,
       readable: true,
-      archived: false,
-      deleted: false,
+      persistent: true,
       observed_at: this.timestamp(),
     };
   }
@@ -259,22 +261,18 @@ export class CodexAppServerThreadMetadataPort implements ThreadMetadataPort {
 export class CodexAppServerDevelopmentTask implements DevelopmentTaskPort, ThreadControlPort {
   private readonly client: CodexAppServerClient;
   private readonly now: () => Date;
-  private readonly revisionProvider: ThreadRevisionProvider;
   private readonly compactionContentProbe: CompactionContentProbePort | undefined;
   private readonly compactionProbeScheduler: DeadlineScheduler;
   private readonly metadataPort: CodexAppServerThreadMetadataPort;
   private readonly sessions = new Map<string, TaskSession>();
   private readonly interruptReceipts = new Map<string, { readonly threadId: string; readonly receipt: InterruptReceipt }>();
-  private readonly archivedThreads = new Set<string>();
   private readonly deletedThreads = new Set<string>();
-  private readonly closedThreads = new Set<string>();
   private unsubscribe: (() => void) | null = null;
   private active: TaskSession | null = null;
 
   public constructor(options: CodexAppServerDevelopmentTaskOptions = {}) {
     this.client = new CodexAppServerClient(options);
     this.now = options.now ?? (() => new Date());
-    this.revisionProvider = options.thread_revision_provider ?? FAIL_CLOSED_THREAD_REVISION_PROVIDER;
     this.compactionContentProbe = options.compaction_content_probe;
     this.compactionProbeScheduler = options.compaction_probe_scheduler ?? new TimeoutDeadlineScheduler({
       now: () => this.now(),
@@ -407,16 +405,29 @@ export class CodexAppServerDevelopmentTask implements DevelopmentTaskPort, Threa
     if (session.terminal === null) {
       await this.requestInterrupt(session);
     }
-    const terminal = await session.completion;
-    if (terminal instanceof ProductionRuntimeError) {
-      throw terminal;
+    const completion = await session.completion;
+    const terminal = session.terminalSignal;
+    if (
+      terminal === null ||
+      terminal.thread_id !== threadId ||
+      terminal.turn_id !== session.turnId ||
+      terminal.outcome !== "INTERRUPTED"
+    ) {
+      if (terminal === null && completion instanceof ProductionRuntimeError) {
+        throw completion;
+      }
+      throw new SourceInterruptionError(
+        "source_interrupt_failed",
+        "turn/interrupt did not terminate the tracked Source turn as interrupted.",
+        { reason: "interrupt_receipt_invalid" },
+      );
     }
-    const persistedRevision = await this.readPersistedRevision(threadId);
     const receipt: InterruptReceipt = {
       thread_id: threadId,
+      turn_id: terminal.turn_id,
+      terminal_status: "interrupted",
       execution_stopped: true,
       thread_persisted: true,
-      persisted_revision: persistedRevision,
       observed_at: this.timestamp(),
     };
     this.interruptReceipts.set(idempotencyKey, { threadId, receipt });
@@ -424,22 +435,14 @@ export class CodexAppServerDevelopmentTask implements DevelopmentTaskPort, Threa
   }
 
   public async inspect(threadId: string, includeTurns: false = false): Promise<unknown> {
-    if (
-      this.archivedThreads.has(threadId) ||
-      this.deletedThreads.has(threadId) ||
-      this.closedThreads.has(threadId)
-    ) {
+    if (this.deletedThreads.has(threadId)) {
       throw new ProductionRuntimeError(
         "app_server_request_failed",
-        "Source Thread is archived, deleted, or closed.",
+        "Source Thread was deleted before summary-only inspection.",
       );
     }
     const summary = await this.metadataPort.inspect(threadId, includeTurns);
-    const persistedRevision = await this.readPersistedRevision(threadId);
-    const inspection: ThreadInspection = {
-      ...summary,
-      persisted_revision: persistedRevision,
-    };
+    const inspection: ThreadInspection = summary;
     return inspection;
   }
 
@@ -562,6 +565,7 @@ export class CodexAppServerDevelopmentTask implements DevelopmentTaskPort, Threa
       turnId: null,
       forcedFailure: null,
       terminal: null,
+      terminalSignal: null,
       interruptPromise: null,
     };
   }
@@ -583,14 +587,8 @@ export class CodexAppServerDevelopmentTask implements DevelopmentTaskPort, Threa
 
   private handleSignal(signal: ControllerSignal): void {
     if (signal.type === "THREAD_LIFECYCLE") {
-      if (signal.state === "ARCHIVED") {
-        this.archivedThreads.add(signal.thread_id);
-      } else if (signal.state === "DELETED") {
+      if (signal.state === "DELETED") {
         this.deletedThreads.add(signal.thread_id);
-      } else if (signal.state === "UNARCHIVED") {
-        this.archivedThreads.delete(signal.thread_id);
-      } else {
-        this.closedThreads.add(signal.thread_id);
       }
       return;
     }
@@ -860,6 +858,7 @@ export class CodexAppServerDevelopmentTask implements DevelopmentTaskPort, Threa
     session: TaskSession,
     signal: Extract<ControllerSignal, { readonly type: "TURN_TERMINAL" }>,
   ): void {
+    session.terminalSignal = signal;
     this.stopCompactionProbe(session);
     if (signal.outcome !== "INTERRUPTED") {
       this.completeProbeCompaction(session, signal.completed_at);
@@ -936,44 +935,6 @@ export class CodexAppServerDevelopmentTask implements DevelopmentTaskPort, Threa
     if (this.active === session) {
       this.active = null;
     }
-  }
-
-  private async readPersistedRevision(threadId: string): Promise<OpaqueStableRevision> {
-    if (
-      this.archivedThreads.has(threadId) ||
-      this.deletedThreads.has(threadId) ||
-      this.closedThreads.has(threadId)
-    ) {
-      throw new ProductionRuntimeError(
-        "app_server_request_failed",
-        "Source Thread is not active and readable.",
-      );
-    }
-    let revision: unknown;
-    try {
-      revision = await this.revisionProvider.read(threadId);
-    } catch (error: unknown) {
-      throw new SourceInterruptionError(
-        "source_interrupt_failed",
-        "The Host revision capability could not read a stable Source Thread revision.",
-        { reason: "thread_revision_unavailable", cause: error },
-      );
-    }
-    if (revision === THREAD_REVISION_UNAVAILABLE) {
-      throw new SourceInterruptionError(
-        "source_interrupt_failed",
-        "The Host has no stable summary-only Source Thread revision capability.",
-        { reason: "thread_revision_unavailable" },
-      );
-    }
-    if (!isOpaqueStableRevision(revision)) {
-      throw new SourceInterruptionError(
-        "source_interrupt_failed",
-        "The Host revision capability returned an invalid opaque revision token.",
-        { reason: "thread_revision_invalid" },
-      );
-    }
-    return revision;
   }
 
   private timestamp(): string {

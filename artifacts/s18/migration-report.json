@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "source_interruption_schema_version": 2,
+  "source_revision_authority": "export-codex-handoff",
+  "thread_read": {
+    "include_turns": false,
+    "accepts_empty_turns": true,
+    "rejects_nonempty_turns_or_items": true
+  },
+  "interrupt_receipt": {
+    "terminal_status": "interrupted",
+    "thread_turn_bound": true,
+    "persisted_revision_present": false
+  },
+  "legacy_in_flight": {
+    "outcome": "NEEDS_USER",
+    "reason": "source_interruption_migration_required",
+    "rewrites_completed_effect_receipt": false
+  },
+  "legacy_production_matches": [],
+  "production_typescript_file_count": 79,
+  "surfaces": [
+    {
+      "path": "src/controller/state/types.ts",
+      "digest": "sha256:a65cffd52eeb62833cd165bbcf9ef95a54379bb990fb63eee8eec2b218f19e31"
+    },
+    {
+      "path": "src/controller/state/validation.ts",
+      "digest": "sha256:84dc9a01464f7255f0d1b3128ee865d3c00d83791ca8923c5616acebfa66c5bd"
+    },
+    {
+      "path": "src/controller/compaction-monitor/compaction-monitor.ts",
+      "digest": "sha256:4dc2efd238f3033cef038021f6c170590b280a6ed16fbf1eb199bebc05d43e27"
+    },
+    {
+      "path": "src/controller/thread-control/types.ts",
+      "digest": "sha256:7ea1ee1ec80f5dd3176006096cd220fdd446768b4c79fb67b550a2ca62909945"
+    },
+    {
+      "path": "src/controller/thread-control/source-interruption-coordinator.ts",
+      "digest": "sha256:4200beb2deb3ce7afaf66b25fe127cb0eb8259b300b4ea3567b4860c6b53539e"
+    },
+    {
+      "path": "src/controller/production/codex-app-server-development-task.ts",
+      "digest": "sha256:aa9dc3b204752a963e079aa50f0e551eaf4863bf145e977ff009b990fff22e60"
+    },
+    {
+      "path": "src/controller/handoff/types.ts",
+      "digest": "sha256:417fcb006b7d65de7f2f2b8b8c172c0b7adce1c2e6f47d5b21c0a14325cf45e3"
+    },
+    {
+      "path": "src/controller/handoff/compression-handoff-coordinator.ts",
+      "digest": "sha256:fc02fa506619f4e7f18d0361f2743652026a60381d6e5fd82547038abcdacad0"
+    }
+  ],
+  "slice_id": "S18",
+  "result": "PASS",
+  "surface_digest": "sha256:61df0558b8b0be277051993a6f818a9e084d4a3b84bf44a5e47ff1f461119921",
+  "negative_contracts": [
+    "completed terminal after turn/interrupt rejected",
+    "non-empty turns or any items rejected",
+    "observed delete rejected",
+    "legacy in-flight interruption requires migration",
+    "non-canonical export revision rejected"
+  ]
+}
