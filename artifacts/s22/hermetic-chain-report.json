@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "status": "HERMETIC_CHAIN_PASS",
+  "cli_status": "PRODUCTION_CONTINUATION_STARTED",
+  "timeout_boundary_ms": 30000,
+  "default_host_composition": true,
+  "task_uuid_count": 3,
+  "task_uuids_pairwise_distinct": true,
+  "protocol_trace": [
+    "SOURCE:turn/interrupt",
+    "SOURCE:thread/read",
+    "COMPRESSION:skills/list",
+    "COMPRESSION:thread/start",
+    "COMPRESSION:turn/start",
+    "CONTINUATION:thread/start",
+    "CONTINUATION:turn/start:readOnly",
+    "CONTINUATION:turn/start:workspaceWrite"
+  ],
+  "handoff_result": {
+    "first_markdown_file_address_used": true,
+    "evidence_index_address_ignored": true,
+    "host_verify_evidence_calls": 0
+  },
+  "handoff_receipt_schema_version": 3,
+  "canary_hits": 0,
+  "remote_connections": 0,
+  "user_source_runs": 0
+}

@@ -1,6 +1,6 @@
 # Export 单一 revision 与 App Server fresh-task 接力
 
-状态：Accepted（2026-08-11，文档审查完成、实现未开始）。取代 ADR-0008 的 Compression/Continuation 输入、`implementation-slices.md` 的 S15 双 revision 门禁，以及 ADR-0001 中把 App Server sandbox 与 Project Write Lease 混同的“Compression 始终只读”；保留 ADR-0004 的三任务隔离、ADR-0009 的 Content-blind Controller 和 ADR-0010 的 Trusted Completion。
+状态：Accepted（2026-08-12，S17–S21 已实现；§5 由 S22 收敛）。取代 ADR-0008 的 Compression/Continuation 输入、`implementation-slices.md` 的 S15 双 revision 门禁，以及 ADR-0001 中把 App Server sandbox 与 Project Write Lease 混同的“Compression 始终只读”；保留 ADR-0004 的三任务隔离、ADR-0009 的 Content-blind Controller 和 ADR-0010 的 Trusted Completion。
 
 ### §1 Source Evidence Revision
 
@@ -55,16 +55,15 @@
 
 ### §5 Handoff Receipt
 
-**决策**:Receipt 只取确定性产物。
+**决策**:Receipt 只取 completed Compression Turn 最终结果中的首个 Markdown 地址。
 
 **否决**:
-- 测试 launcher 回显 `source_persisted_revision`：没有执行 export。
-- 解析模型最终回复：不是机器证明。
-- 保留无真实 publish 来源的 `frame_digest`：制造伪精度。
-- 接受任意 command 的 JSON 或任意输出路径：无法证明运行了预期 helper、也无法防止路径替换。
+- prepare→Frame/MAP/REDUCE→publish 轨迹：实际技能会演化，不作为 receipt 模型。
+- Evidence Index 与 `HANDOFF_VERIFY`：不向 path-only receipt 提供字段。
+- 扫描默认 cwd 或“最新文件”：不是 completed Compression Turn 显式选择的结果。
 
-**命门**:只接受已注册 Compression thread/turn 内有序、唯一的 export `prepare <Source UUID> ...` 与 `publish <same workDir>` 两份 completed command 证明；prepare 必须绑定 `continuation-map-v2`、SourceCwd 和 Host 预分配路径，publish 必须复核同 revision/路径。随后再核对双文件原始字节、Evidence `sourceRevision` 与 Host 直接执行的成功 `verify-evidence` JSON；`artifact_digest=sha256(canonical-json(receipt without artifact_digest))`。
-**何时回头**:export skill 直接发布签名且版本化的 receipt 时改为验证该 receipt。
+**命门**:Host 只在已绑定 Compression Turn 为 completed 后，从其 bounded 最终 `agentMessage` 提取第一个绝对本地 Markdown 地址；schema 3 只绑定 Source/Compression task、Compression turn、该地址与 canonical receipt digest。Continuation 在首个 read-only Turn 前读取 bounded UTF-8 Markdown；helper 输出、Evidence Index、`HANDOFF_VERIFY` 与 Worker Content 均不进入 receipt。
+**何时回头**:若 completed Compression Turn 不再是可信发布边界，先版本化签名 receipt，再扩展 Host 字段。
 **展开**:[实施切片方案](../切片方案-App-Server三任务接力解锁.md)
 
 ### §6 Continuation fresh thread

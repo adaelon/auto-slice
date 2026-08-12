@@ -176,11 +176,12 @@ function validateConsumerContract(value: unknown): void {
 }
 
 function validHandoffReceiptBinding(value: Readonly<Record<string, unknown>>): boolean {
-  const v2Binding = value.handoff_receipt_schema_version === 2 &&
+  const currentBinding = (value.handoff_receipt_schema_version === 2 ||
+    value.handoff_receipt_schema_version === 3) &&
     canonicalUuid(value.compression_turn_id);
   const legacyReplayBinding = value.handoff_receipt_schema_version === undefined &&
     value.compression_turn_id === undefined;
-  return v2Binding || legacyReplayBinding;
+  return currentBinding || legacyReplayBinding;
 }
 
 function validateEnvelope(value: unknown): asserts value is ResumeEnvelope {
@@ -191,6 +192,17 @@ function validateEnvelope(value: unknown): asserts value is ResumeEnvelope {
     );
   }
   const workspace = value.expected_workspace_identity;
+  const markdownPath = typeof value.handoff_markdown_path === "string"
+    ? value.handoff_markdown_path
+    : undefined;
+  const resultPathBinding = value.handoff_receipt_schema_version === 3;
+  const artifactFieldsValid = resultPathBinding
+    ? value.evidence_index_path === undefined && value.handoff_digest === undefined
+    : markdownPath !== undefined &&
+      typeof value.evidence_index_path === "string" &&
+      path.isAbsolute(value.evidence_index_path) &&
+      path.resolve(markdownPath) !== path.resolve(value.evidence_index_path) &&
+      sha256Digest(value.handoff_digest);
   if (
     !validIdentifier(value.run_id) ||
     !validIdentifier(value.current_slice_id) ||
@@ -201,11 +213,8 @@ function validateEnvelope(value: unknown): asserts value is ResumeEnvelope {
     value.source_thread_id === value.compression_task_id ||
     typeof value.handoff_markdown_path !== "string" ||
     !path.isAbsolute(value.handoff_markdown_path) ||
-    typeof value.evidence_index_path !== "string" ||
-    !path.isAbsolute(value.evidence_index_path) ||
-    path.resolve(value.handoff_markdown_path) === path.resolve(value.evidence_index_path) ||
+    !artifactFieldsValid ||
     !sha256Digest(value.handoff_artifact_digest) ||
-    !sha256Digest(value.handoff_digest) ||
     !isRecord(workspace) ||
     typeof workspace.canonical_root !== "string" ||
     !path.isAbsolute(workspace.canonical_root) ||
@@ -228,12 +237,13 @@ function validateEnvelope(value: unknown): asserts value is ResumeEnvelope {
 
 function firstTurnGoal(envelope: ResumeEnvelope): string {
   const deliverables = canonicalJson(envelope.consumer_contract.firstDeliverableIds);
+  const bindingDigest = envelope.handoff_digest ?? envelope.handoff_artifact_digest;
   const goal = [
     "Auto Slice Continuation synthesize-first read-only Turn.",
     `run_id=${JSON.stringify(envelope.run_id)}; slice_id=${JSON.stringify(envelope.current_slice_id)}.`,
-    `consumer_contract_digest=${sha256Json(envelope.consumer_contract)}; handoff_digest=${envelope.handoff_digest}.`,
+    `consumer_contract_digest=${sha256Json(envelope.consumer_contract)}; handoff_binding_digest=${bindingDigest}.`,
     `Produce only the first substantive draft for deliverables=${deliverables}.`,
-    "The next input item is the complete verified Handoff body.",
+    "The next input item is the complete Handoff body selected by Compression.",
     "Do not call tools, search, read files, modify files, continue implementation, or report receipt fields in this Turn.",
   ].join("\n");
   if (Buffer.byteLength(goal, "utf8") > MAXIMUM_CONTINUATION_GOAL_BYTES) {
@@ -260,8 +270,8 @@ function secondTurnGoal(envelope: ResumeEnvelope): string {
     ? "完成后commit，刷新checkpoint"
     : "完成后刷新checkpoint";
   const goal = [
-    `设定goal：已读取验证Handoff，继续实现${envelope.current_slice_id}，${completion}`,
-    `继续同一Slice；run_id=${JSON.stringify(envelope.run_id)}；write_epoch=${String(envelope.write_epoch)}；handoff_digest=${envelope.handoff_digest}。`,
+    `设定goal：已读取Handoff，继续实现${envelope.current_slice_id}，${completion}`,
+    `继续同一Slice；run_id=${JSON.stringify(envelope.run_id)}；write_epoch=${String(envelope.write_epoch)}；handoff_binding_digest=${envelope.handoff_digest ?? envelope.handoff_artifact_digest}。`,
   ].join("\n");
   if (Buffer.byteLength(goal, "utf8") > MAXIMUM_CONTINUATION_GOAL_BYTES) {
     throw launcherError(
@@ -436,7 +446,7 @@ export class AppServerContinuationTaskLauncher implements ContinuationLauncher {
   }
 
   private async startInner(envelope: ResumeEnvelope): Promise<string> {
-    const markdown = await this.readVerifiedHandoff(envelope);
+    const markdown = await this.readHandoff(envelope);
     let session: CodexAppServerFreshTaskSession | ProductionRuntimeError;
     try {
       session = await this.options.fresh_task_sessions.start({
@@ -494,8 +504,17 @@ export class AppServerContinuationTaskLauncher implements ContinuationLauncher {
     return session.thread_id;
   }
 
-  private async readVerifiedHandoff(envelope: ResumeEnvelope): Promise<string> {
+  private async readHandoff(envelope: ResumeEnvelope): Promise<string> {
     try {
+      if (envelope.handoff_receipt_schema_version === 3) {
+        const bytes = await readFile(envelope.handoff_markdown_path);
+        if (bytes.byteLength === 0 || bytes.byteLength > this.maximumHandoffMarkdownBytes) {
+          throw new Error("Handoff is empty or exceeds its bound");
+        }
+        const markdown = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+        if (markdown.includes("\0")) throw new Error("Handoff contains NUL");
+        return markdown;
+      }
       const before = await lstat(envelope.handoff_markdown_path);
       if (!before.isFile() || before.isSymbolicLink()) throw new Error("not a regular file");
       const [canonicalPath, bytes] = await Promise.all([
@@ -516,7 +535,9 @@ export class AppServerContinuationTaskLauncher implements ContinuationLauncher {
     } catch (error: unknown) {
       throw launcherError(
         "HANDOFF_INTEGRITY_FAILED",
-        "Continuation Handoff bytes no longer match the verified receipt.",
+        envelope.handoff_receipt_schema_version === 3
+          ? "Continuation could not read the Handoff path selected by Compression."
+          : "Continuation Handoff bytes no longer match the verified receipt.",
         error,
       );
     }

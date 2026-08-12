@@ -20,7 +20,7 @@ export interface CodexAppServerTaskHostOptions extends CodexAppServerDevelopment
   readonly continuation_launcher?: ContinuationLauncher;
   readonly fresh_task_sessions?: CodexAppServerFreshTaskSessionsOptions;
   readonly handoff_artifact_storage_root?: string;
-  readonly compression_verify_evidence_timeout_ms?: number;
+  readonly compression_maximum_final_result_bytes?: number;
   readonly continuation_maximum_handoff_markdown_bytes?: number;
 }
 
@@ -51,9 +51,9 @@ export class CodexAppServerTaskHost implements ProductionTaskHostPorts {
         ...(options.handoff_artifact_storage_root === undefined
           ? {}
           : { artifact_storage_root: options.handoff_artifact_storage_root }),
-        ...(options.compression_verify_evidence_timeout_ms === undefined
+        ...(options.compression_maximum_final_result_bytes === undefined
           ? {}
-          : { verify_evidence_timeout_ms: options.compression_verify_evidence_timeout_ms }),
+          : { maximum_final_result_bytes: options.compression_maximum_final_result_bytes }),
         ...(options.now === undefined ? {} : { now: options.now }),
       });
     this.continuation_launcher = options.continuation_launcher ??

@@ -1,4 +1,3 @@
-import { spawn } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import {
   lstat,
@@ -10,38 +9,36 @@ import {
 } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
 import {
   decodeAppServerSkillsListResponse,
   resolveAppServerSkill,
-  type AppServerCommandExecutionItem,
+  type AppServerAgentMessageItem,
 } from "../production/app-server-protocol-v2.js";
 import type { CodexAppServerClient } from "../production/app-server-client.js";
 import type {
   AppServerFreshTaskTurnHandle,
+  AppServerFreshTaskTurnReceipt,
   CodexAppServerFreshTaskSessions,
 } from "../production/app-server-fresh-task-session.js";
 import { ProductionRuntimeError } from "../production/errors.js";
 import {
-  canonicalJson,
-  sha256Bytes,
   sha256Json,
   type Sha256Digest,
 } from "../state/index.js";
 
 import {
-  HANDOFF_RECEIPT_SCHEMA_VERSION,
-  HANDOFF_WORKFLOW_VERSION,
+  HANDOFF_RESULT_RECEIPT_SCHEMA_VERSION,
+  HANDOFF_RESULT_WORKFLOW_VERSION,
   type CompressionRequest,
   type CompressionTaskLauncher,
   type CompressionTaskLaunchReceipt,
-  type HandoffReceiptV2,
-  type SynthesizeFirstConsumerContract,
+  type HandoffResultReceipt,
 } from "./types.js";
 
 export const EXPORT_CODEX_HANDOFF_SKILL_NAME = "export-codex-handoff" as const;
-export const DEFAULT_COMPRESSION_COMMAND_OUTPUT_BYTES = 64 * 1024;
-export const DEFAULT_VERIFY_EVIDENCE_TIMEOUT_MS = 120_000;
+export const DEFAULT_COMPRESSION_FINAL_RESULT_BYTES = 64 * 1024;
 export const DEFAULT_HANDOFF_STORAGE_ROOT = path.join(
   os.homedir(),
   ".codex",
@@ -53,7 +50,6 @@ const SHA256_PATTERN = /^sha256:[0-9a-f]{64}$/u;
 const STABLE_PATH_SEGMENT = /^[A-Za-z0-9][A-Za-z0-9._-]{0,255}$/u;
 const CANONICAL_UUID =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/u;
-const MANAGED_WORK_DIR_PREFIX = "codex-handoff-task-";
 const JOURNAL_DIRECTORY = "handoff-launcher-journal";
 const HANDOFF_DIRECTORY = "handoffs";
 
@@ -78,7 +74,7 @@ interface CompressionLauncherJournalRecord {
   readonly compression_task_id?: string;
   readonly compression_turn_id?: string;
   readonly launch_receipt?: CompressionTaskLaunchReceipt;
-  readonly receipt?: HandoffReceiptV2;
+  readonly receipt?: HandoffResultReceipt;
   readonly diagnostic_code?: string;
   readonly retained_work_dir?: string;
 }
@@ -101,34 +97,17 @@ interface ActiveCompressionLaunch {
   readonly request: CompressionRequest;
   readonly requestDigest: Sha256Digest;
   readonly allocation: ArtifactAllocation;
-  readonly skill: ResolvedExportSkill;
   readonly launchReceipt: CompressionTaskLaunchReceipt;
   readonly turn: AppServerFreshTaskTurnHandle;
   readonly journal: CompressionLauncherJournalRecord;
-}
-
-interface PreparedHelperOutput {
-  readonly sourceRevision: Sha256Digest;
-  readonly workDir: string;
-}
-
-interface PublishedHelperOutput {
-  readonly sourceRevision: Sha256Digest;
-  readonly structuralDigest: Sha256Digest;
-  readonly handoffDigest: Sha256Digest;
-  readonly evidenceIndexDigest: Sha256Digest;
-  readonly consumerContract: SynthesizeFirstConsumerContract;
-  readonly retainedWorkDir?: string;
 }
 
 export interface AppServerCompressionTaskLauncherOptions {
   readonly client: CodexAppServerClient;
   readonly fresh_task_sessions: CodexAppServerFreshTaskSessions;
   readonly artifact_storage_root?: string;
-  readonly node_executable?: string;
   readonly now?: () => Date;
-  readonly maximum_command_output_bytes?: number;
-  readonly verify_evidence_timeout_ms?: number;
+  readonly maximum_final_result_bytes?: number;
 }
 
 export class AppServerCompressionLauncherError extends Error {
@@ -226,156 +205,61 @@ function validateCompressionRequest(request: CompressionRequest): void {
   }
 }
 
-function decodeConsumerContract(value: unknown): SynthesizeFirstConsumerContract {
-  if (!isRecord(value)) {
-    throw launcherError("HANDOFF_RECEIPT_INVALID", "Publish output omitted its consumer contract.");
-  }
-  const keys = Object.keys(value).sort();
-  const expectedKeys = [
-    "allowedReadReasons",
-    "firstDeliverableIds",
-    "forbidBroadSearch",
-    "forbidFullFileReread",
-    "formatVersion",
-    "kind",
-    "maxTargetedReads",
-    "mode",
-    "preDraftEvidenceReads",
-  ].sort();
+function firstMarkdownFileAddress(
+  terminal: AppServerFreshTaskTurnReceipt,
+  maximumBytes: number,
+  artifactRoot: string,
+): string {
+  const messages = terminal.completed_items
+    .map((entry) => entry.item)
+    .filter((item): item is AppServerAgentMessageItem => (
+      item.type === "agentMessage" && item.text.trim().length > 0
+    ));
+  const finalMessages = messages.filter((item) => item.phase === "final_answer");
+  const result = finalMessages.at(-1) ?? messages.at(-1);
   if (
-    canonicalJson(keys) !== canonicalJson(expectedKeys) ||
-    value.formatVersion !== 1 ||
-    value.kind !== "codex-handoff-synthesize-first-consumer-contract" ||
-    value.mode !== "synthesize_first" ||
-    !Array.isArray(value.firstDeliverableIds) ||
-    value.firstDeliverableIds.length === 0 ||
-    value.firstDeliverableIds.some((entry) => typeof entry !== "string" || entry.length === 0) ||
-    value.preDraftEvidenceReads !== 0 ||
-    !Number.isSafeInteger(value.maxTargetedReads) ||
-    (value.maxTargetedReads as number) < 0 ||
-    (value.maxTargetedReads as number) > 3 ||
-    !Array.isArray(value.allowedReadReasons) ||
-    value.allowedReadReasons.some((entry) => (
-      entry !== "claim_verification" && entry !== "named_uncertainty"
-    )) ||
-    value.forbidBroadSearch !== true ||
-    value.forbidFullFileReread !== true
+    result === undefined ||
+    Buffer.byteLength(result.text, "utf8") > maximumBytes
   ) {
     throw launcherError(
-      "HANDOFF_RECEIPT_INVALID",
-      "Publish output consumer contract violated the synthesize-first schema.",
+      "HANDOFF_RESULT_INVALID",
+      "Compression final result is missing or exceeds its bound.",
+      artifactRoot,
     );
   }
-  return value as unknown as SynthesizeFirstConsumerContract;
-}
-
-function parseSingleJson(
-  value: string | null,
-  maximumBytes: number,
-  label: string,
-): Readonly<Record<string, unknown>> {
-  if (
-    typeof value !== "string" ||
-    value.trim().length === 0 ||
-    Buffer.byteLength(value, "utf8") > maximumBytes
-  ) {
-    throw launcherError("HELPER_OUTPUT_INVALID", `${label} output is missing or exceeds its bound.`);
+  const match = /\[[^\]\r\n]*\]\(\s*(<[^>\r\n]+>|[^)\r\n]+?)\s*\)/u.exec(result.text);
+  if (match === null) {
+    throw launcherError(
+      "HANDOFF_RESULT_INVALID",
+      "Compression final result contains no Markdown file address.",
+      artifactRoot,
+    );
   }
+  const captured = match[1] as string;
+  const destination = captured.startsWith("<") && captured.endsWith(">")
+    ? captured.slice(1, -1)
+    : captured;
+  let filePath: string;
   try {
-    const parsed: unknown = JSON.parse(value);
-    if (!isRecord(parsed)) throw new Error("not an object");
-    return parsed;
+    filePath = destination.startsWith("file:")
+      ? fileURLToPath(destination)
+      : destination;
   } catch (error: unknown) {
-    throw launcherError("HELPER_OUTPUT_INVALID", `${label} output is not one JSON object.`, undefined, error);
+    throw launcherError(
+      "HANDOFF_RESULT_INVALID",
+      "Compression final result contains an invalid file address.",
+      artifactRoot,
+      error,
+    );
   }
-}
-
-function tokenizeDirectCommand(command: string): readonly string[] {
-  if (
-    command.length === 0 ||
-    Buffer.byteLength(command, "utf8") > 32 * 1024 ||
-    command.includes("\0") ||
-    command.includes("\r") ||
-    command.includes("\n")
-  ) {
-    throw launcherError("COMMAND_CHAIN_INVALID", "Compression command text is invalid.");
+  if (!path.isAbsolute(filePath) || /[\r\n\0]/u.test(filePath)) {
+    throw launcherError(
+      "HANDOFF_RESULT_INVALID",
+      "Compression final result's first file address is not an absolute local path.",
+      artifactRoot,
+    );
   }
-  const tokens: string[] = [];
-  let current = "";
-  let quote: "\"" | "'" | null = null;
-  let tokenStarted = false;
-  for (let index = 0; index < command.length; index += 1) {
-    const character = command[index] as string;
-    if (quote === null) {
-      if (/\s/u.test(character)) {
-        if (tokenStarted) {
-          tokens.push(current);
-          current = "";
-          tokenStarted = false;
-        }
-        continue;
-      }
-      if (character === "\"" || character === "'") {
-        quote = character;
-        tokenStarted = true;
-        continue;
-      }
-      if ("&|;<>`".includes(character)) {
-        throw launcherError(
-          "COMMAND_CHAIN_INVALID",
-          "Compression command contains shell composition syntax.",
-        );
-      }
-      current += character;
-      tokenStarted = true;
-      continue;
-    }
-    if (character === quote) {
-      quote = null;
-      continue;
-    }
-    if (character === "\\" && quote === "\"") {
-      const next = command[index + 1];
-      if (next === "\"" || next === "\\") {
-        current += next;
-        index += 1;
-        continue;
-      }
-    }
-    current += character;
-  }
-  if (quote !== null) {
-    throw launcherError("COMMAND_CHAIN_INVALID", "Compression command contains an open quote.");
-  }
-  if (tokenStarted) tokens.push(current);
-  return tokens;
-}
-
-function exactNodeCommand(token: string, canonicalNode: string): boolean {
-  return samePath(token, canonicalNode);
-}
-
-function commandIsCompletedAgentEvidence(item: AppServerCommandExecutionItem): boolean {
-  return item.source === "agent" &&
-    item.status === "completed" &&
-    item.exitCode === 0;
-}
-
-function safeDiagnosticCode(items: readonly AppServerCommandExecutionItem[]): string | undefined {
-  for (const item of [...items].reverse()) {
-    if (typeof item.aggregatedOutput !== "string" || item.aggregatedOutput.length > 64 * 1024) {
-      continue;
-    }
-    try {
-      const parsed: unknown = JSON.parse(item.aggregatedOutput);
-      if (isRecord(parsed) && typeof parsed.code === "string" && /^[A-Z0-9_]{1,64}$/u.test(parsed.code)) {
-        return parsed.code;
-      }
-    } catch {
-      // Only a single bounded JSON error code is eligible for diagnostic mapping.
-    }
-  }
-  return undefined;
+  return path.normalize(filePath);
 }
 
 function promptForCompression(
@@ -385,7 +269,8 @@ function promptForCompression(
 ): string {
   return `$${EXPORT_CODEX_HANDOFF_SKILL_NAME} ${sourceThreadId} Use continuation-map-v2. ` +
     `Publish the Handoff Markdown to ${JSON.stringify(markdownPath)} and the Evidence Index to ` +
-    `${JSON.stringify(evidenceIndexPath)}.`;
+    `${JSON.stringify(evidenceIndexPath)}. Complete the skill workflow and end the Turn only after both ` +
+    `final files exist.`;
 }
 
 function launchReceiptFromJournal(
@@ -446,24 +331,18 @@ async function assertRegularNonLink(
 export class AppServerCompressionTaskLauncher implements CompressionTaskLauncher {
   private readonly now: () => Date;
   private readonly storageRoot: string;
-  private readonly nodeExecutable: string;
-  private readonly maximumCommandOutputBytes: number;
-  private readonly verifyEvidenceTimeoutMs: number;
+  private readonly maximumFinalResultBytes: number;
   private readonly startPromises = new Map<Sha256Digest, Promise<CompressionTaskLaunchReceipt>>();
   private readonly activeLaunches = new Map<string, ActiveCompressionLaunch>();
-  private readonly handoffPromises = new Map<Sha256Digest, Promise<HandoffReceiptV2>>();
+  private readonly handoffPromises = new Map<Sha256Digest, Promise<HandoffResultReceipt>>();
   private rootPromise: Promise<string> | null = null;
 
   public constructor(private readonly options: AppServerCompressionTaskLauncherOptions) {
     this.now = options.now ?? (() => new Date());
     this.storageRoot = path.resolve(options.artifact_storage_root ?? DEFAULT_HANDOFF_STORAGE_ROOT);
-    this.nodeExecutable = path.resolve(options.node_executable ?? process.execPath);
-    this.maximumCommandOutputBytes = options.maximum_command_output_bytes ??
-      DEFAULT_COMPRESSION_COMMAND_OUTPUT_BYTES;
-    this.verifyEvidenceTimeoutMs = options.verify_evidence_timeout_ms ??
-      DEFAULT_VERIFY_EVIDENCE_TIMEOUT_MS;
-    requirePositiveInteger(this.maximumCommandOutputBytes, "maximum_command_output_bytes");
-    requirePositiveInteger(this.verifyEvidenceTimeoutMs, "verify_evidence_timeout_ms");
+    this.maximumFinalResultBytes = options.maximum_final_result_bytes ??
+      DEFAULT_COMPRESSION_FINAL_RESULT_BYTES;
+    requirePositiveInteger(this.maximumFinalResultBytes, "maximum_final_result_bytes");
   }
 
   public async start(request: CompressionRequest): Promise<unknown> {
@@ -590,7 +469,7 @@ export class AppServerCompressionTaskLauncher implements CompressionTaskLauncher
         },
         model: request.model,
         effort: request.reasoning_effort,
-        project_completed_item_types: ["commandExecution"],
+        project_completed_item_types: ["agentMessage"],
       });
       if (turn instanceof ProductionRuntimeError) throw turn;
       const launchReceipt: CompressionTaskLaunchReceipt = {
@@ -615,7 +494,6 @@ export class AppServerCompressionTaskLauncher implements CompressionTaskLauncher
         request,
         requestDigest,
         allocation,
-        skill,
         launchReceipt,
         turn,
         journal: launchedJournal,
@@ -642,31 +520,22 @@ export class AppServerCompressionTaskLauncher implements CompressionTaskLauncher
     }
   }
 
-  private async completeActiveLaunch(active: ActiveCompressionLaunch): Promise<HandoffReceiptV2> {
+  private async completeActiveLaunch(active: ActiveCompressionLaunch): Promise<HandoffResultReceipt> {
     try {
       const terminal = await active.turn.completion;
       if (terminal instanceof ProductionRuntimeError) throw terminal;
-      const commands = terminal.completed_items
-        .map((entry) => entry.item)
-        .filter((item): item is AppServerCommandExecutionItem => item.type === "commandExecution");
       if (terminal.terminal_status !== "completed") {
-        const diagnosticCode = safeDiagnosticCode(commands) ?? "COMPRESSION_TURN_FAILED";
-        const retainedWorkDir = this.retainedWorkDirFromCommands(active, commands) ??
-          active.allocation.artifactRoot;
         throw launcherError(
-          diagnosticCode,
+          "COMPRESSION_TURN_FAILED",
           "Compression Turn did not reach a completed terminal.",
-          retainedWorkDir,
+          active.allocation.artifactRoot,
         );
       }
-      const receipt = await this.buildReceipt(active, commands);
+      const receipt = this.buildReceipt(active, terminal);
       const completedJournal: CompressionLauncherJournalRecord = {
         ...active.journal,
         status: "COMPLETED",
         receipt,
-        ...(receipt.retained_work_dir === undefined
-          ? {}
-          : { retained_work_dir: receipt.retained_work_dir }),
       };
       await this.writeJournal(active.allocation.journalPath, completedJournal);
       return receipt;
@@ -675,7 +544,7 @@ export class AppServerCompressionTaskLauncher implements CompressionTaskLauncher
         ? error
         : launcherError(
           "COMPRESSION_TURN_FAILED",
-          "Compression Turn evidence could not be verified.",
+          "Compression Turn final result could not be accepted.",
           active.allocation.artifactRoot,
           error,
         );
@@ -691,356 +560,23 @@ export class AppServerCompressionTaskLauncher implements CompressionTaskLauncher
     }
   }
 
-  private async buildReceipt(
+  private buildReceipt(
     active: ActiveCompressionLaunch,
-    commands: readonly AppServerCommandExecutionItem[],
-  ): Promise<HandoffReceiptV2> {
-    if (commands.length !== 2 || commands.some((item) => !commandIsCompletedAgentEvidence(item))) {
-      throw launcherError(
-        "COMMAND_CHAIN_INVALID",
-        "Compression Turn must contain exactly one completed prepare and one completed publish command.",
-        active.allocation.artifactRoot,
-      );
-    }
-    const prepareCommand = commands[0] as AppServerCommandExecutionItem;
-    const publishCommand = commands[1] as AppServerCommandExecutionItem;
-    if (
-      !samePath(prepareCommand.cwd, active.request.workspace_identity.canonical_root) ||
-      !samePath(publishCommand.cwd, active.request.workspace_identity.canonical_root)
-    ) {
-      throw launcherError(
-        "COMMAND_CHAIN_INVALID",
-        "Compression helper commands did not run in SourceCwd.",
-        active.allocation.artifactRoot,
-      );
-    }
-    const prepared = this.decodePrepareCommand(active, prepareCommand);
-    const publishArgv = tokenizeDirectCommand(publishCommand.command);
-    if (
-      publishArgv.length !== 4 ||
-      !exactNodeCommand(publishArgv[0] as string, this.nodeExecutable) ||
-      !samePath(publishArgv[1] as string, active.skill.helperPath) ||
-      publishArgv[2] !== "publish" ||
-      !samePath(publishArgv[3] as string, prepared.workDir)
-    ) {
-      throw launcherError(
-        "COMMAND_CHAIN_INVALID",
-        "Compression publish command is not bound to the prepared workDir.",
-        prepared.workDir,
-      );
-    }
-    const published = this.decodePublishOutput(
-      parseSingleJson(
-        publishCommand.aggregatedOutput,
-        this.maximumCommandOutputBytes,
-        "publish",
-      ),
-      active,
-      prepared,
-    );
-    const { markdown, evidence } = await this.verifyPublishedPair(active, published);
-    const verifyResult = await this.verifyEvidence(active, published.sourceRevision);
-    const retainedWorkDir = published.retainedWorkDir;
+    terminal: AppServerFreshTaskTurnReceipt,
+  ): HandoffResultReceipt {
     const material = {
-      receipt_schema_version: HANDOFF_RECEIPT_SCHEMA_VERSION,
+      receipt_schema_version: HANDOFF_RESULT_RECEIPT_SCHEMA_VERSION,
       compression_task_id: active.launchReceipt.compression_task_id,
       compression_turn_id: active.turn.turn_id,
       source_thread_id: active.request.source_thread_id,
-      workflow_version: HANDOFF_WORKFLOW_VERSION,
-      markdown_path: active.allocation.markdownPath,
-      evidence_index_path: active.allocation.evidenceIndexPath,
-      source_revision: published.sourceRevision,
-      structural_digest: published.structuralDigest,
-      handoff_digest: sha256Bytes(markdown),
-      evidence_index_digest: sha256Bytes(evidence),
-      verify_evidence: "PASS",
-      verify_evidence_result_digest: sha256Json(verifyResult),
-      consumer_contract: published.consumerContract,
-      ...(retainedWorkDir === undefined ? {} : { retained_work_dir: retainedWorkDir }),
-    } satisfies Omit<HandoffReceiptV2, "artifact_digest">;
-    return { ...material, artifact_digest: sha256Json(material) };
-  }
-
-  private decodePrepareCommand(
-    active: ActiveCompressionLaunch,
-    command: AppServerCommandExecutionItem,
-  ): PreparedHelperOutput {
-    if (
-      !commandIsCompletedAgentEvidence(command) ||
-      !samePath(command.cwd, active.request.workspace_identity.canonical_root)
-    ) {
-      throw launcherError(
-        "COMMAND_CHAIN_INVALID",
-        "Compression prepare evidence is not one completed agent command in SourceCwd.",
+      workflow_version: HANDOFF_RESULT_WORKFLOW_VERSION,
+      markdown_path: firstMarkdownFileAddress(
+        terminal,
+        this.maximumFinalResultBytes,
         active.allocation.artifactRoot,
-      );
-    }
-    const argv = tokenizeDirectCommand(command.command);
-    if (
-      argv.length !== 10 ||
-      !exactNodeCommand(argv[0] as string, this.nodeExecutable) ||
-      !samePath(argv[1] as string, active.skill.helperPath) ||
-      argv[2] !== "prepare" ||
-      argv[3] !== active.request.source_thread_id ||
-      argv[4] !== "--map-result-mode" ||
-      argv[5] !== "continuation-map-v2" ||
-      argv[6] !== "--output" ||
-      !samePath(argv[7] as string, active.allocation.markdownPath) ||
-      argv[8] !== "--evidence-index" ||
-      !samePath(argv[9] as string, active.allocation.evidenceIndexPath)
-    ) {
-      throw launcherError(
-        "COMMAND_CHAIN_INVALID",
-        "Compression prepare command is outside the canonical helper argv contract.",
-        active.allocation.artifactRoot,
-      );
-    }
-    return this.decodePrepareOutput(
-      parseSingleJson(
-        command.aggregatedOutput,
-        this.maximumCommandOutputBytes,
-        "prepare",
       ),
-      active,
-    );
-  }
-
-  private retainedWorkDirFromCommands(
-    active: ActiveCompressionLaunch,
-    commands: readonly AppServerCommandExecutionItem[],
-  ): string | undefined {
-    const prepare = commands[0];
-    if (prepare === undefined) return undefined;
-    try {
-      return this.decodePrepareCommand(active, prepare).workDir;
-    } catch {
-      return undefined;
-    }
-  }
-
-  private decodePrepareOutput(
-    value: Readonly<Record<string, unknown>>,
-    active: ActiveCompressionLaunch,
-  ): PreparedHelperOutput {
-    if (
-      value.formatVersion !== 2 ||
-      value.sessionId !== active.request.source_thread_id ||
-      value.mapResultMode !== "continuation-map-v2" ||
-      typeof value.sourceCwd !== "string" ||
-      !samePath(value.sourceCwd, active.request.workspace_identity.canonical_root) ||
-      typeof value.outputPath !== "string" ||
-      !samePath(value.outputPath, active.allocation.markdownPath) ||
-      typeof value.evidenceIndexPath !== "string" ||
-      !samePath(value.evidenceIndexPath, active.allocation.evidenceIndexPath) ||
-      !sha256Digest(value.sourceRevision) ||
-      typeof value.workDir !== "string" ||
-      !path.isAbsolute(value.workDir) ||
-      !path.basename(value.workDir).startsWith(MANAGED_WORK_DIR_PREFIX) ||
-      !isWithin(path.resolve(os.tmpdir()), path.resolve(value.workDir))
-    ) {
-      throw launcherError(
-        "HELPER_OUTPUT_INVALID",
-        "Prepare output is not bound to SourceCwd, workflow mode, paths, and a managed workDir.",
-        active.allocation.artifactRoot,
-      );
-    }
-    return { sourceRevision: value.sourceRevision, workDir: path.resolve(value.workDir) };
-  }
-
-  private decodePublishOutput(
-    value: Readonly<Record<string, unknown>>,
-    active: ActiveCompressionLaunch,
-    prepared: PreparedHelperOutput,
-  ): PublishedHelperOutput {
-    if (
-      value.formatVersion !== 2 ||
-      value.sessionId !== active.request.source_thread_id ||
-      typeof value.outputPath !== "string" ||
-      !samePath(value.outputPath, active.allocation.markdownPath) ||
-      typeof value.evidenceIndexPath !== "string" ||
-      !samePath(value.evidenceIndexPath, active.allocation.evidenceIndexPath) ||
-      value.sourceRevision !== prepared.sourceRevision ||
-      !sha256Digest(value.sourceRevision) ||
-      !sha256Digest(value.structuralDigest) ||
-      !sha256Digest(value.handoffDigest) ||
-      !sha256Digest(value.evidenceIndexDigest) ||
-      (value.workDir !== null && value.workDir !== undefined && (
-        typeof value.workDir !== "string" || !samePath(value.workDir, prepared.workDir)
-      ))
-    ) {
-      throw launcherError(
-        "HANDOFF_RECEIPT_INVALID",
-        "Publish output is not bound to prepare, Source revision, and preallocated paths.",
-        prepared.workDir,
-      );
-    }
-    return {
-      sourceRevision: value.sourceRevision,
-      structuralDigest: value.structuralDigest,
-      handoffDigest: value.handoffDigest,
-      evidenceIndexDigest: value.evidenceIndexDigest,
-      consumerContract: decodeConsumerContract(value.consumerContract),
-      ...(typeof value.workDir === "string" ? { retainedWorkDir: path.resolve(value.workDir) } : {}),
-    };
-  }
-
-  private async verifyPublishedPair(
-    active: ActiveCompressionLaunch,
-    published: PublishedHelperOutput,
-  ): Promise<Readonly<{ markdown: Buffer; evidence: Buffer }>> {
-    try {
-      const [markdownIdentity, evidenceIdentity] = await Promise.all([
-        assertRegularNonLink(active.allocation.markdownPath, "Handoff Markdown"),
-        assertRegularNonLink(active.allocation.evidenceIndexPath, "Evidence Index"),
-      ]);
-      if (
-        markdownIdentity.ino !== 0 &&
-        markdownIdentity.dev === evidenceIdentity.dev &&
-        markdownIdentity.ino === evidenceIdentity.ino
-      ) {
-        throw launcherError(
-          "HANDOFF_PATH_INVALID",
-          "Published Handoff pair aliases one filesystem identity.",
-          active.allocation.artifactRoot,
-        );
-      }
-      const [realArtifactRoot, realMarkdown, realEvidence, markdown, evidence] = await Promise.all([
-        realpath(active.allocation.artifactRoot),
-        realpath(active.allocation.markdownPath),
-        realpath(active.allocation.evidenceIndexPath),
-        readFile(active.allocation.markdownPath),
-        readFile(active.allocation.evidenceIndexPath),
-      ]);
-      if (
-        !samePath(realMarkdown, active.allocation.markdownPath) ||
-        !samePath(realEvidence, active.allocation.evidenceIndexPath) ||
-        !isWithin(realArtifactRoot, realMarkdown) ||
-        !isWithin(realArtifactRoot, realEvidence)
-      ) {
-        throw launcherError(
-          "HANDOFF_PATH_INVALID",
-          "Published Handoff pair escaped or replaced its preallocated paths.",
-          active.allocation.artifactRoot,
-        );
-      }
-      if (
-        sha256Bytes(markdown) !== published.handoffDigest ||
-        sha256Bytes(evidence) !== published.evidenceIndexDigest
-      ) {
-        throw launcherError(
-          "HANDOFF_ARTIFACT_DIGEST_MISMATCH",
-          "Published Handoff bytes differ from publish output.",
-          active.allocation.artifactRoot,
-        );
-      }
-      const evidenceValue: unknown = JSON.parse(evidence.toString("utf8"));
-      if (
-        !isRecord(evidenceValue) ||
-        !isRecord(evidenceValue.source) ||
-        evidenceValue.source.sourceRevision !== published.sourceRevision
-      ) {
-        throw launcherError(
-          "HANDOFF_VERIFY_FAILED",
-          "Evidence Index does not bind the published Source revision.",
-          active.allocation.artifactRoot,
-        );
-      }
-      return { markdown, evidence };
-    } catch (error: unknown) {
-      if (error instanceof AppServerCompressionLauncherError) throw error;
-      const code = (error as NodeJS.ErrnoException).code === "ENOENT"
-        ? "HANDOFF_ARTIFACT_MISSING"
-        : "HANDOFF_VERIFY_FAILED";
-      throw launcherError(
-        code,
-        "Published Handoff pair is incomplete or unreadable.",
-        active.allocation.artifactRoot,
-        error,
-      );
-    }
-  }
-
-  private async verifyEvidence(
-    active: ActiveCompressionLaunch,
-    sourceRevision: Sha256Digest,
-  ): Promise<Readonly<Record<string, unknown>>> {
-    const output = await this.spawnVerifyEvidence(
-      active.skill.helperPath,
-      active.allocation.evidenceIndexPath,
-      active.request.workspace_identity.canonical_root,
-    );
-    const value = parseSingleJson(output, this.maximumCommandOutputBytes, "verify-evidence");
-    if (value.valid !== true || value.sourceRevision !== sourceRevision) {
-      throw launcherError(
-        "HANDOFF_VERIFY_FAILED",
-        "Host verify-evidence did not validate the published Source revision.",
-        active.allocation.artifactRoot,
-      );
-    }
-    return value;
-  }
-
-  private spawnVerifyEvidence(
-    helperPath: string,
-    evidencePath: string,
-    cwd: string,
-  ): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const child = spawn(
-        this.nodeExecutable,
-        [helperPath, "verify-evidence", evidencePath],
-        {
-          cwd,
-          env: process.env,
-          shell: false,
-          stdio: ["ignore", "pipe", "pipe"],
-          windowsHide: true,
-        },
-      );
-      const stdout: Buffer[] = [];
-      let stdoutBytes = 0;
-      let stderrBytes = 0;
-      let settled = false;
-      const fail = (error: AppServerCompressionLauncherError): void => {
-        if (settled) return;
-        settled = true;
-        clearTimeout(timeout);
-        child.kill();
-        reject(error);
-      };
-      const timeout = setTimeout(() => {
-        fail(launcherError("HANDOFF_VERIFY_FAILED", "Host verify-evidence timed out."));
-      }, this.verifyEvidenceTimeoutMs);
-      child.stdout.on("data", (chunk: Buffer | string) => {
-        const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-        stdoutBytes += bytes.length;
-        if (stdoutBytes + stderrBytes > this.maximumCommandOutputBytes) {
-          fail(launcherError("HANDOFF_VERIFY_FAILED", "Host verify-evidence output exceeded its bound."));
-          return;
-        }
-        stdout.push(bytes);
-      });
-      child.stderr.on("data", (chunk: Buffer | string) => {
-        const bytes = Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk);
-        stderrBytes += bytes.length;
-        if (stdoutBytes + stderrBytes > this.maximumCommandOutputBytes) {
-          fail(launcherError("HANDOFF_VERIFY_FAILED", "Host verify-evidence output exceeded its bound."));
-        }
-      });
-      child.once("error", (error) => {
-        fail(launcherError("HANDOFF_VERIFY_FAILED", "Host verify-evidence could not start.", undefined, error));
-      });
-      child.once("close", (code, signal) => {
-        if (settled) return;
-        settled = true;
-        clearTimeout(timeout);
-        if (code !== 0 || signal !== null) {
-          reject(launcherError("HANDOFF_VERIFY_FAILED", "Host verify-evidence failed."));
-          return;
-        }
-        resolve(Buffer.concat(stdout).toString("utf8"));
-      });
-    });
+    } satisfies Omit<HandoffResultReceipt, "artifact_digest">;
+    return { ...material, artifact_digest: sha256Json(material) };
   }
 
   private async resolveExportSkill(cwd: string): Promise<ResolvedExportSkill> {
@@ -1306,8 +842,8 @@ export class AppServerCompressionTaskLauncher implements CompressionTaskLauncher
   }
 
   private receiptMaterial(
-    receipt: HandoffReceiptV2,
-  ): Omit<HandoffReceiptV2, "artifact_digest"> {
+    receipt: HandoffResultReceipt,
+  ): Omit<HandoffResultReceipt, "artifact_digest"> {
     return {
       receipt_schema_version: receipt.receipt_schema_version,
       compression_task_id: receipt.compression_task_id,
@@ -1315,17 +851,6 @@ export class AppServerCompressionTaskLauncher implements CompressionTaskLauncher
       source_thread_id: receipt.source_thread_id,
       workflow_version: receipt.workflow_version,
       markdown_path: receipt.markdown_path,
-      evidence_index_path: receipt.evidence_index_path,
-      source_revision: receipt.source_revision,
-      structural_digest: receipt.structural_digest,
-      handoff_digest: receipt.handoff_digest,
-      evidence_index_digest: receipt.evidence_index_digest,
-      verify_evidence: receipt.verify_evidence,
-      verify_evidence_result_digest: receipt.verify_evidence_result_digest,
-      consumer_contract: receipt.consumer_contract,
-      ...(receipt.retained_work_dir === undefined
-        ? {}
-        : { retained_work_dir: receipt.retained_work_dir }),
     };
   }
 }

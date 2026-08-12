@@ -37,7 +37,7 @@ export interface RunCompactionState {
 export interface RunHandoffState {
   readonly compression_task_id: string;
   readonly markdown_path: string;
-  readonly evidence_index_path: string;
+  readonly evidence_index_path?: string;
   readonly artifact_digest: Sha256Digest;
   readonly continuation_task_id?: string;
 }

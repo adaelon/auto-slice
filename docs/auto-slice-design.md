@@ -62,7 +62,7 @@ RunState {
   handoff?: {
     compression_task_id
     markdown_path
-    evidence_index_path
+    evidence_index_path?  // schema 2/legacy replay only
     artifact_digest
     continuation_task_id
   }
@@ -136,8 +136,9 @@ SOURCE_INTERRUPTING:
 HANDOFF_EXPORTING:
   create fresh task in Source Thread workspace
   input exactly: $export-codex-handoff <source_thread_id>
-  require Markdown + Evidence Index atomic publication
-  require verify-evidence == PASS
+  wait for completed Compression Turn
+  take the first Markdown file address from its bounded final result
+  persist a schema 3 path-only receipt; Evidence Index and HANDOFF_VERIFY add zero fields
 ```
 
 Compression Task 必须满足 `export-codex-handoff` 的 Isolation Gate：它不是 Source Thread，不带源历史副本，也不会继续源工作。每个 `compaction_id` 最多创建一次 Compression Task；失败进入 `NEEDS_USER(handoff_export_failed)`，不自动重试。
@@ -148,13 +149,13 @@ Compression Task 必须满足 `export-codex-handoff` 的 Isolation Gate：它不
 CONTINUATION_STARTING:
   create second fresh task in the same workspace
   input exactly: one goal sentence with the Handoff Markdown absolute-path link, current_slice_id, optional commit, and checkpoint refresh
-  provide verified Handoff consumer contract out of band
+  provide the frozen synthesize-first consumer contract out of band
   acquire Project Write Lease(write_epoch)
   continue current_slice_id
   replace source_thread_id with continuation_task_id
 ```
 
-Continuation Task 必须先按 Handoff 的 Resume Policy 产出首份实质草案，再按允许的定向证据读取范围继续。只有任务创建成功、Handoff 校验通过且写租约取得后，状态才返回 `SLICE_RUNNING`。
+Continuation Task 必须先读取 selected path 的 bounded UTF-8 Markdown，并在 read-only Turn 产出首份实质草案，再按允许的定向证据读取范围继续。只有任务创建成功、Handoff 可读且写租约取得后，状态才返回 `SLICE_RUNNING`。
 
 一次成功接力后，只有出现新的 `compaction_id` 且期间已有持久进展，才允许再次进入本流程。这样不限制长任务的正常多次接力，同时禁止对同一压缩事件形成无限循环。
 

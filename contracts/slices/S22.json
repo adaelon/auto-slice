@@ -1,0 +1,109 @@
+{
+  "id": "S22",
+  "contract_version": 1,
+  "requires": ["S20", "S21"],
+  "objective": "以默认 CodexAppServerTaskHost 完成 Source → Compression → Continuation 三任务链的 hermetic 与本机 disposable live 双层验收；Compression completed 后只取最终结果中的第一个 Markdown 文件地址作为 Handoff。",
+  "exclusions": [
+    "不启动或复用用户真实 Source Run",
+    "不连接远端或执行远程 Git",
+    "不缩短真实 30 秒 Compaction Timeout、注入假租约或注入 revision provider/launcher",
+    "不把 hermetic fixture 成功解释为模型语义质量验收",
+    "不把 provider、worker 或 1200 秒预算 blocker 降级为 LIVE_CHAIN_PASS",
+    "不从 prepare、Frame、MAP、REDUCE 或 publish helper 命令及其输出构造 HandoffReceiptV2",
+    "不读取、校验或持久化 Evidence Index 与 HANDOFF_VERIFY 结果到新 receipt",
+    "不读取或持久化 Worker Content 到 Controller、RunStore、日志或验证报告"
+  ],
+  "inputs": [
+    {
+      "path": "artifacts/s20/completion-receipt.json",
+      "digest": "sha256:6bd0367648ee4226122c0b137a154b92de1b15aee7c4f77fa49cdf4d02764f1d",
+      "producer_slice": "S20"
+    },
+    {
+      "path": "artifacts/s21/completion-receipt.json",
+      "digest": "sha256:83712fb3baaa7c54f439136c40e237f46ff047f3415840df49fb133fa4660feb",
+      "producer_slice": "S21"
+    }
+  ],
+  "owned_paths": [
+    "contracts/slices/S22.json",
+    "src/controller/handoff/app-server-compression-task-launcher.ts",
+    "src/controller/handoff/compression-handoff-coordinator.ts",
+    "src/controller/handoff/index.ts",
+    "src/controller/handoff/types.ts",
+    "src/controller/continuation/app-server-continuation-launcher.ts",
+    "src/controller/continuation/continuation-coordinator.ts",
+    "src/controller/continuation/types.ts",
+    "src/controller/production/codex-app-server-task-host.ts",
+    "src/controller/production/file-production-runtime.ts",
+    "src/controller/state/types.ts",
+    "src/controller/state/validation.ts",
+    "CONTEXT.md",
+    "docs/adr/0011-export-owned-revision-and-fresh-task-launchers.md",
+    "scripts/run-s22-hermetic.mjs",
+    "scripts/run-s22-live-canary.mjs",
+    "scripts/s22-app-server-proxy.mjs",
+    "scripts/verify-s22.mjs",
+    "test/handoff.test.ts",
+    "test/fixtures/export-codex-handoff/scripts/export-handoff.mjs",
+    "test/fixtures/process/fake-s20-app-server.mjs",
+    "test/fixtures/process/fake-s22-app-server.mjs",
+    "test/fixtures/s22-export-codex-handoff/**",
+    "package.json",
+    "docs/切片方案-App-Server三任务接力解锁.md",
+    "docs/auto-slice-design.md",
+    "docs/implementation-slices.md",
+    "docs/架构.md",
+    "docs/代码链路.md",
+    "artifacts/s22/**"
+  ],
+  "budgets": {
+    "hermetic_timeout_boundary_ms": 30000,
+    "live_chain_budget_ms": 1200000,
+    "live_chain_budget_origin": "SOURCE_INTERRUPT",
+    "source_ready_timeout_ms": 120000,
+    "task_roots": 3,
+    "protocol_steps": 8,
+    "receipt_command_evidence_items": 0,
+    "receipt_final_result_file_addresses": 1,
+    "receipt_evidence_index_addresses": 0,
+    "host_verify_evidence_calls": 0,
+    "controller_worker_content_canary_hits": 0,
+    "remote_connections": 0,
+    "user_source_runs": 0
+  },
+  "checks": [
+    { "id": "surface", "argv": ["node", "scripts/verify-s22.mjs", "--surface-only"], "expected_exit_code": 0 },
+    { "id": "schema_projection", "argv": ["node", "scripts/verify-s17.mjs", "--schema-only"], "expected_exit_code": 0 },
+    { "id": "build", "argv": ["npm", "run", "build"], "expected_exit_code": 0 },
+    { "id": "typecheck", "argv": ["npm", "run", "typecheck"], "expected_exit_code": 0 },
+    {
+      "id": "target_test",
+      "argv": [
+        "node",
+        "--test",
+        "dist/test/app-server-protocol-v2.test.js",
+        "dist/test/handoff.test.js",
+        "dist/test/continuation.test.js",
+        "dist/test/file-production-runtime.test.js",
+        "dist/test/production-orchestrator.test.js"
+      ],
+      "expected_exit_code": 0
+    },
+    { "id": "hermetic_chain", "argv": ["node", "scripts/run-s22-hermetic.mjs"], "expected_exit_code": 0 },
+    { "id": "live_chain", "argv": ["node", "scripts/run-s22-live-canary.mjs"], "expected_exit_code": 0 },
+    { "id": "test", "argv": ["npm", "run", "test"], "expected_exit_code": 0 },
+    { "id": "lint", "argv": ["npm", "run", "lint"], "expected_exit_code": 0 },
+    { "id": "plugin_validation", "argv": ["npm", "run", "validate:plugin"], "expected_exit_code": 0 },
+    { "id": "markdown_links", "argv": ["npm", "run", "verify:markdown-links"], "expected_exit_code": 0 },
+    { "id": "diff_check", "argv": ["git", "diff", "HEAD", "--check", "--"], "expected_exit_code": 0 }
+  ],
+  "expected_artifacts": [
+    { "path": "artifacts/s22/hermetic-chain-report.json", "kind": "default_host_hermetic_chain_evidence" },
+    { "path": "artifacts/s22/live-chain-report.json", "kind": "disposable_real_app_server_chain_evidence" },
+    { "path": "artifacts/s22/default-production-chain-report.json", "kind": "two_layer_production_unlock_evidence" },
+    { "path": "artifacts/s22/completion-receipt.json", "kind": "completion_receipt" },
+    { "path": "docs/代码链路.md", "kind": "code_path_index" },
+    { "path": "docs/架构.md", "kind": "implementation_architecture" }
+  ]
+}

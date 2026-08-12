@@ -19,15 +19,19 @@ import { buildCompressionPrompt } from "../production/prompt-builder.js";
 import { CompressionHandoffError } from "./errors.js";
 import {
   DEFAULT_HANDOFF_EXPORT_TIMEOUT_MS,
+  HANDOFF_RESULT_RECEIPT_SCHEMA_VERSION,
+  HANDOFF_RESULT_WORKFLOW_VERSION,
   HANDOFF_RECEIPT_SCHEMA_VERSION,
   HANDOFF_WORKFLOW_VERSION,
   type CompressionHandoffCoordinatorOptions,
   type CompressionHandoffDecision,
   type CompressionHandoffFailureCode,
   type CompressionHandoffFailureReason,
+  type CompressionHandoffReceipt,
   type CompressionRequest,
   type CompressionTaskLaunchReceipt,
   type HandoffReceiptV2,
+  type HandoffResultReceipt,
   type SynthesizeFirstConsumerContract,
 } from "./types.js";
 
@@ -62,6 +66,16 @@ const HANDOFF_RECEIPT_KEYS = [
   "verify_evidence",
   "verify_evidence_result_digest",
   "consumer_contract",
+  "artifact_digest",
+] as const;
+
+const HANDOFF_RESULT_RECEIPT_KEYS = [
+  "receipt_schema_version",
+  "compression_task_id",
+  "compression_turn_id",
+  "source_thread_id",
+  "workflow_version",
+  "markdown_path",
   "artifact_digest",
 ] as const;
 
@@ -177,7 +191,7 @@ function decodeConsumerContract(value: unknown): SynthesizeFirstConsumerContract
   return value as unknown as SynthesizeFirstConsumerContract;
 }
 
-function artifactDigest(receipt: Omit<HandoffReceiptV2, "artifact_digest">): Sha256Digest {
+function artifactDigest(receipt: unknown): Sha256Digest {
   return sha256Json(receipt);
 }
 
@@ -224,6 +238,7 @@ function reasonForDiagnostic(
   if (code === "COMPRESSION_TURN_FAILED") return "compression_turn_failed";
   if (code === "COMMAND_CHAIN_INVALID") return "command_chain_invalid";
   if (code === "HELPER_OUTPUT_INVALID") return "helper_output_invalid";
+  if (code === "HANDOFF_RESULT_INVALID") return "handoff_result_invalid";
   if (code === "HANDOFF_PATH_INVALID") return "handoff_path_invalid";
   if (code === "HANDOFF_ARTIFACT_MISSING") return "handoff_artifact_missing";
   if (code === "HANDOFF_ARTIFACT_DIGEST_MISMATCH") {
@@ -388,9 +403,9 @@ export class CompressionHandoffCoordinator {
           ...(completed.diagnostic_code === undefined
             ? {}
             : { diagnostic_code: completed.diagnostic_code }),
-          ...(received.retained_work_dir === undefined
-            ? {}
-            : { retained_work_dir: received.retained_work_dir }),
+          ...("retained_work_dir" in received
+            ? { retained_work_dir: received.retained_work_dir }
+            : {}),
         },
       );
     }
@@ -405,7 +420,9 @@ export class CompressionHandoffCoordinator {
           handoff: {
             compression_task_id: received.compression_task_id,
             markdown_path: received.markdown_path,
-            evidence_index_path: received.evidence_index_path,
+            ...("evidence_index_path" in received
+              ? { evidence_index_path: received.evidence_index_path }
+              : {}),
             artifact_digest: received.artifact_digest,
           },
           last_error: null,
@@ -521,7 +538,7 @@ export class CompressionHandoffCoordinator {
     request: CompressionRequest,
     state: RunState,
     idempotencyKey: Sha256Digest,
-  ): Promise<HandoffReceiptV2 | CompressionHandoffError> {
+  ): Promise<CompressionHandoffReceipt | CompressionHandoffError> {
     let raw: unknown;
     try {
       raw = await this.bounded(
@@ -650,7 +667,10 @@ export class CompressionHandoffCoordinator {
     value: unknown,
     launch: CompressionTaskLaunchReceipt,
     request: CompressionRequest,
-  ): Promise<HandoffReceiptV2> {
+  ): Promise<CompressionHandoffReceipt> {
+    if (isRecord(value) && exactKeys(value, HANDOFF_RESULT_RECEIPT_KEYS)) {
+      return this.decodeHandoffResultReceipt(value, launch, request);
+    }
     if (!isRecord(value) || !exactKeys(value, HANDOFF_RECEIPT_KEYS, ["retained_work_dir"])) {
       throw new CompressionHandoffError(
         "handoff_integrity_failed",
@@ -747,6 +767,46 @@ export class CompressionHandoffCoordinator {
       ...material,
       artifact_digest: value.artifact_digest,
     };
+  }
+
+  private decodeHandoffResultReceipt(
+    value: Readonly<Record<string, unknown>>,
+    launch: CompressionTaskLaunchReceipt,
+    request: CompressionRequest,
+  ): HandoffResultReceipt {
+    if (
+      value.receipt_schema_version !== HANDOFF_RESULT_RECEIPT_SCHEMA_VERSION ||
+      value.workflow_version !== HANDOFF_RESULT_WORKFLOW_VERSION ||
+      value.compression_task_id !== launch.compression_task_id ||
+      value.source_thread_id !== request.source_thread_id ||
+      typeof value.compression_turn_id !== "string" ||
+      !CANONICAL_UUID.test(value.compression_turn_id) ||
+      typeof value.markdown_path !== "string" ||
+      !path.isAbsolute(value.markdown_path) ||
+      !sha256Digest(value.artifact_digest)
+    ) {
+      throw new CompressionHandoffError(
+        "handoff_integrity_failed",
+        "Compression final-result receipt is outside the path-only schema.",
+        { reason: "handoff_receipt_invalid" },
+      );
+    }
+    const material = {
+      receipt_schema_version: value.receipt_schema_version,
+      compression_task_id: value.compression_task_id,
+      compression_turn_id: value.compression_turn_id,
+      source_thread_id: value.source_thread_id,
+      workflow_version: value.workflow_version,
+      markdown_path: path.normalize(value.markdown_path),
+    } satisfies Omit<HandoffResultReceipt, "artifact_digest">;
+    if (artifactDigest(material) !== value.artifact_digest) {
+      throw new CompressionHandoffError(
+        "handoff_integrity_failed",
+        "Compression final-result receipt fields do not match artifact_digest.",
+        { reason: "handoff_artifact_digest_mismatch" },
+      );
+    }
+    return { ...material, artifact_digest: value.artifact_digest };
   }
 
   private async verifyPublishedArtifacts(
@@ -1183,7 +1243,7 @@ export class CompressionHandoffCoordinator {
   private isTerminalSuccess(
     state: RunState,
     expectedStateVersion: number,
-    receipt: HandoffReceiptV2,
+    receipt: CompressionHandoffReceipt,
   ): boolean {
     return state.status === "CONTINUATION_STARTING" &&
       state.state_version === expectedStateVersion + 2 &&
@@ -1195,7 +1255,7 @@ export class CompressionHandoffCoordinator {
     state: RunState,
     outcome: CompressionHandoffDecision["outcome"],
     effectIdempotencyKey: Sha256Digest,
-    receipt: HandoffReceiptV2,
+    receipt: CompressionHandoffReceipt,
   ): CompressionHandoffDecision {
     if (
       state.status !== "CONTINUATION_STARTING" ||

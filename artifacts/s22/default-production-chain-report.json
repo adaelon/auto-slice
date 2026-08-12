@@ -1,0 +1,209 @@
+{
+  "schema_version": 1,
+  "lease_heartbeat_statuses": [
+    "PREPARING",
+    "SLICE_RUNNING",
+    "COMPACTION_WAIT",
+    "SOURCE_INTERRUPTING",
+    "HANDOFF_EXPORTING",
+    "CONTINUATION_STARTING",
+    "VERIFYING",
+    "COMMITTING",
+    "CHECKPOINTING"
+  ],
+  "hermetic_gate": {
+    "timeout_boundary_ms": 30000,
+    "default_host_composition": true,
+    "fake_app_server": true,
+    "real_export_helper_fixture": true
+  },
+  "live_gate": {
+    "codex_cli_version": "0.146.0",
+    "disposable_workspace": true,
+    "live_chain_budget_ms": 1200000,
+    "live_chain_budget_origin": "SOURCE_INTERRUPT",
+    "source_ready_timeout_ms": 120000,
+    "blocker_is_not_pass": true
+  },
+  "prerequisite_completion_receipts": [
+    {
+      "slice_id": "S01",
+      "contract_digest": "sha256:65bf82aaec4e6362b8971323c1a7e169eabf456455dc7603344df8beaedf448d",
+      "contract_binding": "historical_receipt",
+      "receipt_digest": "sha256:244e7b2d75a27ff77e9e0747a8553c09b21d6b79372133bf22e7474e1cbc4ef9"
+    },
+    {
+      "slice_id": "S02",
+      "contract_digest": "sha256:44ddff75f353160659331c24d2ae9e780ab7c380bec5b05eb6edf01b47e5a1e0",
+      "contract_binding": "historical_receipt",
+      "receipt_digest": "sha256:21897c4a55c145e285109ea2c0f065356f94249616497b2d8dd2225762032d98"
+    },
+    {
+      "slice_id": "S03",
+      "contract_digest": "sha256:2f3b231fc9652b6a464a8787e7705d9853091b539adc360e08f5ca9ac327b922",
+      "contract_binding": "historical_receipt",
+      "receipt_digest": "sha256:2272647e961ac4adacb39d74eb53c68145b4206d28be2f3f679eb5a05730d02e"
+    },
+    {
+      "slice_id": "S04",
+      "contract_digest": "sha256:14abc23f94f6d8f75f291c0dfb04b318434f0edaae5d702b1c10485066ca63e4",
+      "contract_binding": "historical_receipt",
+      "receipt_digest": "sha256:6f4b8e43ed3d82d294c46049b904bb20723583a901a1d930d48cfb4d4b41110a"
+    },
+    {
+      "slice_id": "S05",
+      "contract_digest": "sha256:d785aefe0a2215e4c58c74bcccf4e8a2ab97a5f6288c815b84fdfb7e8f5bcd5a",
+      "contract_binding": "historical_receipt",
+      "receipt_digest": "sha256:d89d90ac8e26712b8b1d52243fcb983d1346a83a8c55331d6b6416cc6ebf9454"
+    },
+    {
+      "slice_id": "S06",
+      "contract_digest": "sha256:22ca58a7eb60fbda3cf9218d6a6e16fc54be61d2b867130946a66b762e194861",
+      "contract_binding": "historical_receipt",
+      "receipt_digest": "sha256:aae657083738032e51a1e3c980ae64c9e53f789d7cc970e96d64a2c46e790735"
+    },
+    {
+      "slice_id": "S07",
+      "contract_digest": "sha256:59f4695702105d7807f8984bab2d0cada941db486d831cc9681ef7c0868778b2",
+      "contract_binding": "historical_receipt",
+      "receipt_digest": "sha256:0d96833541fd3c3b5ac499d3a04563533298c48efe02ae06790cb42b41606508"
+    },
+    {
+      "slice_id": "S08",
+      "contract_digest": "sha256:7dd872284c0b9cf9dcd24e5672cc8a44f93130fd7149a9c02ddce0bc1f807f4e",
+      "contract_binding": "historical_receipt",
+      "receipt_digest": "sha256:a9a6239e512319c8beb40cd1b08ec983f050dd8881a021d7227c4e344803de7b"
+    },
+    {
+      "slice_id": "S09",
+      "contract_digest": "sha256:74bce51247ca22f0276fe7284d3312608dae7e6b5a8adc1cb37c044dac1c5bc1",
+      "contract_binding": "historical_receipt",
+      "receipt_digest": "sha256:f749c280d37481343eac9ef04b9a965a43b7c1c54a092b559507c15d81f320ec"
+    },
+    {
+      "slice_id": "S10",
+      "contract_digest": "sha256:2bbb3b73223e71c65cc08f92373aa31c2851422a8563bfc69acd8b94353be269",
+      "contract_binding": "historical_receipt",
+      "receipt_digest": "sha256:fd72be19f5f36168dea8b3f70ec4d14a24814ab3bbf09d7fa87dbf7804c493b1"
+    },
+    {
+      "slice_id": "S11",
+      "contract_digest": "sha256:07044eeb55b34142e3ecbd5cb9d09ecdd58b227061b41e9b145f34c9b61bf94f",
+      "contract_binding": "historical_receipt",
+      "receipt_digest": "sha256:ebe0b86f87399baf9f37dfab8fdd96188d0756a0ca3de0cc39b226c9f0a9e169"
+    },
+    {
+      "slice_id": "S12",
+      "contract_digest": "sha256:d720d72f50196b0b3bc0918dd49d317450189cfacf40a38315acb9e68df639e8",
+      "contract_binding": "historical_receipt",
+      "receipt_digest": "sha256:a684a4578212037b07dde6bd58a2142e5b2ba3cacd9bcbcf3830f878449bea72"
+    },
+    {
+      "slice_id": "S13",
+      "contract_digest": "sha256:2743968d8833125764212d80470a6422de4d7eaa33d933624de7750b2f04ae1d",
+      "contract_binding": "historical_receipt",
+      "receipt_digest": "sha256:d8ea9df68eb8e46078bc60f5fffa60eb6c91a936c65b0d0c4221f9d3ab3b2bbf"
+    },
+    {
+      "slice_id": "S14",
+      "contract_digest": "sha256:6c5ad5398a9296661c50f68d0c3d57bcdefea2fb489e1e039516db260ebf494e",
+      "contract_binding": "historical_receipt",
+      "receipt_digest": "sha256:09f17d0ab66d78f3c757870a05c5f52ea00d0f6b395b21f88f73e8c81d972e45"
+    },
+    {
+      "slice_id": "S15",
+      "contract_digest": "sha256:1152e7b4c6f35cc6c088496ad84d5b47bbe66bdf5ecbfccb5d7d95c15cb091ce",
+      "contract_binding": "historical_receipt",
+      "receipt_digest": "sha256:c841f1599586342b8ab6e82805dedf0345f4c91b548a10a9b641952475029738"
+    },
+    {
+      "slice_id": "S16",
+      "contract_digest": "sha256:32161b4309e104dad059bdc53ca028a3d4c45661732ae0d5b690d2af0ac1d956",
+      "contract_binding": "historical_receipt",
+      "receipt_digest": "sha256:e4a9407df3ad604761b5ac2a95cd8e5d022c69780e5e79a2bd3da880fec7169a"
+    },
+    {
+      "slice_id": "S17",
+      "contract_digest": "sha256:adb27b324d1a57e134510069db4b0ed60947e78a0c77271a20a2a49f0167ddb6",
+      "contract_binding": "current",
+      "receipt_digest": "sha256:0d37c3821893197fd9c07aea0a851c22a4ef0a9f090ba05c59af6734747b2ec2"
+    },
+    {
+      "slice_id": "S18",
+      "contract_digest": "sha256:3ca0ac9daa61a78798431608a9b49381678901c878a42a105245a879446cecca",
+      "contract_binding": "current",
+      "receipt_digest": "sha256:2268cf6f76d9bc93c18d54420fe5cafffb0a351da7f6434b146f84dd5e179686"
+    },
+    {
+      "slice_id": "S19",
+      "contract_digest": "sha256:bfc612011644500909907b73b0d216839c1660edbf3b8bc8b4ed47114440a1f7",
+      "contract_binding": "current",
+      "receipt_digest": "sha256:0ab077d66dd6e4f1a042bbd58fcce962cfe7bb6b21bb3fdd73da97bd6ef837d2"
+    },
+    {
+      "slice_id": "S20",
+      "contract_digest": "sha256:a149ace2ac80455c589a2e5d992efd94115f4b2b73dbd7baf38e41c6bb53af8c",
+      "contract_binding": "current",
+      "receipt_digest": "sha256:6bd0367648ee4226122c0b137a154b92de1b15aee7c4f77fa49cdf4d02764f1d"
+    },
+    {
+      "slice_id": "S21",
+      "contract_digest": "sha256:fe8e1a97731c4c240ec22c9c1ffcc2ba04372ae785e9cf4e7f7f098eb414c820",
+      "contract_binding": "current",
+      "receipt_digest": "sha256:83712fb3baaa7c54f439136c40e237f46ff047f3415840df49fb133fa4660feb"
+    }
+  ],
+  "surfaces": [
+    {
+      "path": "src/controller/production/file-production-runtime.ts",
+      "digest": "sha256:7146f9466b6a0ec26e6bf3922c6f015c45a086e1f9aac723502e3de6132cea49"
+    },
+    {
+      "path": "scripts/run-s22-hermetic.mjs",
+      "digest": "sha256:7b853bf2d2a187a47fc593af15a42f968ffeb13211b634fc6adbdc18799db374"
+    },
+    {
+      "path": "scripts/run-s22-live-canary.mjs",
+      "digest": "sha256:164d4df556bfa02b513ad8c0d289283f1b5f907e2e4a3faf2a020ff4ae2c6b96"
+    },
+    {
+      "path": "scripts/s22-app-server-proxy.mjs",
+      "digest": "sha256:cb951255f7b348714a00163117b4be092ab74a18af629b4740a837542020d6ca"
+    },
+    {
+      "path": "test/fixtures/process/fake-s22-app-server.mjs",
+      "digest": "sha256:bf202116c0d887699a0553e10cdd972c31a6f46bfe70299eec30a29fc1fd356a"
+    },
+    {
+      "path": "test/fixtures/s22-export-codex-handoff/SKILL.md",
+      "digest": "sha256:959312ad3ad42678dc897a12641cd5894df0dc250d5f08ccd8d09b11e6910d1c"
+    },
+    {
+      "path": "test/fixtures/s22-export-codex-handoff/scripts/export-handoff.mjs",
+      "digest": "sha256:56403c9fbb199ac440bb7d3305aeac7248763b8110fad26345f2ea3e9083762a"
+    },
+    {
+      "path": "src/controller/handoff/app-server-compression-task-launcher.ts",
+      "digest": "sha256:28f3670f9cf9621924dd016198b17bac02cd77fc9ed57f52fd1a6647cd4a3870"
+    }
+  ],
+  "slice_id": "S22",
+  "result": "PASS",
+  "production_unlocked": true,
+  "surface_digest": "sha256:49ca8a736243259eff1b81906c0d7f7b15a33870ef273769a09b5be83acc6895",
+  "gates": {
+    "hermetic": "HERMETIC_CHAIN_PASS",
+    "live": "LIVE_CHAIN_PASS"
+  },
+  "negative_contracts": [
+    "provider timing, worker capacity, and 1200 second budget failures remain blockers",
+    "a fake or shortened lease cannot satisfy the real default handoff lifecycle",
+    "Source interruption and Compression request contain zero revision fields",
+    "Compression helper command trajectories provide zero receipt fields",
+    "the first Markdown file address in the Compression final result is the sole Handoff path",
+    "Evidence Index and HANDOFF_VERIFY provide zero receipt fields",
+    "Controller, RunStore, logs, traces, and reports contain zero Worker Content canary bytes",
+    "a hermetic PASS without a disposable live PASS cannot unlock production",
+    "no user Source Run or remote Git connection participates in either gate"
+  ]
+}

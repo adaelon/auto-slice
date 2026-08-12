@@ -982,7 +982,37 @@ launcher failure code -> existing ContinuationFailureReason -> NEEDS_USER/frozen
 
 **Unlocks**：S22。
 
-## 23. 计划级验收矩阵
+## 23. S22 默认生产链验收与 path-only receipt
+
+**状态**：COMPLETE；发布证据见 `artifacts/s22/default-production-chain-report.json` 与 `artifacts/s22/completion-receipt.json`。
+
+**Requires**：S20、S21、ADR-0011 §5 与三任务接力切片方案 `## S22`。
+
+**Objective**：以默认 `CodexAppServerTaskHost` 完成 hermetic 与本机 disposable live 两层三任务验收，并把新生产 receipt 收敛为 completed Compression Turn 最终结果中的首个 Markdown 地址。
+
+**Exclusions**：不启动或复用用户 Source Run；不连接远端 Git；不读取 Evidence Index、`HANDOFF_VERIFY` 或 Worker Content 进入 Controller/RunStore/report；不把 provider、worker 或 1200 秒预算 blocker 当作 PASS。
+
+**Owned outputs**：`contracts/slices/S22.json`、schema 3 receipt/coordinator/Continuation 兼容边界、hermetic/live harness、process fixtures、`verify-s22`、架构/代码链路与发布证据。
+
+**Production contract**：
+
+```text
+completed Compression Turn + bounded final agentMessage
+  -> first absolute local Markdown address
+  -> HandoffResultReceipt(schema 3, identity/path/canonical digest only)
+  -> Continuation reads bounded UTF-8 Markdown from selected path
+Evidence Index / HANDOFF_VERIFY / helper command output -> zero receipt fields
+Source interrupt/read -> Compression skills/list/thread/start/turn/start
+  -> Continuation thread/start/readOnly/workspaceWrite -> exact eight-step trace
+```
+
+**Deterministic checks**：surface/build/typecheck；104 个目标测试；真实 30 秒 hermetic boundary；本机 0.146.0 disposable live；三 UUID distinct；首地址消费、Evidence Index ignored、Host verify calls=0、canary hits=0；全量 tests/lint/plugin/Markdown/diff check。
+
+**Completion evidence**：`hermetic-chain-report.json`、`live-chain-report.json`、`default-production-chain-report.json`、S22 `CompletionReceipt` 与代码链路条目。
+
+**Unlocks**：默认 Source → Compression → Continuation 生产链。
+
+## 24. 计划级验收矩阵
 
 实现开始前和每个切片完成后，使用下表检查计划没有被悄悄削弱：
 
@@ -1006,7 +1036,7 @@ launcher failure code -> existing ContinuationFailureReason -> NEEDS_USER/frozen
 | App Server 0.146.0 exact wire 字段与 discriminant fail closed | S17 | S22 |
 | Source interruption revisionless 且 export 独占内容 revision | S18 | S22 |
 | fresh task 共用单 client、顺序 Turn 且私有内容不进 Controller | S19 | S22 |
-| Compression skill、attempt 与 receipt 只取确定性机器证据 | S20 | S22 |
+| Compression skill/attempt 有界，schema 3 receipt 只取 completed Turn 首个 Markdown 地址 | S20 | S22 |
 | Continuation 双 Turn、Ready/epoch 门禁与 receipt 只取私有终态投影 | S21 | S22 |
 
 任何一行缺少对应测试、回执或产物 digest，相关切片不得标记 `COMPLETE`。

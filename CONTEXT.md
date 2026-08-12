@@ -37,8 +37,8 @@ _Avoid_: 普通总结、聊天复制
 _Avoid_: Source 工作区默认文件名、覆盖旧 Handoff、Slice 开发写权限
 
 **Handoff Receipt**:
-Host launcher 只依据已绑定 Compression thread/turn 的 export helper 机器发布结果、Host 预分配路径、已发布文件字节和 `verify-evidence` 结果构造的有界接力证明。
-_Avoid_: 模型最终回复、请求字段回显、测试 launcher 自报
+Host launcher 等待已绑定 Compression Turn 正常结束后，从其最终结果中提取第一个 Markdown 文件地址，并绑定该地址与最终 Markdown 字节构造 path-only 接力证明。
+_Avoid_: Evidence Index、`HANDOFF_VERIFY`、prepare/Frame/MAP/REDUCE/publish helper 命令或输出、请求字段回显、测试 launcher 自报
 
 **Continuation Task**:
 消费已验证 Handoff、恢复同一 Slice 工作的第二个全新 Codex 任务。

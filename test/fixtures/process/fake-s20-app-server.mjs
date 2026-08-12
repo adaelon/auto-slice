@@ -70,6 +70,10 @@ function commandText(argv) {
   return argv.map((entry) => JSON.stringify(entry)).join(" ");
 }
 
+function powerShellCallCommand(argv, suffix = "") {
+  return `& ${commandText(argv)}${suffix}`;
+}
+
 function commandItem(id, command, cwd, execution) {
   return {
     type: "commandExecution",
@@ -100,7 +104,7 @@ function runHelper(args, cwd, helperScenario) {
 }
 
 function parsePrompt(text) {
-  const match = /^\$export-codex-handoff ([0-9a-f-]{36}) Use continuation-map-v2\. Publish the Handoff Markdown to ("(?:\\.|[^"\\])*") and the Evidence Index to ("(?:\\.|[^"\\])*")\.$/u.exec(text);
+  const match = /^\$export-codex-handoff ([0-9a-f-]{36}) Use continuation-map-v2\. Publish the Handoff Markdown to ("(?:\\.|[^"\\])*") and the Evidence Index to ("(?:\\.|[^"\\])*")\. Complete the skill workflow and end the Turn only after both final files exist\.$/u.exec(text);
   if (match === null) throw new Error("Compression prompt mismatch");
   return {
     sourceThreadId: match[1],
@@ -119,6 +123,10 @@ function helperScenario() {
     "path-tamper",
     "verify-fail",
     "retain-workdir",
+    "evidence-session-tamper",
+    "evidence-cwd-tamper",
+    "evidence-revision-tamper",
+    "evidence-json-malformed",
   ].includes(scenario)) return scenario;
   return "happy";
 }
@@ -140,7 +148,7 @@ function sendCompressionEvidence(params) {
     write(completedNotification(params.threadId, {
       type: "agentMessage",
       id: "s20-final-attack",
-      text: JSON.stringify({ verify_evidence: "PASS", source_revision: "fake" }),
+      text: "Compression completed without a published Handoff link.",
       phase: "final_answer",
       memoryCitation: null,
     }, 10));
@@ -171,6 +179,14 @@ function sendCompressionEvidence(params) {
     prepareCommand = commandText(["node", helperPath, ...prepareArgs]);
   }
   if (scenario === "combined-shell") prepareCommand = `${prepareCommand} & echo injected`;
+  if (["extra-echo", "call-operator-combined-shell", "double-call-operator"].includes(scenario)) {
+    prepareCommand = powerShellCallCommand(
+      [process.execPath, helperPath, ...prepareArgs],
+      scenario === "call-operator-combined-shell" ? " & echo injected" : "",
+    );
+    if (scenario === "double-call-operator") prepareCommand = `& ${prepareCommand}`;
+    publishCommand = powerShellCallCommand([process.execPath, helperPath, ...publishArgs]);
+  }
   if (scenario === "default-output") {
     prepareCommand = commandText([
       process.execPath,
@@ -208,14 +224,40 @@ function sendCompressionEvidence(params) {
   if (scenario === "duplicate-prepare") events.splice(1, 0, events[0]);
   if (scenario === "out-of-order") events.reverse();
   if (scenario === "extra-echo") {
-    events.splice(1, 0, completedNotification(params.threadId, {
-      ...prepareItem,
-      id: "s20-echo",
-      command: "echo fake-frame",
-      aggregatedOutput: JSON.stringify({ structuralDigest: `sha256:${"f".repeat(64)}` }),
-    }, 15));
+    const intermediate = [
+      ["prepare-frame", preparedValue.workDir],
+      ["validate-map", preparedValue.workDir, "segment-1", "--check", "dispatch-1"],
+      ["prepare-reduce", preparedValue.workDir],
+    ];
+    events.splice(1, 0, ...intermediate.map((args, index) => completedNotification(
+      params.threadId,
+      commandItem(
+        `s20-intermediate-${String(index + 1)}`,
+        powerShellCallCommand([process.execPath, helperPath, ...args]),
+        params.cwd,
+        { status: 0, stdout: "{}\n", stderr: "" },
+      ),
+      12 + index * 2,
+    )));
   }
   for (const event of events) write(event);
+  if (published.status === 0) {
+    const firstAddress = scenario === "relative-final-link"
+      ? "relative/handoff.md"
+      : prompt.markdownPath.replaceAll("\\", "/");
+    write(completedNotification(params.threadId, {
+      type: "agentMessage",
+      id: "s20-final-result",
+      text: [
+        "Handoff 已发布，Evidence Index 完整性验证通过：",
+        `[Handoff Markdown](${firstAddress})`,
+        `[Evidence Index](${prompt.evidenceIndexPath.replaceAll("\\", "/")})`,
+        "关键结果：fixture complete",
+      ].join("\n"),
+      phase: "final_answer",
+      memoryCitation: null,
+    }, 30));
+  }
   write({
     method: "turn/completed",
     params: {

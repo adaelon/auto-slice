@@ -13,6 +13,8 @@ import type { InterruptReceipt } from "../thread-control/index.js";
 
 export const HANDOFF_RECEIPT_SCHEMA_VERSION = 2 as const;
 export const HANDOFF_WORKFLOW_VERSION = 2 as const;
+export const HANDOFF_RESULT_RECEIPT_SCHEMA_VERSION = 3 as const;
+export const HANDOFF_RESULT_WORKFLOW_VERSION = 3 as const;
 export const LEGACY_HANDOFF_WORKFLOW_VERSION = "v2" as const;
 export const DEFAULT_HANDOFF_EXPORT_TIMEOUT_MS = 600_000 as const;
 
@@ -93,6 +95,22 @@ export interface HandoffReceiptV2 {
   readonly retained_work_dir?: string;
 }
 
+/**
+ * S22 receipt whose only Compression-owned artifact field is the first local
+ * file address in the completed Compression Turn's final answer.
+ */
+export interface HandoffResultReceipt {
+  readonly receipt_schema_version: typeof HANDOFF_RESULT_RECEIPT_SCHEMA_VERSION;
+  readonly compression_task_id: string;
+  readonly compression_turn_id: string;
+  readonly source_thread_id: string;
+  readonly workflow_version: typeof HANDOFF_RESULT_WORKFLOW_VERSION;
+  readonly markdown_path: string;
+  readonly artifact_digest: Sha256Digest;
+}
+
+export type CompressionHandoffReceipt = HandoffReceiptV2 | HandoffResultReceipt;
+
 export interface CompressionTaskLauncher {
   start(request: CompressionRequest): Promise<unknown>;
   awaitHandoff(
@@ -135,7 +153,7 @@ export interface CompressionHandoffDecision {
   readonly state_version: number;
   readonly status: Extract<RunStatus, "CONTINUATION_STARTING">;
   readonly effect_idempotency_key: Sha256Digest;
-  readonly receipt: HandoffReceiptV2;
+  readonly receipt: CompressionHandoffReceipt;
 }
 
 export type CompressionHandoffFailureReason =
@@ -164,6 +182,7 @@ export type CompressionHandoffFailureReason =
   | "compression_turn_failed"
   | "command_chain_invalid"
   | "helper_output_invalid"
+  | "handoff_result_invalid"
   | "handoff_receipt_invalid"
   | "handoff_workflow_version_mismatch"
   | "handoff_source_mismatch"

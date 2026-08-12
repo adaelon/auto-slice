@@ -1,6 +1,6 @@
 # App Server 三任务接力解锁切片方案
 
-> 状态：Implementation in progress（2026-08-11，S17–S21 已完成并分别由 release verifier 锁定，下一刀 S22）。S15/S16 的回执保留为历史证据，但不再代表真实三任务链可用。
+> 状态：Complete（2026-08-12，S17–S22 已实现；S22 的 hermetic/live 双门禁解锁默认三任务链）。S15/S16 的回执保留为历史证据，但不再代表真实三任务链可用。
 > 权威边界：[`CONTEXT.md`](../CONTEXT.md)、[ADR-0011](adr/0011-export-owned-revision-and-fresh-task-launchers.md)、[OpenAI Docs: Codex App Server](https://developers.openai.com/codex/app-server/)。
 
 ## 目标与排除
@@ -10,7 +10,7 @@
 - 删除 Source Interruption 的 revision 前置门禁，只证明 Turn 已停且 Source Thread 仍持久可读。
 - 让 `export-codex-handoff` 成为 `Source Evidence Revision` 的唯一签发者和发布前复核者。
 - 用真实 App Server `thread/start`/`turn/start` 实现 Compression 与 Continuation launcher。
-- 从 export 机器输出、发布字节和 `verify-evidence` 构造可信 `Handoff Receipt`。
+- 从 completed Compression Turn 的最终结果取第一个 Markdown 地址，构造 path-only `Handoff Receipt`。
 - 用默认生产 Host 证明 Source → Compression → Continuation，无注入 revision provider 或内存 launcher。
 
 **不做**:
@@ -60,7 +60,7 @@ turn/interrupt -> structured terminal
 | --- | --- | --- |
 | OpenAI Docs | `thread/start` 创建新 conversation；`turn/start` 启动 Turn；显式 skill 调用同时发送 `$<skill-name>` text 与 `skill` item；`skills/list` 可按 cwd 强制刷新 | 官方 App Server 页面 |
 | 本机版本事实 | `codex-cli 0.146.0`；`ThreadStartParams.sandbox` 为 kebab-case；`TurnStartParams.sandboxPolicy.type` 为 camelCase tagged enum；text 的 `text_elements`、workspaceWrite 的两个 temp 排除位在生成 TS 中必填；completed item 暴露 command/agent message 机器字段 | `codex app-server generate-ts/json-schema` |
-| export workflow 事实 | rollout 原始字节 hash 为 `sha256:<64hex>`；publish 前复核 Source；输出双文件事务；成功后仍须 `verify-evidence` | 本机 `export-codex-handoff` skill/helper |
+| export workflow 事实 | rollout 原始字节 hash 为 `sha256:<64hex>`；publish 前复核 Source；输出双文件事务；skill 可独立执行 `verify-evidence`，但这些字段不进入生产 receipt | 本机 `export-codex-handoff` skill/helper |
 | 仓库契约 | 只采用下文列出的最小字段投影；未知或漂移字段不静默猜测 | S17 schema projection test |
 
 官方示例可证明方法语义，但不是 0.146.0 的完整字段清单。本方案中的 exact wire shapes 以本机生成 schema 为准；升级 CLI 必须先重生成契约夹具。
@@ -74,17 +74,16 @@ flowchart TD
   Summary --> Resolve["skills/list + allocate attempt paths"]
   Resolve --> CThread["thread/start<br/>fresh Compression root"]
   CThread --> CTurn["turn/start<br/>frozen text + export skill item"]
-  CTurn --> Prepare["export prepare<br/>hash raw Source rollout"]
-  Prepare --> Publish["publish rechecks Source<br/>atomically writes Handoff pair"]
-  Publish --> PrivateRoute["private item projector<br/>binds helper command evidence"]
-  PrivateRoute --> Receipt["Host verifies paths + bytes + verify-evidence<br/>builds HandoffReceiptV2"]
+  CTurn --> Export["export skill workflow<br/>publishes Handoff artifacts"]
+  Export --> Final["Compression Turn completed<br/>bounded final agentMessage"]
+  Final --> Receipt["Host extracts first Markdown address<br/>builds schema 3 path-only receipt"]
   Receipt --> KThread["thread/start<br/>fresh Continuation root"]
   KThread --> Draft["turn/start readOnly<br/>goal + verified Handoff body"]
   Draft --> Grant["second turn/start workspaceWrite<br/>new write epoch"]
   Grant --> Running["same Slice resumes"]
 ~~~
 
-单一 App Server 连接先按已注册 thread/turn 分流：Controller firewall 只接收身份、枚举状态、时间和 digest；Compression/Continuation 的私有 projector 只接收各自所需、大小受限的 completed item。Source/Handoff 正文和 raw notification 不能进入 RunStore、错误文本、Controller listener 或日志。
+单一 App Server 连接先按已注册 thread/turn 分流：Controller firewall 只接收身份、枚举状态、时间和 digest；Compression 私有 projector 只保留 bounded `agentMessage`，Continuation 私有 projector 只保留签发 Ready/Progress 所需的 bounded completed item。Source/Handoff 正文和 raw notification 不能进入 RunStore、错误文本、Controller listener 或日志。
 
 ## 精确 App Server 请求
 
@@ -248,35 +247,20 @@ interface ThreadInspectionV2 {
 两个结构都没有 revision。`turn/interrupt` 成功响应本身不足以签发 receipt，必须再收到同 thread/turn 的 `turn/completed.status="interrupted"`。`thread/read(includeTurns:false)` 的成功、相同 UUID、`ephemeral:false` 与空 turns 共同支持 `ThreadInspectionV2`；读取失败或已观测 delete 事件直接失败，archive/closed 本身不否定持久可读性，“未观测事件”也不被伪装成任何负证明。
 
 ~~~typescript
-interface HandoffReceiptV2 {
-  receipt_schema_version: 2;
+interface HandoffResultReceipt {
+  receipt_schema_version: 3;
   compression_task_id: string;
   compression_turn_id: string;
   source_thread_id: string;
-  workflow_version: 2;
+  workflow_version: 3;
   markdown_path: AbsolutePath;
-  evidence_index_path: AbsolutePath;
-  source_revision: SourceEvidenceRevision;
-  structural_digest: Sha256Digest;
-  handoff_digest: Sha256Digest;
-  evidence_index_digest: Sha256Digest;
-  verify_evidence: "PASS";
-  verify_evidence_result_digest: Sha256Digest;
-  consumer_contract: SynthesizeFirstConsumerContract;
   artifact_digest: Sha256Digest;
-  retained_work_dir?: AbsolutePath;
 }
 ~~~
 
-Receipt builder 的唯一输入是：
+Receipt builder 的唯一输入是已绑定 Compression thread/turn 的 completed terminal，以及该 Turn bounded 最终 `agentMessage` 中的第一个 Markdown 文件地址。地址必须是绝对本地路径；`artifact_digest=sha256(canonical-json(receipt without artifact_digest))`。
 
-1. 私有 projector 从已注册 Compression thread/turn 收到的有序 completed command 证明；每项都必须为 `commandExecution`、`source:"agent"`、`status:"completed"`、`exitCode:0`、`cwd===SourceCwd`，command 不得含管道、重定向或第二命令；
-2. 第一项 command 解析后恰为 canonical `node`＋canonical helper＋`prepare <source_thread_id> --map-result-mode continuation-map-v2 --output <markdownPath> --evidence-index <evidenceIndexPath>`；其单一 JSON（不超过 App Server message cap）的 `formatVersion/sessionId/sourceCwd/outputPath/evidenceIndexPath/mapResultMode/sourceRevision/workDir` 必须匹配请求，且 workDir 位于 helper 管理的临时根；
-3. 后续唯一 publish command 解析后恰为同一 helper 的 `publish <same workDir>`；其不超过 64 KiB 的单一 JSON提供 `formatVersion/sessionId/outputPath/evidenceIndexPath/sourceRevision/structuralDigest/handoffDigest/evidenceIndexDigest/consumerContract`，并与 prepare 完全同源；
-4. effect 绑定的 artifactRoot、attempt_id 与预分配双路径，以及重新读取的双文件原始字节及其 digest；
-5. launcher 以 `spawn(shell:false)` 直接执行同一 canonical helper 的 `verify-evidence <evidenceIndexPath>`，得到的 exit code 0、`valid:true` 单一 JSON及其 canonical digest。
-
-必须满足 `publish.sessionId == source_thread_id`、返回路径等于预分配路径，且 publish、Evidence Index、`verify-evidence` 的 Source revision 三者完全相等。`verify_evidence_result_digest=sha256(canonical-json(verify JSON))`；`artifact_digest=sha256(canonical-json(receipt without artifact_digest))`。模型 final message、CompressionRequest、测试常量和非 helper command 输出一律不能补字段。现有无真实来源的 `frame_digest` 从 V2 receipt 删除；需要 Compression Frame 身份时使用 publish 的 `structural_digest`。旧 `workflow_version:"v2"` receipt 只保留历史解码，不得升级解释成 `receipt_schema_version:2`。
+schema 3 不读取或持久化 Evidence Index、Source revision、helper command/output、`HANDOFF_VERIFY` 或 Worker Content。Host 信任 completed Compression Turn 选择的地址；Continuation 在 fresh read-only Turn 前读取该地址的 bounded、非空、无 NUL UTF-8 Markdown，并把正文作为隔离 input item 交给模型。schema 2 `HandoffReceiptV2` 与旧 `workflow_version:"v2"` receipt 只保留历史迁移重放，不再是新生产输入。
 
 ## 切片依赖
 
@@ -338,11 +322,12 @@ S20 + S21 -> S22 默认生产链端到端验收
 
 ## S22 · 默认生产链验收与文档收口
 
-- **做**：先用未注入 revision provider/launcher 的默认 `CodexAppServerTaskHost` 跑 30 秒超时 hermetic 场景，fake App Server 执行真实 export helper fixture 并返回真实 publish items；再以本机 0.146.0 App Server、disposable workspace/Source 跑真实 interrupt/read、Compression skill publish/verify 与 Continuation 双 Turn live canary；更新架构、代码链路、切片契约和 release checklist。
+- **状态**：COMPLETE；证据见 `contracts/slices/S22.json` 与 `artifacts/s22/`。
+- **做**：先用未注入 revision provider/launcher 的默认 `CodexAppServerTaskHost` 跑 30 秒超时 hermetic 场景，fake App Server 执行真实 export helper fixture；再以本机 0.146.0 App Server、disposable workspace/Source 跑真实 interrupt/read、Compression skill、首 Markdown 地址消费与 Continuation 双 Turn live canary；更新架构、代码链路、切片契约和 release checklist。
 - **不做**：不启动用户真实 Source Run，不连接远端，不把 fixture 成功宣称为模型语义质量验收。
-- **判据**：hermetic 与 live 轨迹都严格为 Source interrupt/read → Compression skills/list/thread/start/turn/start → export prepare/publish/verify → Continuation thread/start/两次 turn/start；三个 UUID distinct；Source revision 在 interruption/request 中不存在、只从 Compression 私有 prepare 输出开始出现并由 publish/verify 复核；分别发布 `HERMETIC_CHAIN_PASS` 与 `LIVE_CHAIN_PASS`，两者齐全后默认链才返回 `PRODUCTION_CONTINUATION_STARTED`。
+- **判据**：hermetic 与 live 控制轨迹都严格为 Source interrupt/read → Compression skills/list/thread/start/turn/start → Continuation thread/start/两次 turn/start；三个 UUID distinct；schema 3 只消费 completed Compression Turn 最终结果的第一个 Markdown 地址，Evidence Index 与 `HANDOFF_VERIFY` 提供零 receipt 字段，Host verify 调用为零；分别发布 `HERMETIC_CHAIN_PASS` 与 `LIVE_CHAIN_PASS`，两者齐全后默认链才返回 `PRODUCTION_CONTINUATION_STARTED`。
 - **触达**：`contracts/slices/S17-S22.json`、fake App Server/process harness、`verify-s17..s22`、`docs/架构.md`、`docs/代码链路.md` 和发布证据。
-- **回归门禁**：短/大 Worker Content 的 Controller 投影仍等价，canary 零泄漏；live canary 的 `PROVIDER_TIMING_UNAVAILABLE`、worker 不可用或 600 秒预算失败只能发布 blocker、不得降级成 PASS；S01-S16 verifier、build/typecheck/tests/lint/Markdown links 全绿。
+- **回归门禁**：短/大 Worker Content 的 Controller 投影仍等价，canary 零泄漏；live canary 从 `SOURCE_INTERRUPT` 起使用 1200 秒完整接力预算，`PROVIDER_TIMING_UNAVAILABLE`、worker 不可用或预算失败只能发布 blocker、不得降级成 PASS；Source readiness 仍使用独立 120 秒前置预算，export 技能内部 600 秒 Compression 约束不变；S01-S16 verifier、build/typecheck/tests/lint/Markdown links 全绿。
 
 ## 验收矩阵
 
@@ -356,12 +341,12 @@ S20 + S21 -> S22 默认生产链端到端验收
 | skill resolution | `skills/list` 对 SourceCwd 强制刷新且恰有一个 enabled canonical path |
 | Compression start | fresh root、persistent、与 Source UUID 不同 |
 | Compression input | exact UUID/mode/双路径 text item + exact skill item + 完整 workspaceWrite policy |
-| Handoff targets | effect 绑定的新 attempt 目录；拒绝覆盖、默认 cwd 输出和路径逃逸 |
-| helper command chain | 同 Compression thread/turn 的唯一有序 direct prepare→publish，same workDir，exit 0 |
-| Source revision | interruption/request 中不存在；prepare 首次签发 canonical `sha256:<64 lowercase hex>`，publish/verify 复核 |
+| Handoff targets | text 仍向 skill 提供 effect 绑定的新 attempt 双路径；schema 3 receipt 只采用 completed Turn 明示的首个绝对 Markdown 地址 |
+| helper command chain | 不建模；prepare/Frame/MAP/REDUCE/publish 命令与输出提供零 receipt 字段 |
+| Source revision | interruption/request 与 schema 3 receipt 中均不存在；Evidence Index 即使发布也不被 Host 读取 |
 | publish 前 Source 变化 | export `SOURCE_CHANGED`，无 HandoffReceipt |
-| fake/echo receipt | `handoff_integrity_failed` |
-| Continuation first Turn | fresh read-only root，goal＋verified Handoff body |
+| receipt binding | Source/Compression task、Compression turn、首 Markdown 地址与 canonical digest 不一致则 `handoff_integrity_failed` |
+| Continuation first Turn | fresh read-only root，goal＋从 selected path 读取的 bounded UTF-8 Handoff body |
 | Ready evidence | 首份实质 agentMessage 先于所有工具/write item；不读模型自报 JSON |
 | write grant | 第一 Turn terminal 后的第二 `turn/start`，不是 `turn/steer` |
 | event isolation | Controller/RunStore/log 零 raw content；launcher projector 有 thread/turn/size 边界 |

@@ -4,6 +4,7 @@ import path from "node:path";
 import type { WorkspaceIdentity } from "../../contracts/index.js";
 import type {
   HandoffReceipt,
+  HandoffResultReceipt,
   HandoffReceiptV2,
   SynthesizeFirstConsumerContract,
 } from "../handoff/index.js";
@@ -78,6 +79,16 @@ const HANDOFF_RECEIPT_V2_KEYS = [
   "artifact_digest",
 ] as const;
 
+const HANDOFF_RESULT_RECEIPT_KEYS = [
+  "receipt_schema_version",
+  "compression_task_id",
+  "compression_turn_id",
+  "source_thread_id",
+  "workflow_version",
+  "markdown_path",
+  "artifact_digest",
+] as const;
+
 const CONSUMER_CONTRACT_KEYS = [
   "formatVersion",
   "kind",
@@ -147,7 +158,7 @@ interface WorkflowReceipts {
   readonly progress: ProgressReceipt;
 }
 
-type VerifiedHandoffReceipt = HandoffReceipt | HandoffReceiptV2;
+type VerifiedHandoffReceipt = HandoffReceipt | HandoffReceiptV2 | HandoffResultReceipt;
 
 class BoundedCallError extends Error {
   public constructor(
@@ -277,7 +288,36 @@ function legacyHandoffArtifactDigest(
 function isHandoffReceiptV2(
   receipt: VerifiedHandoffReceipt,
 ): receipt is HandoffReceiptV2 {
-  return "receipt_schema_version" in receipt;
+  return "receipt_schema_version" in receipt && receipt.receipt_schema_version === 2;
+}
+
+function isHandoffResultReceipt(
+  receipt: VerifiedHandoffReceipt,
+): receipt is HandoffResultReceipt {
+  return "receipt_schema_version" in receipt && receipt.receipt_schema_version === 3;
+}
+
+function resultConsumerContract(sliceId: string): SynthesizeFirstConsumerContract {
+  return {
+    formatVersion: 1,
+    kind: "codex-handoff-synthesize-first-consumer-contract",
+    mode: "synthesize_first",
+    firstDeliverableIds: [sliceId],
+    preDraftEvidenceReads: 0,
+    maxTargetedReads: 3,
+    allowedReadReasons: ["claim_verification", "named_uncertainty"],
+    forbidBroadSearch: true,
+    forbidFullFileReread: true,
+  };
+}
+
+function consumerContractFor(
+  receipt: VerifiedHandoffReceipt,
+  sliceId: string,
+): SynthesizeFirstConsumerContract {
+  return isHandoffResultReceipt(receipt)
+    ? resultConsumerContract(sliceId)
+    : receipt.consumer_contract;
 }
 
 function diagnosticCode(error: unknown): string | undefined {
@@ -830,6 +870,9 @@ export class ContinuationCoordinator {
         { reason: "handoff_binding_mismatch" },
       );
     }
+    if (exactKeys(value, HANDOFF_RESULT_RECEIPT_KEYS)) {
+      return this.decodeHandoffResultReceipt(value, state, terminal);
+    }
     if (exactKeys(value, HANDOFF_RECEIPT_V2_KEYS, ["retained_work_dir"])) {
       return this.decodeAndVerifyHandoffReceiptV2(value, state, terminal);
     }
@@ -906,6 +949,60 @@ export class ContinuationCoordinator {
         ? {}
         : { retained_work_dir: value.retained_work_dir }),
     };
+  }
+
+  private decodeHandoffResultReceipt(
+    value: Readonly<Record<string, unknown>>,
+    state: RunState,
+    terminal: boolean,
+  ): HandoffResultReceipt {
+    if (
+      value.receipt_schema_version !== 3 ||
+      value.workflow_version !== 3 ||
+      !validTaskId(value.source_thread_id) ||
+      !validTaskId(value.compression_task_id) ||
+      !validTaskId(value.compression_turn_id) ||
+      value.source_thread_id === value.compression_task_id ||
+      typeof value.markdown_path !== "string" ||
+      !path.isAbsolute(value.markdown_path) ||
+      !sha256Digest(value.artifact_digest)
+    ) {
+      throw new ContinuationError(
+        "handoff_integrity_failed",
+        "Continuation final-result receipt is outside the path-only schema.",
+        { reason: "handoff_binding_mismatch" },
+      );
+    }
+    if (
+      state.handoff === undefined ||
+      state.handoff.compression_task_id !== value.compression_task_id ||
+      path.normalize(state.handoff.markdown_path) !== path.normalize(value.markdown_path) ||
+      state.handoff.artifact_digest !== value.artifact_digest ||
+      (!terminal && state.source_thread_id !== value.source_thread_id) ||
+      (terminal && state.source_thread_id === value.source_thread_id)
+    ) {
+      throw new ContinuationError(
+        "handoff_integrity_failed",
+        "Continuation final-result receipt differs from the persisted Run binding.",
+        { reason: "handoff_binding_mismatch" },
+      );
+    }
+    const material = {
+      receipt_schema_version: value.receipt_schema_version,
+      compression_task_id: value.compression_task_id,
+      compression_turn_id: value.compression_turn_id,
+      source_thread_id: value.source_thread_id,
+      workflow_version: value.workflow_version,
+      markdown_path: path.normalize(value.markdown_path),
+    } satisfies Omit<HandoffResultReceipt, "artifact_digest">;
+    if (sha256Json(material) !== value.artifact_digest) {
+      throw new ContinuationError(
+        "handoff_integrity_failed",
+        "Continuation final-result receipt fields no longer match artifact_digest.",
+        { reason: "handoff_artifact_digest_mismatch" },
+      );
+    }
+    return { ...material, artifact_digest: value.artifact_digest };
   }
 
   private async decodeAndVerifyHandoffReceiptV2(
@@ -1126,23 +1223,31 @@ export class ContinuationCoordinator {
         { reason: "invalid_request", cause: goalPrompt },
       );
     }
+    const consumerContract = consumerContractFor(
+      handoff,
+      state.current_slice_id as string,
+    );
     return {
       run_id: state.run_id,
       current_slice_id: state.current_slice_id as string,
       goal_prompt: goalPrompt,
       source_thread_id: handoff.source_thread_id,
       compression_task_id: handoff.compression_task_id,
-      ...(isHandoffReceiptV2(handoff)
+      ...(isHandoffReceiptV2(handoff) || isHandoffResultReceipt(handoff)
         ? {
           compression_turn_id: handoff.compression_turn_id,
           handoff_receipt_schema_version: handoff.receipt_schema_version,
         }
         : {}),
       handoff_markdown_path: handoff.markdown_path,
-      evidence_index_path: handoff.evidence_index_path,
+      ...("evidence_index_path" in handoff
+        ? { evidence_index_path: handoff.evidence_index_path }
+        : {}),
       handoff_artifact_digest: handoff.artifact_digest,
-      handoff_digest: handoff.handoff_digest,
-      consumer_contract: handoff.consumer_contract,
+      ...("handoff_digest" in handoff
+        ? { handoff_digest: handoff.handoff_digest }
+        : {}),
+      consumer_contract: consumerContract,
       expected_workspace_identity: state.workspace_identity,
       lease_id: leaseId,
       write_epoch: state.write_epoch,
@@ -1202,13 +1307,17 @@ export class ContinuationCoordinator {
         { reason: "ready_receipt_invalid" },
       );
     }
+    const consumerContract = consumerContractFor(
+      handoff,
+      state.current_slice_id as string,
+    );
     const workspace = decodeWorkspaceIdentity(value.workspace_identity, "ready_workspace_mismatch");
     if (
       value.task_id !== taskId ||
       value.run_id !== state.run_id ||
       value.slice_id !== state.current_slice_id ||
       value.handoff_artifact_digest !== handoff.artifact_digest ||
-      value.consumer_contract_digest !== sha256Json(handoff.consumer_contract) ||
+      value.consumer_contract_digest !== sha256Json(consumerContract) ||
       value.observed_state_version !== observedStateVersion
     ) {
       throw new ContinuationError(
@@ -1229,17 +1338,17 @@ export class ContinuationCoordinator {
       value.write_access !== false ||
       !Array.isArray(value.first_deliverable_ids) ||
       canonicalJson(value.first_deliverable_ids) !==
-        canonicalJson(handoff.consumer_contract.firstDeliverableIds) ||
+        canonicalJson(consumerContract.firstDeliverableIds) ||
       !sha256Digest(value.first_deliverable_draft_digest) ||
       value.pre_draft_evidence_reads !== 0 ||
       !Number.isSafeInteger(value.targeted_evidence_reads) ||
       (value.targeted_evidence_reads as number) < 0 ||
       (value.targeted_evidence_reads as number) >
-        handoff.consumer_contract.maxTargetedReads ||
+        consumerContract.maxTargetedReads ||
       !Array.isArray(value.targeted_read_reasons) ||
       value.targeted_read_reasons.length !== value.targeted_evidence_reads ||
       value.targeted_read_reasons.some((reason) =>
-        !handoff.consumer_contract.allowedReadReasons.includes(
+        !consumerContract.allowedReadReasons.includes(
           reason as "claim_verification" | "named_uncertainty",
         )
       ) ||
@@ -1467,11 +1576,13 @@ export class ContinuationCoordinator {
                 : { source_thread_id: current.state.source_thread_id }),
               ...(current.state.handoff === undefined
                 ? {}
-                : {
-                  compression_task_id: current.state.handoff.compression_task_id,
-                  handoff_markdown_path: current.state.handoff.markdown_path,
-                  evidence_index_path: current.state.handoff.evidence_index_path,
-                }),
+                 : {
+                   compression_task_id: current.state.handoff.compression_task_id,
+                   handoff_markdown_path: current.state.handoff.markdown_path,
+                   ...(current.state.handoff.evidence_index_path === undefined
+                     ? {}
+                     : { evidence_index_path: current.state.handoff.evidence_index_path }),
+                 }),
               ...(position.task_id === undefined
                 ? {}
                 : { continuation_task_id: position.task_id }),

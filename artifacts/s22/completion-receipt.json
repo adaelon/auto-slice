@@ -1,0 +1,265 @@
+{
+  "schema_version": 1,
+  "slice_id": "S22",
+  "result": "PASS",
+  "contract_digest": "sha256:e17d3f9ab7af5bd91119080299c3164e1ee5bc49f5d8d447f4e99f2d93c013da",
+  "input_receipt_digests": [
+    {
+      "path": "artifacts/s20/completion-receipt.json",
+      "digest": "sha256:6bd0367648ee4226122c0b137a154b92de1b15aee7c4f77fa49cdf4d02764f1d"
+    },
+    {
+      "path": "artifacts/s21/completion-receipt.json",
+      "digest": "sha256:83712fb3baaa7c54f439136c40e237f46ff047f3415840df49fb133fa4660feb"
+    }
+  ],
+  "surface_digest": "sha256:49ca8a736243259eff1b81906c0d7f7b15a33870ef273769a09b5be83acc6895",
+  "output_digests": [
+    {
+      "path": "CONTEXT.md",
+      "digest": "sha256:6acf94685644374376eb905e0c78c54316c1eb8a155f789963c65f2cb89bbeca"
+    },
+    {
+      "path": "artifacts/s22/default-production-chain-report.json",
+      "digest": "sha256:ed922bbfe9021ee6c3e875e4cc6370c7c017e518b24c2bbdd3da553add5abc55"
+    },
+    {
+      "path": "artifacts/s22/hermetic-chain-report.json",
+      "digest": "sha256:f21c74321f0f8d6c12a72032b4d13ed0ff13def297326720bb153f611aae2392"
+    },
+    {
+      "path": "artifacts/s22/live-chain-report.json",
+      "digest": "sha256:dbb7c4e7e1db913667e4f9f792d660bd5ae093b3656294519dc3ad5f194a3f73"
+    },
+    {
+      "path": "contracts/slices/S22.json",
+      "digest": "sha256:e17d3f9ab7af5bd91119080299c3164e1ee5bc49f5d8d447f4e99f2d93c013da"
+    },
+    {
+      "path": "docs/adr/0011-export-owned-revision-and-fresh-task-launchers.md",
+      "digest": "sha256:d822bc8ab3d5f03c174ee9cf0d3585440031f4be8e6b1f784bdd423e230fe058"
+    },
+    {
+      "path": "docs/auto-slice-design.md",
+      "digest": "sha256:3e8a5da46094e3a819881e4c81d851df0b8359c6c23f8bbc9e6bea55a731d694"
+    },
+    {
+      "path": "docs/implementation-slices.md",
+      "digest": "sha256:86c20a0f207b94e7fa14906d175d33291e7b22bff812311b06e53a8ab16c98c8"
+    },
+    {
+      "path": "docs/代码链路.md",
+      "digest": "sha256:0d4d1c0aeec58664f2d4398d40b3949efdd31de8706b03889652b7d0600fc567"
+    },
+    {
+      "path": "docs/切片方案-App-Server三任务接力解锁.md",
+      "digest": "sha256:6e632417c775d8f9eb2c33957cd333309df4ebc4858a234438736747618c867b"
+    },
+    {
+      "path": "docs/架构.md",
+      "digest": "sha256:d26c2a52ffdf59b505fdf643ededb1573aee66dd8dfbc6570b47d3fdc4ed35e4"
+    },
+    {
+      "path": "package.json",
+      "digest": "sha256:d5a45a29b016cd34a32df526415054c6fb02896ceabe772c70fe6db9ebeb04d9"
+    },
+    {
+      "path": "scripts/run-s22-hermetic.mjs",
+      "digest": "sha256:7b853bf2d2a187a47fc593af15a42f968ffeb13211b634fc6adbdc18799db374"
+    },
+    {
+      "path": "scripts/run-s22-live-canary.mjs",
+      "digest": "sha256:164d4df556bfa02b513ad8c0d289283f1b5f907e2e4a3faf2a020ff4ae2c6b96"
+    },
+    {
+      "path": "scripts/s22-app-server-proxy.mjs",
+      "digest": "sha256:cb951255f7b348714a00163117b4be092ab74a18af629b4740a837542020d6ca"
+    },
+    {
+      "path": "scripts/verify-s22.mjs",
+      "digest": "sha256:4b63734f0589c802968c449b304bbc6f688a1977adea0d14c7fe685c461cb189"
+    },
+    {
+      "path": "src/controller/continuation/app-server-continuation-launcher.ts",
+      "digest": "sha256:43790ee41b07a72252d7097d2b2c05c731f580f004c819fa2ce6be4a05a644f7"
+    },
+    {
+      "path": "src/controller/continuation/continuation-coordinator.ts",
+      "digest": "sha256:c19493c43c7a9bef0445891694aeffd1e93e47f5c6ebf2d9fc9abaa025c85d79"
+    },
+    {
+      "path": "src/controller/continuation/types.ts",
+      "digest": "sha256:68506e84e5360513dbb68b9f96974e4f02b0333c691faf1b36ba9e93802dad5f"
+    },
+    {
+      "path": "src/controller/handoff/app-server-compression-task-launcher.ts",
+      "digest": "sha256:28f3670f9cf9621924dd016198b17bac02cd77fc9ed57f52fd1a6647cd4a3870"
+    },
+    {
+      "path": "src/controller/handoff/compression-handoff-coordinator.ts",
+      "digest": "sha256:935fb0cb4154b5559fdf78831b1429aa99b8d1d0259e68ff772039d075d83474"
+    },
+    {
+      "path": "src/controller/handoff/index.ts",
+      "digest": "sha256:dde3da8e29108a9caab13ff1334ce4a9ed24e298553d8688d49cace8183ea8ee"
+    },
+    {
+      "path": "src/controller/handoff/types.ts",
+      "digest": "sha256:265804c5c0137a6f3bd2dc34529345117acf87d79d31aabfa25ea70ce395e933"
+    },
+    {
+      "path": "src/controller/production/codex-app-server-task-host.ts",
+      "digest": "sha256:ad80da633b10ec3cdebab6908ae195d905981d99b195fda18c2bde3d8ffa733b"
+    },
+    {
+      "path": "src/controller/production/file-production-runtime.ts",
+      "digest": "sha256:7146f9466b6a0ec26e6bf3922c6f015c45a086e1f9aac723502e3de6132cea49"
+    },
+    {
+      "path": "src/controller/state/types.ts",
+      "digest": "sha256:fb8d59fcf05612424b5b1e15f09bde79fb9f15d3553067ffa05a1eaefbbe54d3"
+    },
+    {
+      "path": "src/controller/state/validation.ts",
+      "digest": "sha256:825a3d4b17afdc078b88aa9928b466fe1308017ea1dc05621896a8ec5cca6ddc"
+    },
+    {
+      "path": "test/fixtures/export-codex-handoff/scripts/export-handoff.mjs",
+      "digest": "sha256:da3598da00f75e0f99bbc2a7cc9f8d32077272ba3813348d809e8823c05153d6"
+    },
+    {
+      "path": "test/fixtures/process/fake-s20-app-server.mjs",
+      "digest": "sha256:045affa5b3f6efdae0d875539f799b7b52d2b4908ba625b9235d5ba08509e2ff"
+    },
+    {
+      "path": "test/fixtures/process/fake-s22-app-server.mjs",
+      "digest": "sha256:bf202116c0d887699a0553e10cdd972c31a6f46bfe70299eec30a29fc1fd356a"
+    },
+    {
+      "path": "test/fixtures/s22-export-codex-handoff/SKILL.md",
+      "digest": "sha256:959312ad3ad42678dc897a12641cd5894df0dc250d5f08ccd8d09b11e6910d1c"
+    },
+    {
+      "path": "test/fixtures/s22-export-codex-handoff/scripts/export-handoff.mjs",
+      "digest": "sha256:56403c9fbb199ac440bb7d3305aeac7248763b8110fad26345f2ea3e9083762a"
+    },
+    {
+      "path": "test/handoff.test.ts",
+      "digest": "sha256:e332580156097ec264b525145e2bab003d41137aecb5af39266aa80f8593cc7b"
+    }
+  ],
+  "check_receipts": [
+    {
+      "check_id": "surface",
+      "argv": [
+        "node",
+        "scripts/verify-s22.mjs",
+        "--surface-only"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "schema_projection",
+      "argv": [
+        "node",
+        "scripts/verify-s17.mjs",
+        "--schema-only"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "build",
+      "argv": [
+        "npm",
+        "run",
+        "build"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "typecheck",
+      "argv": [
+        "npm",
+        "run",
+        "typecheck"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "target_test",
+      "argv": [
+        "node",
+        "--test",
+        "dist/test/app-server-protocol-v2.test.js",
+        "dist/test/handoff.test.js",
+        "dist/test/continuation.test.js",
+        "dist/test/file-production-runtime.test.js",
+        "dist/test/production-orchestrator.test.js"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "hermetic_chain",
+      "argv": [
+        "node",
+        "scripts/run-s22-hermetic.mjs"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "live_chain",
+      "argv": [
+        "node",
+        "scripts/run-s22-live-canary.mjs"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "test",
+      "argv": [
+        "npm",
+        "run",
+        "test"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "lint",
+      "argv": [
+        "npm",
+        "run",
+        "lint"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "plugin_validation",
+      "argv": [
+        "npm",
+        "run",
+        "validate:plugin"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "markdown_links",
+      "argv": [
+        "npm",
+        "run",
+        "verify:markdown-links"
+      ],
+      "exit_code": 0
+    },
+    {
+      "check_id": "diff_check",
+      "argv": [
+        "git",
+        "diff",
+        "HEAD",
+        "--check",
+        "--"
+      ],
+      "exit_code": 0
+    }
+  ]
+}

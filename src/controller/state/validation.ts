@@ -152,14 +152,16 @@ function decodeHandoff(value: unknown, code: StateStoreFailureCode): RunHandoffS
   const record = asRecord(value, "RunState.handoff", code);
   assertExactKeys(
     record,
-    ["compression_task_id", "markdown_path", "evidence_index_path", "artifact_digest"],
-    ["continuation_task_id"],
+    ["compression_task_id", "markdown_path", "artifact_digest"],
+    ["evidence_index_path", "continuation_task_id"],
     "RunState.handoff",
     code,
   );
   requireString(record.compression_task_id, "RunState.handoff.compression_task_id", code);
   requireString(record.markdown_path, "RunState.handoff.markdown_path", code);
-  requireString(record.evidence_index_path, "RunState.handoff.evidence_index_path", code);
+  if (record.evidence_index_path !== undefined) {
+    requireString(record.evidence_index_path, "RunState.handoff.evidence_index_path", code);
+  }
   requireSha256Digest(record.artifact_digest, "RunState.handoff.artifact_digest", code);
   if (record.continuation_task_id !== undefined) {
     requireString(record.continuation_task_id, "RunState.handoff.continuation_task_id", code);

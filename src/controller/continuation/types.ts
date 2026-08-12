@@ -1,6 +1,7 @@
 import type { WorkspaceIdentity } from "../../contracts/index.js";
 import type {
   HandoffReceipt,
+  HandoffResultReceipt,
   HandoffReceiptV2,
   SynthesizeFirstConsumerContract,
 } from "../handoff/index.js";
@@ -33,11 +34,11 @@ export interface ResumeEnvelope {
   readonly source_thread_id: string;
   readonly compression_task_id: string;
   readonly compression_turn_id?: string;
-  readonly handoff_receipt_schema_version?: 2;
+  readonly handoff_receipt_schema_version?: 2 | 3;
   readonly handoff_markdown_path: string;
-  readonly evidence_index_path: string;
+  readonly evidence_index_path?: string;
   readonly handoff_artifact_digest: Sha256Digest;
-  readonly handoff_digest: Sha256Digest;
+  readonly handoff_digest?: Sha256Digest;
   readonly consumer_contract: SynthesizeFirstConsumerContract;
   readonly expected_workspace_identity: WorkspaceIdentity;
   readonly lease_id: string;
@@ -147,8 +148,8 @@ export interface ContinuationCoordinatorOptions {
 export interface ContinueFromHandoffInput {
   readonly run_id: string;
   readonly lease_id: string;
-  /** S21 will make V2 the only production decode path; legacy is retained for replay tests. */
-  readonly handoff_receipt: HandoffReceipt | HandoffReceiptV2;
+  /** S22 produces path-only receipts; V2 and legacy remain replay-compatible. */
+  readonly handoff_receipt: HandoffReceipt | HandoffReceiptV2 | HandoffResultReceipt;
   readonly slice_contract: SliceContractV1;
   readonly model_decision: ModelDecision;
   /** Accepted only for legacy callers and ignored by runtime decisions. */
